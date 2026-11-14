@@ -423,7 +423,7 @@
     <h2>Новый месяц!</h2>
     <p>Начался новый месяц. Рекомендуем сделать резервную копию данных, чтобы ничего не потерять.</p>
     <button class="btn btn-primary" onclick="backupFromReminder()">📥 Скачать копию</button>
-    <button class="btn btn-secondary" onclick="closeBackupReminder()">Напомнить позже</button>
+    <button class="btn btn-secondary" onclick="closeBackupReminder()">Напомнить в следующем месяце</button>
   </div>
 </div>
 
@@ -437,7 +437,6 @@ const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#a855f7', '#ec4899'
 let templates = JSON.parse(localStorage.getItem(TEMPLATES_KEY) || '[]');
 let shifts = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
 
-// Работаем с годом и месяцем отдельно, чтобы избежать багов с часовыми поясами
 let currentYear = new Date().getFullYear();
 let currentMonth = new Date().getMonth();
 
@@ -483,10 +482,13 @@ function switchTab(tab){
 function checkBackupReminder(){
   const now = new Date();
   const currentMonthStr = now.getFullYear() + '-' + pad(now.getMonth() + 1);
-  const lastBackupMonth = localStorage.getItem('last_backup_month');
+  
+  // Получаем месяц, в котором последний раз показывали окно или делали бэкап
+  const lastPromptMonth = localStorage.getItem('last_backup_prompt_month');
   const hasData = Object.keys(shifts).length > 0;
   
-  if (hasData && lastBackupMonth !== currentMonthStr){
+  // Показываем, только если есть данные и в этом месяце еще не показывали
+  if (hasData && lastPromptMonth !== currentMonthStr){
     setTimeout(() => {
       document.getElementById('backupOverlay').classList.add('open');
     }, 1000);
@@ -497,11 +499,18 @@ function backupFromReminder(){
   exportData();
   const now = new Date();
   const currentMonthStr = now.getFullYear() + '-' + pad(now.getMonth() + 1);
-  localStorage.setItem('last_backup_month', currentMonthStr);
+  
+  // Запоминаем, что в этом месяце уже сделали бэкап
+  localStorage.setItem('last_backup_prompt_month', currentMonthStr);
   closeBackupReminder();
 }
 
 function closeBackupReminder(){
+  // Запоминаем, что пользователь нажал "Напомнить позже" и в этом месяце больше не спрашиваем
+  const now = new Date();
+  const currentMonthStr = now.getFullYear() + '-' + pad(now.getMonth() + 1);
+  localStorage.setItem('last_backup_prompt_month', currentMonthStr);
+  
   document.getElementById('backupOverlay').classList.remove('open');
 }
 
@@ -896,10 +905,11 @@ function renderPastMonths(){
   const currentMk = salaryYear + '-' + pad(salaryMonth+1);
   if (!monthsMap[currentMk]) monthsMap[currentMk] = 0;
 
-  // Сортируем от новых к старым
-  const sorted = Object.entries(monthsMap).sort((a,b)=> b[0].localeCompare(a[0]));
+  let sorted = Object.entries(monthsMap).sort((a,b)=> b[0].localeCompare(a[0]));
   
-  // Если не показываем все, оставляем только 3
+  // Фильтруем пустые месяцы (сумма 0), если это не текущий выбранный месяц
+  sorted = sorted.filter(([mk, sum]) => sum > 0 || mk === currentMk);
+
   const toShow = showAllPastMonths ? sorted : sorted.slice(0, 3);
 
   document.getElementById('pastMonths').innerHTML = toShow.map(([mk,sum])=>{
@@ -913,7 +923,6 @@ function renderPastMonths(){
     </div>`;
   }).join('');
 
-  // Показываем кнопку "Показать все", если месяцев больше 3
   const showAllBtn = document.getElementById('showAllMonthsBtn');
   if (sorted.length > 3) {
     showAllBtn.style.display = 'block';
