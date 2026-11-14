@@ -152,6 +152,11 @@
   .past-month-row .name { color: #cbd5e1; }
   .past-month-row .sum { color: #86efac; font-weight: 600; }
 
+  .show-all-btn {
+    background: none; border: none; color: #38bdf8; font-size: 14px;
+    padding: 10px 0 0; cursor: pointer; text-align: center; width: 100%;
+  }
+
   /* Шаблоны */
   .template-list { display: flex; flex-direction: column; gap: 6px; }
   .template-item {
@@ -338,6 +343,7 @@
   <div class="card">
     <div class="card-title">Прошлые месяцы</div>
     <div class="past-months" id="pastMonths"></div>
+    <button class="show-all-btn" id="showAllMonthsBtn" style="display:none" onclick="toggleAllMonths()">Показать все ↓</button>
   </div>
 
 </div>
@@ -362,7 +368,6 @@
     </div>
   </div>
 
-  <!-- Блок бэкапа -->
   <div class="card">
     <div class="card-title">Резервная копия</div>
     <p style="font-size:12px;color:#94a3b8;margin:0 0 8px;line-height:1.4;">
@@ -432,7 +437,10 @@ const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#a855f7', '#ec4899'
 let templates = JSON.parse(localStorage.getItem(TEMPLATES_KEY) || '[]');
 let shifts = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
 
-let current = new Date();
+// Работаем с годом и месяцем отдельно, чтобы избежать багов с часовыми поясами
+let currentYear = new Date().getFullYear();
+let currentMonth = new Date().getMonth();
+
 let selectedDate = null;
 let newColor = COLORS[0];
 
@@ -441,6 +449,7 @@ let placeTemplate = null;
 
 let salaryYear = new Date().getFullYear();
 let salaryMonth = new Date().getMonth();
+let showAllPastMonths = false;
 
 document.getElementById('dowRow').innerHTML = DOW.map(d => `<div class="dow">${d}</div>`).join('');
 
@@ -472,13 +481,12 @@ function switchTab(tab){
 
 /* ---------- Бэкап и напоминание ---------- */
 function checkBackupReminder(){
-  const currentMonthStr = new Date().getFullYear() + '-' + pad(new Date().getMonth() + 1);
+  const now = new Date();
+  const currentMonthStr = now.getFullYear() + '-' + pad(now.getMonth() + 1);
   const lastBackupMonth = localStorage.getItem('last_backup_month');
-  
-  // Если есть какие-то данные и месяц сменился с момента последнего бэкапа
   const hasData = Object.keys(shifts).length > 0;
+  
   if (hasData && lastBackupMonth !== currentMonthStr){
-    // Показываем не сразу, а через секунду после загрузки, чтобы не мешать рендеру
     setTimeout(() => {
       document.getElementById('backupOverlay').classList.add('open');
     }, 1000);
@@ -487,7 +495,8 @@ function checkBackupReminder(){
 
 function backupFromReminder(){
   exportData();
-  const currentMonthStr = new Date().getFullYear() + '-' + pad(new Date().getMonth() + 1);
+  const now = new Date();
+  const currentMonthStr = now.getFullYear() + '-' + pad(now.getMonth() + 1);
   localStorage.setItem('last_backup_month', currentMonthStr);
   closeBackupReminder();
 }
@@ -668,7 +677,7 @@ function updatePlaceUI(){
 
 /* ---------- Календарь ---------- */
 function buildCalendarHtml(){
-  const y = current.getFullYear(), m = current.getMonth();
+  const y = currentYear, m = currentMonth;
   const first = new Date(y, m, 1);
   let startDow = (first.getDay() + 6) % 7;
   const daysInMonth = new Date(y, m+1, 0).getDate();
@@ -763,9 +772,9 @@ function onDayTap(key){
 }
 
 function renderCalendar(){
-  const y = current.getFullYear(), m = current.getMonth();
+  const d = new Date(currentYear, currentMonth, 1);
   document.getElementById('monthTitle').textContent =
-    current.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
+    d.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
   document.getElementById('calendar').innerHTML = buildCalendarHtml();
   renderTomorrow();
   updatePlaceUI();
@@ -808,7 +817,12 @@ function escapeHtml(s){
 }
 
 function changeMonth(delta){
-  current.setMonth(current.getMonth()+delta);
+  let m = currentMonth + delta;
+  let y = currentYear;
+  if (m < 0){ m = 11; y--; }
+  if (m > 11){ m = 0; y++; }
+  currentMonth = m;
+  currentYear = y;
   renderCalendar();
 }
 
@@ -882,9 +896,13 @@ function renderPastMonths(){
   const currentMk = salaryYear + '-' + pad(salaryMonth+1);
   if (!monthsMap[currentMk]) monthsMap[currentMk] = 0;
 
+  // Сортируем от новых к старым
   const sorted = Object.entries(monthsMap).sort((a,b)=> b[0].localeCompare(a[0]));
+  
+  // Если не показываем все, оставляем только 3
+  const toShow = showAllPastMonths ? sorted : sorted.slice(0, 3);
 
-  document.getElementById('pastMonths').innerHTML = sorted.map(([mk,sum])=>{
+  document.getElementById('pastMonths').innerHTML = toShow.map(([mk,sum])=>{
     const [y,m] = mk.split('-').map(Number);
     const isCurrent = (y===salaryYear && m===salaryMonth+1);
     return `<div class="past-month-row"
@@ -894,6 +912,20 @@ function renderPastMonths(){
       <span class="sum">${sum.toLocaleString('ru-RU')} ₽</span>
     </div>`;
   }).join('');
+
+  // Показываем кнопку "Показать все", если месяцев больше 3
+  const showAllBtn = document.getElementById('showAllMonthsBtn');
+  if (sorted.length > 3) {
+    showAllBtn.style.display = 'block';
+    showAllBtn.textContent = showAllPastMonths ? 'Свернуть ↑' : 'Показать все ↓';
+  } else {
+    showAllBtn.style.display = 'none';
+  }
+}
+
+function toggleAllMonths(){
+  showAllPastMonths = !showAllPastMonths;
+  renderPastMonths();
 }
 
 function changeSalaryMonth(delta){
