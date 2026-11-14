@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#111827">
@@ -14,6 +14,8 @@
     background: #0f172a; color: #e5e7eb;
     padding: calc(env(safe-area-inset-top) + 12px) 12px;
     padding-bottom: calc(76px + env(safe-area-inset-bottom));
+    -webkit-overflow-scrolling: touch;
+    -webkit-font-smoothing: antialiased;
   }
   .card { background: #1e293b; border-radius: 14px; padding: 12px; margin-bottom: 12px; }
   .card-title { font-size: 13px; color: #94a3b8; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -41,6 +43,7 @@
   .month-nav button {
     background: #334155; border: none; color: #e5e7eb; font-size: 18px;
     width: 36px; height: 36px; border-radius: 10px; cursor: pointer;
+    -webkit-user-select: none; user-select: none;
   }
   .month-title { font-weight: 600; font-size: 16px; }
   .grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
@@ -52,6 +55,7 @@
     border-radius: 10px; background: #273449;
     font-size: 12px; cursor: pointer; position: relative;
     padding: 3px 3px 2px; overflow: hidden;
+    contain: layout style paint;
   }
   .day.other-month { opacity: 0.3; }
   .day.today { box-shadow: 0 0 0 2px #38bdf8 inset; }
@@ -84,12 +88,13 @@
     flex-shrink: 0; margin-top: auto;
   }
 
-  /* Панель режима выставления (под календарём) */
+  /* Панель режима выставления */
   .place-bar { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
   .place-btn {
     flex: 1; background: #334155; color: #e5e7eb; border: none;
     border-radius: 12px; padding: 12px; font-size: 15px; font-weight: 600;
     cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+    -webkit-user-select: none; user-select: none;
   }
   .place-btn.active { background: #22c55e; color: #052e16; }
   .place-btn .dot { width: 12px; height: 12px; border-radius: 50%; }
@@ -117,6 +122,7 @@
   .salary-month-nav button {
     background: #334155; border: none; color: #e5e7eb; font-size: 18px;
     width: 36px; height: 36px; border-radius: 10px; cursor: pointer;
+    -webkit-user-select: none; user-select: none;
   }
   .salary-month-nav .title { font-weight: 600; font-size: 16px; }
 
@@ -172,7 +178,7 @@
   .add-template.open { display: flex; }
   .add-template input {
     width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155;
-    background: #1e293b; color: #e5e7eb; font-size: 15px;
+    background: #1e293b; color: #e5e7eb; font-size: 16px;
   }
   .color-row { display: flex; align-items: center; gap: 8px; }
   .color-row .clabel { font-size: 12px; color: #94a3b8; }
@@ -235,7 +241,7 @@
   .shift-row .note-row textarea {
     width: 100%; min-height: 38px; padding: 8px 10px; border-radius: 8px;
     border: 1px solid #334155; background: #1e293b; color: #e5e7eb;
-    font-size: 14px; font-family: inherit; resize: vertical;
+    font-size: 16px; font-family: inherit; resize: vertical;
   }
 
   .btn {
@@ -256,6 +262,7 @@
     flex: 1; background: none; border: none; color: #64748b; cursor: pointer;
     padding: 10px 0 12px; font-size: 11px; font-family: inherit;
     display: flex; flex-direction: column; align-items: center; gap: 3px;
+    -webkit-user-select: none; user-select: none;
   }
   .tabbar button .ico { font-size: 22px; line-height: 1; }
   .tabbar button.active { color: #38bdf8; }
@@ -291,29 +298,7 @@
 
 </div>
 
-<!-- ========== СТРАНИЦА 2: МОИ СМЕНЫ ========== -->
-<div class="page" id="page-templates">
-
-  <div class="card">
-    <div class="card-title">Мои смены (для календаря)</div>
-    <div class="template-list" id="templateList"></div>
-
-    <button class="show-add-btn" id="showAddBtn" onclick="showAddForm()">+ Добавить смену</button>
-
-    <div class="add-template" id="addTemplateForm">
-      <input id="newTemplateName" placeholder="Название (магазин)">
-      <div class="color-row">
-        <span class="clabel">Цвет:</span>
-        <div class="colors" id="newColors"></div>
-      </div>
-      <button class="add-btn" onclick="addTemplate()">Добавить</button>
-      <button class="cancel-add-btn" onclick="hideAddForm()">Отмена</button>
-    </div>
-  </div>
-
-</div>
-
-<!-- ========== СТРАНИЦА 3: ЗП ========== -->
+<!-- ========== СТРАНИЦА 2: ЗП ========== -->
 <div class="page" id="page-salary">
 
   <div class="card">
@@ -339,16 +324,38 @@
 
 </div>
 
+<!-- ========== СТРАНИЦА 3: МОИ СМЕНЫ ========== -->
+<div class="page" id="page-templates">
+
+  <div class="card">
+    <div class="card-title">Мои смены (для календаря)</div>
+    <div class="template-list" id="templateList"></div>
+
+    <button class="show-add-btn" id="showAddBtn" onclick="showAddForm()">+ Добавить смену</button>
+
+    <div class="add-template" id="addTemplateForm">
+      <input id="newTemplateName" placeholder="Название (магазин)">
+      <div class="color-row">
+        <span class="clabel">Цвет:</span>
+        <div class="colors" id="newColors"></div>
+      </div>
+      <button class="add-btn" onclick="addTemplate()">Добавить</button>
+      <button class="cancel-add-btn" onclick="hideAddForm()">Отмена</button>
+    </div>
+  </div>
+
+</div>
+
 <!-- ========== НИЖНЯЯ НАВИГАЦИЯ ========== -->
 <div class="tabbar">
   <button id="tab-calendar" class="active" onclick="switchTab('calendar')">
     <span class="ico">📅</span><span>Календарь</span>
   </button>
-  <button id="tab-templates" onclick="switchTab('templates')">
-    <span class="ico">🛠</span><span>Мои смены</span>
-  </button>
   <button id="tab-salary" onclick="switchTab('salary')">
     <span class="ico">💰</span><span>ЗП</span>
+  </button>
+  <button id="tab-templates" onclick="switchTab('templates')">
+    <span class="ico">🛠</span><span>Мои смены</span>
   </button>
 </div>
 
@@ -411,14 +418,16 @@ function tomorrowKey(){
 
 function switchTab(tab){
   document.getElementById('page-calendar').classList.toggle('active', tab==='calendar');
-  document.getElementById('page-templates').classList.toggle('active', tab==='templates');
   document.getElementById('page-salary').classList.toggle('active', tab==='salary');
+  document.getElementById('page-templates').classList.toggle('active', tab==='templates');
+  
   document.getElementById('tab-calendar').classList.toggle('active', tab==='calendar');
-  document.getElementById('tab-templates').classList.toggle('active', tab==='templates');
   document.getElementById('tab-salary').classList.toggle('active', tab==='salary');
+  document.getElementById('tab-templates').classList.toggle('active', tab==='templates');
+  
   if (tab==='calendar'){ renderCalendar(); }
-  else if (tab==='templates'){ renderTemplates(); }
-  else { renderSalaryPage(); }
+  else if (tab==='salary'){ renderSalaryPage(); }
+  else { renderTemplates(); }
 }
 
 /* ---------- Палитра ---------- */
