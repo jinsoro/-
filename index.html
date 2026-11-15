@@ -16,12 +16,21 @@
     padding-bottom: calc(90px + env(safe-area-inset-bottom));
     -webkit-overflow-scrolling: touch;
     -webkit-font-smoothing: antialiased;
+    /* Фиксируем высоту body, чтобы не было дерганья при смене контента */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
   .card { background: #1e293b; border-radius: 14px; padding: 12px; margin-bottom: 12px; overflow: hidden; }
   .card-title { font-size: 13px; color: #94a3b8; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 
   .page { display: none; }
-  .page.active { display: block; }
+  .page.active { 
+    display: block; 
+    /* Растягиваем активную страницу, чтобы футер не прыгал */
+    flex: 1;
+    min-height: calc(100vh - 120px); 
+  }
 
   /* Завтра */
   .tomorrow { background: linear-gradient(135deg, #1e3a8a, #1e293b); border: 1px solid #3b82f6; }
@@ -519,6 +528,9 @@ function switchTab(tab){
   if (tab==='calendar'){ renderCalendar(); }
   else if (tab==='salary'){ renderSalaryPage(); }
   else { renderTemplates(); }
+  
+  // Принудительно прокручиваем страницу вверх при смене вкладки, чтобы избежать скачков
+  window.scrollTo(0, 0);
 }
 
 /* ---------- Свайпы и анимация ---------- */
