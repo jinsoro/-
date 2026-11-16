@@ -227,7 +227,10 @@
   .template-item .del { color: #f87171; }
 
   .template-buttons {
-    display: flex; gap: 8px; margin-top: 12px;
+    display: flex; flex-direction: column; gap: 8px; margin-top: 12px;
+  }
+  .btn-row {
+    display: flex; gap: 8px;
   }
   .show-add-btn {
     flex: 2; background: #22c55e; color: #052e16; border: none; border-radius: 12px;
@@ -238,6 +241,12 @@
     padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer;
   }
   .show-archive-btn:active { background: #475569; }
+  
+  .btn-sync {
+    width: 100%; background: #1d4ed8; color: #dbeafe; border: none; border-radius: 12px;
+    padding: 12px; font-size: 14px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
 
   .add-template {
     display: none;
@@ -496,8 +505,11 @@
     <div class="template-list" id="templateList"></div>
 
     <div class="template-buttons">
-      <button class="show-add-btn" id="showAddBtn" onclick="showAddForm()">+ Добавить</button>
-      <button class="show-archive-btn" onclick="openArchive()">📁 Архив</button>
+      <div class="btn-row">
+        <button class="show-add-btn" id="showAddBtn" onclick="showAddForm()">+ Добавить</button>
+        <button class="show-archive-btn" onclick="openArchive()">📁 Архив</button>
+      </div>
+      <button class="btn-sync" onclick="syncHours()">🔄 Синхронизировать часы в календаре</button>
     </div>
 
     <div class="add-template" id="addTemplateForm">
@@ -637,7 +649,10 @@ function switchTab(tab){
   document.getElementById('tab-templates').classList.toggle('active', tab==='templates');
   
   if (tab==='calendar'){ renderCalendar(); }
-  else if (tab==='salary'){ renderSalaryPage(); }
+  else if (tab==='salary'){ 
+    shifts = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+    renderSalaryPage(); 
+  }
   else { renderTemplates(); }
   
   window.scrollTo(0, 0);
@@ -823,22 +838,6 @@ function saveTemplate(){
       templates[idx].name = name;
       templates[idx].color = newColor;
       templates[idx].defaultHours = defaultHours;
-      
-      const today = new Date();
-      today.setHours(0,0,0,0);
-      const tKey = dateKey(today.getFullYear(), today.getMonth(), today.getDate());
-
-      // Жесткая синхронизация: ищем смены по templateId в БУДУЩИХ И ТЕКУЩИХ днях
-      for (const dateStr in shifts) {
-        if (dateStr >= tKey) {
-          for (const s of shifts[dateStr]) {
-            if (s.templateId === id && (!s.hours || isNaN(s.hours)) && defaultHours) {
-              s.hours = defaultHours;
-            }
-          }
-        }
-      }
-      localStorage.setItem(STORE_KEY, JSON.stringify(shifts));
     }
   } else {
     if (templates.some(t => t.name === name)){ alert('Такая смена уже есть'); return; }
@@ -849,9 +848,42 @@ function saveTemplate(){
   hideAddForm();
   renderTemplates();
   
-  // Обновляем все страницы
   renderCalendar();
   renderSalaryPage();
+}
+
+/* ---------- Синхронизация часов (ВО ВСЕХ СМЕНАХ) ---------- */
+function syncHours() {
+  if (!confirm('Обновить часы ВО ВСЕХ сменах в календаре (включая прошлые) согласно настройкам объектов? Если вы меняли часы в календаре вручную, они перезапишутся.')) return;
+  
+  let updatedCount = 0;
+
+  // Создаем словарь шаблонов по имени для быстрого поиска
+  const templatesMap = {};
+  for (const t of templates) {
+    if (!t.archived) templatesMap[t.name] = t;
+  }
+
+  // Проходимся по всем сменам без исключения
+  for (const dateStr in shifts) {
+    for (const s of shifts[dateStr]) {
+      const t = templatesMap[s.name];
+      if (t && t.defaultHours) {
+        s.hours = t.defaultHours;
+        updatedCount++;
+      }
+    }
+  }
+
+  localStorage.setItem(STORE_KEY, JSON.stringify(shifts));
+  renderCalendar();
+  renderSalaryPage();
+  
+  if (updatedCount > 0) {
+    alert(`Готово! Обновлено смен: ${updatedCount}`);
+  } else {
+    alert('Не найдено смен для обновления или у объектов не заданы часы по умолчанию.');
+  }
 }
 
 /* ---------- Шаблоны ---------- */
@@ -1167,16 +1199,23 @@ function collectMonthData(y, m){
   const byShop = {};
   const colorByShop = {};
   const countByShop = {};
+  
+  const tKey = todayKey();
+
   for (const key in shifts){
     const [ky,km] = key.split('-').map(Number);
     if (ky===y && km===m+1){
       for (const s of shifts[key]){
         const inc = +s.income || 0;
         total += inc;
-        totalHours += (+s.hours || 0);
         byShop[s.name] = (byShop[s.name]||0) + inc;
         countByShop[s.name] = (countByShop[s.name]||0) + 1;
         if (!colorByShop[s.name]) colorByShop[s.name] = s.color;
+        
+        // Учитываем часы только для прошедших и сегодняшних дней
+        if (key <= tKey) {
+          totalHours += (+s.hours || 0);
+        }
       }
     }
   }
