@@ -457,7 +457,7 @@
   .shift-row .name { font-weight: 600; font-size: 15px; }
   .shift-row .del { color: #f87171; font-size: 20px; background: none; border: none; cursor: pointer; padding: 0 4px; }
   
-  .shift-row .fields { display: flex; gap: 8px; margin-bottom: 8px; }
+  .shift-row .fields { display: flex; gap: 8px; }
   .shift-row .field { flex: 1; display: flex; flex-direction: column; gap: 4px; }
   .shift-row .field label { font-size: 10px; color: #94a3b8; padding-left: 2px; text-transform: uppercase; }
   .shift-row .field input {
@@ -466,12 +466,6 @@
   }
   .shift-row .field.hours input { color: #e5e7eb; }
   
-  .shift-row .note-row textarea {
-    width: 100%; min-height: 38px; padding: 8px 10px; border-radius: 8px;
-    border: 1px solid #334155; background: #1e293b; color: #e5e7eb;
-    font-size: 15px; font-family: inherit; resize: vertical;
-  }
-
   .btn {
     padding: 14px; border-radius: 12px; border: none; font-size: 15px;
     font-weight: 600; cursor: pointer; width: 100%;
@@ -1718,6 +1712,7 @@ function renderDayShifts(){
     block.innerHTML = '<div class="empty-hint">На этот день смен нет. Выбери ниже.</div>';
     return;
   }
+  // Убрали блок с заметкой к смене
   block.innerHTML = list.map((s,i)=>`
     <div class="shift-row" style="border-left-color:${s.color}">
       <div class="top">
@@ -1739,9 +1734,6 @@ function renderDayShifts(){
                  value="${s.hours || ''}" onchange="setHours(${i}, this.value)">
         </div>
       </div>
-      <div class="note-row">
-        <textarea placeholder="Заметка к смене..." onchange="setNote(${i}, this.value)">${escapeHtml(s.note || '')}</textarea>
-      </div>
     </div>
   `).join('');
 }
@@ -1762,14 +1754,6 @@ function setHours(index, value){
   shifts[selectedDate][index].hours = isNaN(v) ? null : v;
   localStorage.setItem(STORE_KEY, JSON.stringify(shifts));
   renderSalaryPage();
-}
-
-function setNote(index, value){
-  if (!shifts[selectedDate]?.[index]) return;
-  shifts[selectedDate][index].note = value || '';
-  localStorage.setItem(STORE_KEY, JSON.stringify(shifts));
-  renderTodayTomorrow();
-  updateCalendarGrid();
 }
 
 function renderPickList(){
