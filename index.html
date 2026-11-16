@@ -30,6 +30,24 @@
     min-height: calc(100vh - 120px); 
   }
 
+  /* Уведомление о незаполненной ЗП */
+  .warning-banner {
+    background: #422006;
+    border: 1px solid #b45309;
+    color: #fde68a;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    margin-bottom: 12px;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+  }
+  .warning-banner.show { display: flex; }
+  .warning-banner span { font-weight: 600; }
+  .warning-banner .arrow { font-size: 18px; }
+
   /* Сегодня и Завтра */
   .today-tomorrow { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
   .day-card { 
@@ -112,7 +130,7 @@
   .day .labels {
     display: flex; flex-direction: column; gap: 1px;
     flex: 1; justify-content: flex-start; overflow: hidden;
-    padding-bottom: 14px; /* Освобождаем место под иконку и сумму */
+    padding-bottom: 14px; 
   }
   .day .lbl {
     font-size: 9px; line-height: 1.15; font-weight: 700;
@@ -122,7 +140,6 @@
     text-align: center;
   }
   
-  /* Иконка строго по центру ячейки */
   .day .note-icon {
     position: absolute;
     top: 50%;
@@ -135,7 +152,6 @@
     pointer-events: none;
   }
   
-  /* Сумма прижата к низу */
   .day .sum {
     font-size: 10px; line-height: 1.1; color: #fff; font-weight: 600;
     text-align: center; text-shadow: 0 1px 1px rgba(0,0,0,0.5);
@@ -206,6 +222,51 @@
   .shops .shop-name { color: #e5e7eb; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .shops .shop-count { font-size: 11px; color: #94a3b8; margin-top: 2px; }
   .shops .sum { color: #86efac; font-weight: 600; white-space: nowrap; }
+
+  /* График */
+  .chart-container {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    height: 120px;
+    margin-top: 16px;
+    padding-bottom: 24px;
+    position: relative;
+    border-bottom: 1px solid #334155;
+  }
+  .chart-bar-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    position: relative;
+  }
+  .chart-bar {
+    width: 60%;
+    max-width: 40px;
+    background: #3b82f6;
+    border-radius: 4px 4px 0 0;
+    transition: height 0.3s ease-out;
+    min-height: 2px;
+    opacity: 0.8;
+  }
+  .chart-bar.zero { background: #334155; opacity: 1; }
+  .chart-value {
+    font-size: 10px;
+    color: #e5e7eb;
+    position: absolute;
+    top: -16px;
+    white-space: nowrap;
+  }
+  .chart-label {
+    position: absolute;
+    bottom: -22px;
+    font-size: 10px;
+    color: #94a3b8;
+    text-transform: uppercase;
+  }
 
   .past-months { display: flex; flex-direction: column; gap: 6px; }
   .past-month-row {
@@ -483,6 +544,20 @@
   .sync-confirm-modal p { font-size: 14px; color: #94a3b8; margin: 0 0 20px; line-height: 1.4; }
   .sync-confirm-modal .btn-primary { background: #22c55e; color: #052e16; margin-bottom: 8px; }
   .sync-confirm-modal .btn-secondary { background: #334155; color: #e5e7eb; }
+
+  /* Список незаполненных смен */
+  .missing-list {
+    display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;
+    max-height: 60vh; overflow-y: auto;
+  }
+  .missing-item {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #0f172a; border: 1px solid #334155; border-radius: 10px;
+    padding: 12px; cursor: pointer;
+  }
+  .missing-item .date { font-weight: 600; color: #e5e7eb; }
+  .missing-item .shop { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+  .missing-item .arrow { color: #38bdf8; font-size: 18px; }
 </style>
 </head>
 <body>
@@ -527,6 +602,11 @@
 <!-- ========== СТРАНИЦА 2: ЗП ========== -->
 <div class="page" id="page-salary">
 
+  <div class="warning-banner" id="salaryWarningBanner" onclick="openMissingList()">
+    <div>У вас есть <span id="missingCount">0</span> смен без указанной ЗП</div>
+    <div class="arrow">›</div>
+  </div>
+
   <div class="card">
     <div class="salary-month-nav">
       <button onclick="changeSalaryMonth(-1)">‹</button>
@@ -543,6 +623,12 @@
 
     <div class="card-title" style="margin-top:8px;">По объектам</div>
     <div class="shops" id="salaryBreakdown"></div>
+  </div>
+
+  <!-- График -->
+  <div class="card">
+    <div class="card-title">Динамика за 6 месяцев</div>
+    <div class="chart-container" id="chartContainer"></div>
   </div>
 
   <div class="card">
@@ -642,6 +728,15 @@
   </div>
 </div>
 
+<!-- Модалка незаполненных ЗП -->
+<div class="modal-bg" id="missingModalBg">
+  <div class="modal">
+    <h2>Смены без ЗП</h2>
+    <div class="missing-list" id="missingList"></div>
+    <button class="btn btn-cancel" onclick="closeMissingList()">Закрыть</button>
+  </div>
+</div>
+
 <!-- Напоминание о бэкапе -->
 <div class="backup-overlay" id="backupOverlay">
   <div class="backup-modal">
@@ -669,6 +764,7 @@ const TEMPLATES_KEY = 'templates_v4';
 const DAY_NOTES_KEY = 'day_notes_v4';
 const DOW = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const MONTHS = ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+const SHORT_MONTHS = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
 const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#a855f7', '#ec4899'];
 
 let templates = JSON.parse(localStorage.getItem(TEMPLATES_KEY) || '[]');
@@ -866,7 +962,7 @@ function exportData(){
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'backup-smeny.json'; /* Имя файла исправлено */
+  a.download = 'backup-smeny.json';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -1401,7 +1497,9 @@ function renderSalaryPage(){
   document.getElementById('salaryBreakdown').innerHTML = bd ||
     `<div class="empty-hint">Нет смен в ${MONTHS[salaryMonth]} ${salaryYear}</div>`;
 
+  renderChart();
   renderPastMonths();
+  checkMissingIncome();
 }
 
 function shiftWord(n){
@@ -1410,6 +1508,121 @@ function shiftWord(n){
   if (mod10 === 1 && mod100 !== 11) return 'смена';
   if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'смены';
   return 'смен';
+}
+
+/* ---------- График ---------- */
+function renderChart() {
+  const container = document.getElementById('chartContainer');
+  const monthsData = [];
+  
+  for (let i = 5; i >= 0; i--) {
+    let y = salaryYear;
+    let m = salaryMonth - i;
+    
+    if (m < 0) { 
+      const offset = Math.ceil(Math.abs(m) / 12); 
+      y -= offset; 
+      m = 12 - (Math.abs(m) % 12);
+      if (m === 12) m = 0;
+    }
+    
+    const { total } = collectMonthData(y, m);
+    monthsData.push({ y, m, total });
+  }
+  
+  const maxVal = Math.max(...monthsData.map(d => d.total), 1);
+  
+  container.innerHTML = monthsData.map(d => {
+    const heightPercent = (d.total / maxVal) * 100;
+    const isZero = d.total === 0;
+    return `
+      <div class="chart-bar-wrapper">
+        ${!isZero ? `<div class="chart-value">${Math.round(d.total/1000)}к</div>` : ''}
+        <div class="chart-bar ${isZero ? 'zero' : ''}" style="height: ${isZero ? 2 : heightPercent}%"></div>
+        <div class="chart-label">${SHORT_MONTHS[d.m]}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ---------- Незаполненная ЗП ---------- */
+function checkMissingIncome() {
+  const tKey = todayKey();
+  let missingCount = 0;
+  
+  for (const key in shifts) {
+    if (key <= tKey) {
+      for (const s of shifts[key]) {
+        if (s.income === null || s.income === undefined || s.income === '') {
+          missingCount++;
+        }
+      }
+    }
+  }
+  
+  const banner = document.getElementById('salaryWarningBanner');
+  if (missingCount > 0) {
+    document.getElementById('missingCount').textContent = missingCount;
+    banner.classList.add('show');
+  } else {
+    banner.classList.remove('show');
+  }
+}
+
+function openMissingList() {
+  const tKey = todayKey();
+  const list = [];
+  
+  for (const key in shifts) {
+    if (key <= tKey) {
+      for (const s of shifts[key]) {
+        if (s.income === null || s.income === undefined || s.income === '') {
+          list.push({ date: key, shift: s });
+        }
+      }
+    }
+  }
+  
+  list.sort((a,b) => b.date.localeCompare(a.date));
+  
+  const container = document.getElementById('missingList');
+  if (!list.length) {
+    container.innerHTML = '<div class="empty-hint">Все ЗП заполнены! 🎉</div>';
+  } else {
+    container.innerHTML = list.map(item => {
+      const d = new Date(item.date + 'T00:00:00');
+      const formattedDate = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+      return `
+        <div class="missing-item" onclick="jumpToMissing('${item.date}')">
+          <div>
+            <div class="date">${formattedDate}</div>
+            <div class="shop">${item.shift.name}</div>
+          </div>
+          <div class="arrow">›</div>
+        </div>
+      `;
+    }).join('');
+  }
+  
+  document.getElementById('missingModalBg').classList.add('open');
+}
+
+function jumpToMissing(dateKeyStr) {
+  closeMissingList();
+  switchTab('calendar');
+  
+  const [y, m] = dateKeyStr.split('-').map(Number);
+  currentYear = y;
+  currentMonth = m - 1;
+  renderCalendar();
+  
+  setTimeout(() => {
+    openDay(dateKeyStr);
+  }, 100);
+}
+
+function closeMissingList() {
+  document.getElementById('missingModalBg').classList.remove('open');
 }
 
 function renderPastMonths(){
@@ -1615,6 +1828,9 @@ function closeModal(){
 
 document.getElementById('modalBg').addEventListener('click', e=>{
   if (e.target.id==='modalBg') closeModal();
+});
+document.getElementById('missingModalBg').addEventListener('click', e=>{
+  if (e.target.id==='missingModalBg') closeMissingList();
 });
 document.getElementById('placePicker').addEventListener('click', e=>{
   if (e.target.id==='placePicker') closePlacePicker();
