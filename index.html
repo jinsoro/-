@@ -38,7 +38,9 @@
     border-radius: 14px; 
     padding: 10px;
     display: flex; flex-direction: column;
+    cursor: pointer;
   }
+  .day-card:active { opacity: 0.8; }
   .day-card.tomorrow { background: linear-gradient(135deg, #312e81, #1e293b); border-color: #6366f1; }
   .day-card .title { font-size: 12px; color: #93c5fd; margin-bottom: 4px; font-weight: 600; }
   .day-card.tomorrow .title { color: #a5b4fc; }
@@ -100,9 +102,17 @@
     color: #e5e7eb; text-align: center; margin-bottom: 2px; flex-shrink: 0;
   }
   .day.has-shift .num { color: #fff; }
+  
+  .day .warning-badge {
+    position: absolute; top: 3px; right: 3px;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #fbbf24; box-shadow: 0 0 4px #fbbf24;
+  }
+
   .day .labels {
     display: flex; flex-direction: column; gap: 1px;
     flex: 1; justify-content: flex-start; overflow: hidden;
+    margin-bottom: auto;
   }
   .day .lbl {
     font-size: 9px; line-height: 1.15; font-weight: 700;
@@ -113,14 +123,15 @@
   }
   .day .note-icon {
     font-size: 10px; line-height: 1; text-align: center;
-    margin-top: 2px; margin-bottom: 1px; flex-shrink: 0;
+    margin-bottom: 2px; flex-shrink: 0;
     text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+    opacity: 0.9;
   }
   .day .sum {
     font-size: 10px; line-height: 1.1; color: #fff; font-weight: 600;
     text-align: center; text-shadow: 0 1px 1px rgba(0,0,0,0.5);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    flex-shrink: 0; margin-top: auto;
+    flex-shrink: 0;
   }
 
   /* Панель режима выставления */
@@ -164,6 +175,12 @@
   .total-big { text-align: center; padding: 16px 0 8px; }
   .total-big .lbl { font-size: 13px; color: #94a3b8; margin-bottom: 4px; }
   .total-big .val { font-size: 32px; font-weight: 700; color: #86efac; }
+  
+  .stats-row {
+    display: flex; justify-content: center; gap: 16px; margin-top: 4px; margin-bottom: 8px;
+    font-size: 12px; color: #94a3b8;
+  }
+  .stats-row span b { color: #e5e7eb; }
 
   .shops { font-size: 13px; color: #cbd5e1; margin-top: 6px; border-top: 1px solid #334155; padding-top: 8px; }
   .shops .shop-line {
@@ -199,16 +216,28 @@
     background: #0f172a; border: 1px solid #334155; border-radius: 10px;
     padding: 10px 12px; font-size: 15px;
   }
-  .template-item .left { display: flex; align-items: center; gap: 10px; }
+  .template-item .left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
   .template-item .dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
-  .template-item .name { font-weight: 500; }
-  .template-item .del { color: #f87171; background: none; border: none; cursor: pointer; font-size: 20px; padding: 0 6px; }
+  .template-item .name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .template-item .default-hours { font-size: 11px; color: #94a3b8; margin-left: 6px; white-space: nowrap; }
+  
+  .template-item .actions { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
+  .template-item button { background: none; border: none; cursor: pointer; font-size: 16px; padding: 4px 6px; }
+  .template-item .edit { color: #38bdf8; }
+  .template-item .del { color: #f87171; }
 
+  .template-buttons {
+    display: flex; gap: 8px; margin-top: 12px;
+  }
   .show-add-btn {
-    width: 100%; margin-top: 12px;
-    background: #22c55e; color: #052e16; border: none; border-radius: 12px;
+    flex: 2; background: #22c55e; color: #052e16; border: none; border-radius: 12px;
     padding: 14px; font-size: 16px; font-weight: 700; cursor: pointer;
   }
+  .show-archive-btn {
+    flex: 1; background: #334155; color: #e5e7eb; border: none; border-radius: 12px;
+    padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer;
+  }
+  .show-archive-btn:active { background: #475569; }
 
   .add-template {
     display: none;
@@ -217,6 +246,10 @@
   }
   .add-template.open { display: flex; }
   .add-template input {
+    width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155;
+    background: #1e293b; color: #e5e7eb; font-size: 16px;
+  }
+  .add-template .hours-input {
     width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155;
     background: #1e293b; color: #e5e7eb; font-size: 16px;
   }
@@ -235,6 +268,33 @@
   .cancel-add-btn {
     background: #334155; color: #e5e7eb; border: none; border-radius: 10px;
     padding: 12px; font-size: 15px; font-weight: 600; cursor: pointer;
+  }
+
+  /* Модалка Архива */
+  .archive-modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none;
+    align-items: flex-end; z-index: 20;
+  }
+  .archive-modal.open { display: flex; }
+  .archive-modal .inner {
+    background: #1e293b; width: 100%; border-radius: 18px 18px 0 0; padding: 16px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    max-height: 80vh; overflow-y: auto;
+  }
+  .archive-modal h2 { font-size: 16px; margin: 0 0 12px; }
+  
+  .archive-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .archive-item {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #0f172a; border: 1px solid #334155; border-radius: 10px;
+    padding: 12px; font-size: 14px;
+  }
+  .archive-item .left { display: flex; align-items: center; gap: 10px; flex: 1; }
+  .archive-item .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .archive-item .name { color: #94a3b8; text-decoration: line-through; }
+  .archive-item .restore-btn {
+    background: #334155; color: #e5e7eb; border: none; border-radius: 8px;
+    padding: 8px 12px; font-size: 13px; cursor: pointer;
   }
 
   /* Модалка дня */
@@ -285,17 +345,20 @@
   .shift-row .top .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
   .shift-row .name { font-weight: 600; font-size: 15px; }
   .shift-row .del { color: #f87171; font-size: 20px; background: none; border: none; cursor: pointer; padding: 0 4px; }
-  .shift-row .income-row { display: flex; align-items: center; gap: 8px; }
-  .shift-row .income-row input {
-    flex: 1; padding: 8px 10px; border-radius: 8px; border: 1px solid #334155;
+  
+  .shift-row .fields { display: flex; gap: 8px; margin-bottom: 8px; }
+  .shift-row .field { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .shift-row .field label { font-size: 10px; color: #94a3b8; padding-left: 2px; text-transform: uppercase; }
+  .shift-row .field input {
+    width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #334155;
     background: #1e293b; color: #86efac; font-size: 16px; font-weight: 600;
   }
-  .shift-row .income-row span { color: #86efac; font-size: 14px; }
-  .shift-row .note-row { margin-top: 8px; }
+  .shift-row .field.hours input { color: #e5e7eb; }
+  
   .shift-row .note-row textarea {
     width: 100%; min-height: 38px; padding: 8px 10px; border-radius: 8px;
     border: 1px solid #334155; background: #1e293b; color: #e5e7eb;
-    font-size: 16px; font-family: inherit; resize: vertical;
+    font-size: 15px; font-family: inherit; resize: vertical;
   }
 
   .btn {
@@ -362,13 +425,12 @@
 <!-- ========== СТРАНИЦА 1: КАЛЕНДАРЬ ========== -->
 <div class="page active" id="page-calendar">
 
-  <!-- Сегодня и Завтра -->
   <div class="today-tomorrow">
-    <div class="day-card" id="todayCard">
+    <div class="day-card" id="todayCard" onclick="openDay(todayKey())">
       <div class="title">Сегодня</div>
       <div class="shifts" id="todayShifts"></div>
     </div>
-    <div class="day-card tomorrow" id="tomorrowCard">
+    <div class="day-card tomorrow" id="tomorrowCard" onclick="openDay(tomorrowKey())">
       <div class="title">Завтра</div>
       <div class="shifts" id="tomorrowShifts"></div>
     </div>
@@ -411,6 +473,8 @@
       <div class="lbl">Доход за месяц</div>
       <div class="val" id="salaryTotal">0 ₽</div>
     </div>
+    
+    <div class="stats-row" id="salaryStats"></div>
 
     <div class="card-title" style="margin-top:8px;">По объектам</div>
     <div class="shops" id="salaryBreakdown"></div>
@@ -431,15 +495,22 @@
     <div class="card-title">Мои смены (для календаря)</div>
     <div class="template-list" id="templateList"></div>
 
-    <button class="show-add-btn" id="showAddBtn" onclick="showAddForm()">+ Добавить смену</button>
+    <div class="template-buttons">
+      <button class="show-add-btn" id="showAddBtn" onclick="showAddForm()">+ Добавить</button>
+      <button class="show-archive-btn" onclick="openArchive()">📁 Архив</button>
+    </div>
 
     <div class="add-template" id="addTemplateForm">
+      <input type="hidden" id="editingTemplateId" value="">
       <input id="newTemplateName" placeholder="Название (объект/место)">
+      
+      <input id="newTemplateHours" class="hours-input" type="number" inputmode="decimal" placeholder="Часы по умолчанию (необязательно)">
+      
       <div class="color-row">
         <span class="clabel">Цвет:</span>
         <div class="colors" id="newColors"></div>
       </div>
-      <button class="add-btn" onclick="addTemplate()">Добавить</button>
+      <button class="add-btn" id="saveTemplateBtn" onclick="saveTemplate()">Добавить</button>
       <button class="cancel-add-btn" onclick="hideAddForm()">Отмена</button>
     </div>
   </div>
@@ -475,6 +546,15 @@
     <h2>Какую смену выставляем?</h2>
     <div class="pick-list" id="placePickList"></div>
     <button class="btn btn-cancel" onclick="closePlacePicker()">Отмена</button>
+  </div>
+</div>
+
+<!-- Модалка Архива -->
+<div class="archive-modal" id="archiveModal">
+  <div class="inner">
+    <h2>Архив смен</h2>
+    <div class="archive-list" id="archiveList"></div>
+    <button class="btn btn-cancel" onclick="closeArchive()">Закрыть</button>
   </div>
 </div>
 
@@ -694,56 +774,153 @@ function renderColorPicker(){
 }
 function setNewColor(c){ newColor = c; renderColorPicker(); }
 
-/* ---------- Форма добавления ---------- */
+/* ---------- Форма добавления/редактирования ---------- */
 function showAddForm(){
   document.getElementById('addTemplateForm').classList.add('open');
   document.getElementById('showAddBtn').style.display = 'none';
+  document.getElementById('editingTemplateId').value = '';
+  document.getElementById('newTemplateName').value = '';
+  document.getElementById('newTemplateHours').value = '';
+  document.getElementById('saveTemplateBtn').textContent = 'Добавить';
   renderColorPicker();
+  setTimeout(()=>document.getElementById('newTemplateName').focus(), 100);
+}
+
+function showEditForm(id){
+  const t = templates.find(x => x.id === id);
+  if (!t) return;
+  
+  document.getElementById('addTemplateForm').classList.add('open');
+  document.getElementById('showAddBtn').style.display = 'none';
+  document.getElementById('editingTemplateId').value = t.id;
+  document.getElementById('newTemplateName').value = t.name;
+  document.getElementById('newTemplateHours').value = t.defaultHours || '';
+  document.getElementById('saveTemplateBtn').textContent = 'Сохранить';
+  
+  newColor = t.color;
+  renderColorPicker();
+  
   setTimeout(()=>document.getElementById('newTemplateName').focus(), 100);
 }
 
 function hideAddForm(){
   document.getElementById('addTemplateForm').classList.remove('open');
   document.getElementById('showAddBtn').style.display = 'block';
-  document.getElementById('newTemplateName').value = '';
+  document.getElementById('editingTemplateId').value = '';
+}
+
+function saveTemplate(){
+  const id = document.getElementById('editingTemplateId').value;
+  const name = document.getElementById('newTemplateName').value.trim();
+  const hoursInput = document.getElementById('newTemplateHours').value;
+  const defaultHours = parseFloat(hoursInput) || null;
+  
+  if (!name){ alert('Введи название смены'); return; }
+  
+  if (id) {
+    const idx = templates.findIndex(t => t.id === id);
+    if (idx !== -1) {
+      templates[idx].name = name;
+      templates[idx].color = newColor;
+      templates[idx].defaultHours = defaultHours;
+      
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const tKey = dateKey(today.getFullYear(), today.getMonth(), today.getDate());
+
+      // Жесткая синхронизация: ищем смены по templateId в БУДУЩИХ И ТЕКУЩИХ днях
+      for (const dateStr in shifts) {
+        if (dateStr >= tKey) {
+          for (const s of shifts[dateStr]) {
+            if (s.templateId === id && (!s.hours || isNaN(s.hours)) && defaultHours) {
+              s.hours = defaultHours;
+            }
+          }
+        }
+      }
+      localStorage.setItem(STORE_KEY, JSON.stringify(shifts));
+    }
+  } else {
+    if (templates.some(t => t.name === name)){ alert('Такая смена уже есть'); return; }
+    templates.push({ id: 't' + Date.now(), name, color: newColor, defaultHours, archived: false });
+  }
+  
+  localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
+  hideAddForm();
+  renderTemplates();
+  
+  // Обновляем все страницы
+  renderCalendar();
+  renderSalaryPage();
 }
 
 /* ---------- Шаблоны ---------- */
 function renderTemplates(){
+  const activeTemplates = templates.filter(t => !t.archived);
+  
   const el = document.getElementById('templateList');
-  if (!templates.length){
-    el.innerHTML = '<div class="empty-hint">Пока нет смен. Нажми «+ Добавить смену».</div>';
+  if (!activeTemplates.length){
+    el.innerHTML = '<div class="empty-hint">Пока нет смен. Нажми «+ Добавить».</div>';
   } else {
-    el.innerHTML = templates.map(t=>`
+    el.innerHTML = activeTemplates.map(t=>`
       <div class="template-item">
         <div class="left">
           <span class="dot" style="background:${t.color}"></span>
           <span class="name">${t.name}</span>
+          ${t.defaultHours ? `<span class="default-hours">(${t.defaultHours} ч)</span>` : ''}
         </div>
-        <button class="del" onclick="deleteTemplate('${t.id}')">×</button>
+        <div class="actions">
+          <button class="edit" onclick="showEditForm('${t.id}')">✏️</button>
+          <button class="del" onclick="archiveTemplate('${t.id}')">×</button>
+        </div>
       </div>
     `).join('');
   }
 }
 
-function addTemplate(){
-  const input = document.getElementById('newTemplateName');
-  const name = input.value.trim();
-  if (!name){ alert('Введи название смены'); return; }
-  if (templates.some(t => t.name === name)){ alert('Такая смена уже есть'); return; }
-  templates.push({ id: 't' + Date.now(), name, color: newColor });
-  localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
-  hideAddForm();
-  renderTemplates();
+function archiveTemplate(id){
+  if (!confirm('Убрать смену в архив? В календаре все записи сохранятся, но из списка она исчезнет.')) return;
+  const idx = templates.findIndex(x => x.id === id);
+  if (idx !== -1) {
+    templates[idx].archived = true;
+    localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
+    renderTemplates();
+  }
 }
 
-function deleteTemplate(id){
-  const t = templates.find(x => x.id === id);
-  if (!t) return;
-  if (!confirm('Удалить «' + t.name + '» из списка?')) return;
-  templates = templates.filter(x => x.id !== id);
-  localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
-  renderTemplates();
+function restoreTemplate(id){
+  const idx = templates.findIndex(x => x.id === id);
+  if (idx !== -1) {
+    templates[idx].archived = false;
+    localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
+    renderTemplates();
+    openArchive(); // Обновляем список в модалке
+  }
+}
+
+/* ---------- Модалка Архива ---------- */
+function openArchive() {
+  const archivedTemplates = templates.filter(t => t.archived);
+  const archiveList = document.getElementById('archiveList');
+  
+  if (!archivedTemplates.length) {
+    archiveList.innerHTML = '<div class="empty-hint">Архив пуст.</div>';
+  } else {
+    archiveList.innerHTML = archivedTemplates.map(t => `
+      <div class="archive-item">
+        <div class="left">
+          <span class="dot" style="background:${t.color}"></span>
+          <span class="name">${t.name}</span>
+        </div>
+        <button class="restore-btn" onclick="restoreTemplate('${t.id}')">Вернуть</button>
+      </div>
+    `).join('');
+  }
+  document.getElementById('archiveModal').classList.add('open');
+}
+
+function closeArchive() {
+  document.getElementById('archiveModal').classList.remove('open');
 }
 
 /* ---------- Режим выставления ---------- */
@@ -751,7 +928,8 @@ function togglePlaceMode(){
   if (placeMode){
     exitPlaceMode();
   } else {
-    if (!templates.length){
+    const active = templates.filter(t => !t.archived);
+    if (!active.length){
       alert('Сначала добавь смены на вкладке «Мои смены»');
       return;
     }
@@ -760,11 +938,13 @@ function togglePlaceMode(){
 }
 
 function openPlacePicker(){
-  document.getElementById('placePickList').innerHTML = templates.map(t=>`
+  const active = templates.filter(t => !t.archived);
+  document.getElementById('placePickList').innerHTML = active.map(t=>`
     <div class="pick-item" onclick="selectPlaceTemplate('${t.id}')">
       <div class="left">
         <span class="dot" style="background:${t.color}"></span>
         <span>${t.name}</span>
+        ${t.defaultHours ? `<span style="font-size:12px;color:#94a3b8;margin-left:4px">(${t.defaultHours} ч)</span>` : ''}
       </div>
       <span class="add">→</span>
     </div>
@@ -779,7 +959,7 @@ function closePlacePicker(){
 function selectPlaceTemplate(id){
   const t = templates.find(x => x.id === id);
   if (!t) return;
-  placeTemplate = { id: t.id, name: t.name, color: t.color };
+  placeTemplate = { id: t.id, name: t.name, color: t.color, defaultHours: t.defaultHours };
   placeMode = true;
   closePlacePicker();
   updatePlaceUI();
@@ -851,6 +1031,9 @@ function buildDayCell(key, dayNum, otherMonth, tKey, tmKey){
   const total = list.reduce((s,x)=>s+(+x.income||0),0);
   const dayNote = dayNotes[key] || '';
   const hasNote = list.some(s => s.note && s.note.trim().length > 0) || dayNote.trim().length > 0;
+  
+  const isPastOrToday = key <= tKey;
+  const hasMissingIncome = isPastOrToday && list.some(s => s.income === null || s.income === undefined || s.income === '');
 
   let cls = 'day';
   if (otherMonth) cls += ' other-month';
@@ -878,8 +1061,10 @@ function buildDayCell(key, dayNum, otherMonth, tKey, tmKey){
 
   const noteIcon = hasNote ? `<div class="note-icon">📝</div>` : '';
   const sum = total ? `<div class="sum">${total.toLocaleString('ru-RU')}₽</div>` : '';
+  const badge = hasMissingIncome ? `<div class="warning-badge"></div>` : '';
 
   return `<div class="${cls}" style="${bg?`background:${bg};`:''}" onclick="onDayTap('${key}')">
+    ${badge}
     <div class="num">${dayNum}</div>
     ${labels}
     ${noteIcon}
@@ -895,7 +1080,14 @@ function onDayTap(key){
       shifts[key].splice(idx, 1);
       if (!shifts[key].length) delete shifts[key];
     } else {
-      shifts[key].push({ templateId: placeTemplate.id, name: placeTemplate.name, color: placeTemplate.color, income: null, note: '' });
+      shifts[key].push({ 
+        templateId: placeTemplate.id, 
+        name: placeTemplate.name, 
+        color: placeTemplate.color, 
+        income: null, 
+        hours: placeTemplate.defaultHours || null,
+        note: '' 
+      });
     }
     localStorage.setItem(STORE_KEY, JSON.stringify(shifts));
     updateCalendarGrid();
@@ -971,6 +1163,7 @@ function changeMonth(delta, animate = true){
 /* ---------- Страница ЗП ---------- */
 function collectMonthData(y, m){
   let total = 0;
+  let totalHours = 0;
   const byShop = {};
   const colorByShop = {};
   const countByShop = {};
@@ -980,22 +1173,31 @@ function collectMonthData(y, m){
       for (const s of shifts[key]){
         const inc = +s.income || 0;
         total += inc;
+        totalHours += (+s.hours || 0);
         byShop[s.name] = (byShop[s.name]||0) + inc;
         countByShop[s.name] = (countByShop[s.name]||0) + 1;
         if (!colorByShop[s.name]) colorByShop[s.name] = s.color;
       }
     }
   }
-  return { total, byShop, colorByShop, countByShop };
+  return { total, totalHours, byShop, colorByShop, countByShop };
 }
 
 function renderSalaryPage(){
   document.getElementById('salaryMonthTitle').textContent =
     MONTHS[salaryMonth] + ' ' + salaryYear;
 
-  const { total, byShop, colorByShop, countByShop } = collectMonthData(salaryYear, salaryMonth);
+  const { total, totalHours, byShop, colorByShop, countByShop } = collectMonthData(salaryYear, salaryMonth);
 
   document.getElementById('salaryTotal').textContent = total.toLocaleString('ru-RU') + ' ₽';
+  
+  const statsEl = document.getElementById('salaryStats');
+  if (totalHours > 0) {
+    const rate = Math.round(total / totalHours);
+    statsEl.innerHTML = `<span>Часов: <b>${totalHours}</b></span> <span>Ставка: <b>${rate} ₽/ч</b></span>`;
+  } else {
+    statsEl.innerHTML = '';
+  }
 
   const bd = Object.entries(byShop).sort((a,b)=>b[1]-a[1])
     .map(([name,sum])=>{
@@ -1092,7 +1294,6 @@ function openDay(key){
   document.getElementById('modalTitle').textContent =
     t.toLocaleDateString('ru-RU', { day:'numeric', month:'long', weekday:'long' });
   
-  // Заполняем заметку на день
   document.getElementById('dayNoteInput').value = dayNotes[key] || '';
   
   renderDayShifts();
@@ -1129,10 +1330,17 @@ function renderDayShifts(){
         </div>
         <button class="del" onclick="removeShift(${i})">×</button>
       </div>
-      <div class="income-row">
-        <input type="number" inputmode="decimal" placeholder="ЗП по факту"
-               value="${s.income || ''}" onchange="setIncome(${i}, this.value)">
-        <span>₽</span>
+      <div class="fields">
+        <div class="field">
+          <label>ЗП (₽)</label>
+          <input type="number" inputmode="decimal" placeholder="0"
+                 value="${s.income || ''}" onchange="setIncome(${i}, this.value)">
+        </div>
+        <div class="field hours">
+          <label>Часы</label>
+          <input type="number" inputmode="decimal" placeholder="0"
+                 value="${s.hours || ''}" onchange="setHours(${i}, this.value)">
+        </div>
       </div>
       <div class="note-row">
         <textarea placeholder="Заметка к смене..." onchange="setNote(${i}, this.value)">${escapeHtml(s.note || '')}</textarea>
@@ -1151,6 +1359,14 @@ function setIncome(index, value){
   renderSalaryPage();
 }
 
+function setHours(index, value){
+  const v = parseFloat(value);
+  if (!shifts[selectedDate]?.[index]) return;
+  shifts[selectedDate][index].hours = isNaN(v) ? null : v;
+  localStorage.setItem(STORE_KEY, JSON.stringify(shifts));
+  renderSalaryPage();
+}
+
 function setNote(index, value){
   if (!shifts[selectedDate]?.[index]) return;
   shifts[selectedDate][index].note = value || '';
@@ -1161,15 +1377,17 @@ function setNote(index, value){
 
 function renderPickList(){
   const el = document.getElementById('pickList');
-  if (!templates.length){
+  const active = templates.filter(t => !t.archived);
+  if (!active.length){
     el.innerHTML = '<div class="empty-hint">Сначала добавь смены на вкладке «Мои смены».</div>';
     return;
   }
-  el.innerHTML = templates.map(t=>`
+  el.innerHTML = active.map(t=>`
     <div class="pick-item" onclick="pickTemplate('${t.id}')">
       <div class="left">
         <span class="dot" style="background:${t.color}"></span>
         <span>${t.name}</span>
+        ${t.defaultHours ? `<span style="font-size:12px;color:#94a3b8;margin-left:4px">(${t.defaultHours} ч)</span>` : ''}
       </div>
       <span class="add">+</span>
     </div>
@@ -1180,7 +1398,14 @@ function pickTemplate(id){
   const t = templates.find(x => x.id === id);
   if (!t) return;
   if (!shifts[selectedDate]) shifts[selectedDate] = [];
-  shifts[selectedDate].push({ templateId: t.id, name: t.name, color: t.color, income: null, note: '' });
+  shifts[selectedDate].push({ 
+    templateId: t.id, 
+    name: t.name, 
+    color: t.color, 
+    income: null, 
+    hours: t.defaultHours || null, 
+    note: '' 
+  });
   localStorage.setItem(STORE_KEY, JSON.stringify(shifts));
   renderDayShifts();
   updateCalendarGrid();
@@ -1209,6 +1434,9 @@ document.getElementById('modalBg').addEventListener('click', e=>{
 });
 document.getElementById('placePicker').addEventListener('click', e=>{
   if (e.target.id==='placePicker') closePlacePicker();
+});
+document.getElementById('archiveModal').addEventListener('click', e=>{
+  if (e.target.id==='archiveModal') closeArchive();
 });
 
 /* ---------- Старт ---------- */
