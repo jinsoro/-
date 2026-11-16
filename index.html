@@ -9,25 +9,32 @@
 <title>Смены</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  
+  /* Фиксируем body, чтобы не было оттягивания */
   body {
     margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     background: #0f172a; color: #e5e7eb;
-    padding: calc(env(safe-area-inset-top) + 12px) 12px;
-    padding-bottom: calc(90px + env(safe-area-inset-bottom));
-    -webkit-overflow-scrolling: touch;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    position: fixed;
     -webkit-font-smoothing: antialiased;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
   }
+  
   .card { background: #1e293b; border-radius: 14px; padding: 12px; margin-bottom: 12px; overflow: hidden; }
   .card-title { font-size: 13px; color: #94a3b8; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 
-  .page { display: none; }
+  /* Каждая страница теперь скроллится внутри себя */
+  .page { 
+    display: none; 
+    height: 100vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: calc(env(safe-area-inset-top) + 12px) 12px;
+    padding-bottom: calc(90px + env(safe-area-inset-bottom));
+  }
   .page.active { 
     display: block; 
-    flex: 1;
-    min-height: calc(100vh - 120px); 
   }
 
   /* Уведомление о незаполненной ЗП */
@@ -810,7 +817,9 @@ function switchTab(tab){
   }
   else { renderTemplates(); }
   
-  window.scrollTo(0, 0);
+  // Прокрутка контента вверх при смене вкладки
+  const activePage = document.querySelector('.page.active');
+  if (activePage) activePage.scrollTop = 0;
 }
 
 /* ---------- Свайпы и анимация календаря ---------- */
@@ -1712,7 +1721,6 @@ function renderDayShifts(){
     block.innerHTML = '<div class="empty-hint">На этот день смен нет. Выбери ниже.</div>';
     return;
   }
-  // Убрали блок с заметкой к смене
   block.innerHTML = list.map((s,i)=>`
     <div class="shift-row" style="border-left-color:${s.color}">
       <div class="top">
