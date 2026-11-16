@@ -160,11 +160,16 @@
     top: 50%;
     left: 0; right: 0;
     transform: translateY(-50%);
-    font-size: 10px; line-height: 1; text-align: center;
-    text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+    text-align: center;
     opacity: 0.9;
     z-index: 1;
     pointer-events: none;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .day .note-icon svg {
+    width: 10px; height: 10px; fill: #fff;
   }
   
   .day .sum {
@@ -204,7 +209,6 @@
     color: #fff;
     border: none;
     box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    font-size: 24px;
     cursor: pointer;
     z-index: 14;
     display: none; 
@@ -213,13 +217,10 @@
     transition: background 0.2s, transform 0.1s;
   }
   .fab-place-btn.show { display: flex; }
-  .fab-place-btn.active {
-    background: #22c55e;
-    color: #052e16;
-  }
-  .fab-place-btn:active {
-    transform: scale(0.95);
-  }
+  .fab-place-btn.active { background: #22c55e; color: #052e16; }
+  .fab-place-btn:active { transform: scale(0.95); }
+  
+  .fab-place-btn svg { width: 24px; height: 24px; fill: currentColor; }
 
   .place-mode-hint {
     position: fixed;
@@ -364,9 +365,7 @@
     touch-action: pan-y;
   }
   
-  .swipe-content.swiping {
-    transition: none;
-  }
+  .swipe-content.swiping { transition: none; }
 
   .swipe-action {
     position: absolute;
@@ -545,15 +544,18 @@
   .tabbar button {
     flex: 1; background: none; border: 1px solid transparent; color: #64748b; cursor: pointer;
     padding: 8px 0 6px; font-family: inherit;
-    display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 3px;
     -webkit-user-select: none; user-select: none;
     border-radius: 12px; transition: all 0.2s;
   }
   .tabbar button .ico {
-    font-size: 20px;
-    height: 24px;      
-    line-height: 24px; 
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+  }
+  .tabbar button .ico svg {
+    width: 22px; height: 22px; fill: currentColor;
   }
   .tabbar button span:last-child {
     font-size: 10px;
@@ -576,7 +578,8 @@
     background: #1e293b; width: 100%; max-width: 340px; border-radius: 16px;
     padding: 20px; text-align: center;
   }
-  .backup-modal .icon { font-size: 40px; margin-bottom: 10px; }
+  .backup-modal .icon { margin-bottom: 10px; display: flex; justify-content: center; }
+  .backup-modal .icon svg { width: 48px; height: 48px; fill: #94a3b8; }
   .backup-modal h2 { font-size: 18px; margin: 0 0 10px; color: #e5e7eb; }
   .backup-modal p { font-size: 14px; color: #94a3b8; margin: 0 0 20px; line-height: 1.4; }
   .backup-modal .btn-primary { background: #22c55e; color: #052e16; margin-bottom: 8px; }
@@ -648,7 +651,8 @@
 
 <!-- Плавающая кнопка выставления смены -->
 <button class="fab-place-btn show" id="placeBtn" onclick="togglePlaceMode()">
-  ✏️
+  <!-- Иконка карандаша (SVG) -->
+  <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
 </button>
 <div class="place-mode-hint hidden" id="placeHint"></div>
 
@@ -701,7 +705,7 @@
 
     <div class="template-buttons">
       <button class="show-add-btn" id="showAddBtn" onclick="showAddForm()">+ Добавить</button>
-      <button class="show-archive-btn" onclick="openArchive()">📁 Архив</button>
+      <button class="show-archive-btn" onclick="openArchive()">Архив</button>
     </div>
 
     <div class="add-template" id="addTemplateForm">
@@ -734,13 +738,22 @@
 <!-- ========== НИЖНЯЯ НАВИГАЦИЯ ========== -->
 <div class="tabbar">
   <button id="tab-calendar" class="active" onclick="switchTab('calendar')">
-    <span class="ico">📅</span><span>Календарь</span>
+    <span class="ico">
+      <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>
+    </span>
+    <span>Календарь</span>
   </button>
   <button id="tab-salary" onclick="switchTab('salary')">
-    <span class="ico">💰</span><span>ЗП</span>
+    <span class="ico">
+      <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+    </span>
+    <span>ЗП</span>
   </button>
   <button id="tab-templates" onclick="switchTab('templates')">
-    <span class="ico">🛠</span><span>Мои смены</span>
+    <span class="ico">
+      <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+    </span>
+    <span>Мои смены</span>
   </button>
 </div>
 
@@ -793,7 +806,9 @@
 <!-- Напоминание о бэкапе -->
 <div class="backup-overlay" id="backupOverlay">
   <div class="backup-modal">
-    <div class="icon">🗓️</div>
+    <div class="icon">
+      <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>
+    </div>
     <h2>Новый месяц!</h2>
     <p>Начался новый месяц. Рекомендуем сделать резервную копию данных, чтобы ничего не потерять.</p>
     <button class="btn btn-primary" onclick="backupFromReminder()">📥 Скачать копию</button>
@@ -869,7 +884,6 @@ function switchTab(tab){
   }
   else { renderTemplates(); }
   
-  // Управление видимостью кнопки-карандаша
   const fab = document.getElementById('placeBtn');
   if (tab === 'calendar') {
     fab.classList.add('show');
@@ -1315,12 +1329,14 @@ function updatePlaceUI(){
   const hint = document.getElementById('placeHint');
   if (placeMode && placeTemplate){
     btn.classList.add('active');
-    btn.innerHTML = `✓`;
+    // Меняем иконку на галочку
+    btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
     hint.classList.remove('hidden');
     hint.textContent = `Выставляем: ${placeTemplate.name}. Тап по дню — поставить, второй тап — убрать.`;
   } else {
     btn.classList.remove('active');
-    btn.innerHTML = `✏️`;
+    // Возвращаем карандаш
+    btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>`;
     hint.classList.add('hidden');
   }
 }
@@ -1395,7 +1411,8 @@ function buildDayCell(key, dayNum, otherMonth, tKey, tmKey){
     }).join('')}</div>`;
   }
 
-  const noteIcon = hasNote ? `<div class="note-icon">📝</div>` : '';
+  // Иконка заметки (SVG)
+  const noteIcon = hasNote ? `<div class="note-icon"><svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></div>` : '';
   const sum = total ? `<div class="sum">${total.toLocaleString('ru-RU')}₽</div>` : '';
   const badge = hasMissingIncome ? `<div class="warning-badge"></div>` : '';
 
@@ -1442,7 +1459,6 @@ function renderCalendar(){
   renderTodayNotes();
   updatePlaceUI();
   
-  // Обновляем верхнюю цифру дохода
   const { total } = collectMonthData(currentYear, currentMonth);
   document.getElementById('headerMonthTotal').textContent = total.toLocaleString('ru-RU') + ' ₽';
 }
