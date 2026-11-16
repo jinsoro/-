@@ -49,57 +49,61 @@
     border-radius: 12px;
     font-size: 13px;
     margin-bottom: 12px;
-    display: none;
+    display: flex;
     align-items: center;
     justify-content: space-between;
     cursor: pointer;
   }
-  .warning-banner.show { display: flex; }
   .warning-banner span { font-weight: 600; }
   .warning-banner .arrow { font-size: 18px; }
 
-  /* Сегодня и Завтра */
-  .today-tomorrow { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-  .day-card { 
-    background: linear-gradient(135deg, #1e3a8a, #1e293b); 
-    border: 1px solid #3b82f6; 
-    border-radius: 14px; 
-    padding: 12px; /* Увеличили отступы */
-    display: flex; flex-direction: column;
-    cursor: pointer;
-    min-height: 85px; /* Добавили высоту */
+  /* Блок Дохода */
+  .income-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    padding: 0 4px;
   }
-  .day-card:active { opacity: 0.8; }
-  .day-card.tomorrow { background: linear-gradient(135deg, #312e81, #1e293b); border-color: #6366f1; }
-  .day-card .title { font-size: 12px; color: #93c5fd; margin-bottom: 6px; font-weight: 600; }
-  .day-card.tomorrow .title { color: #a5b4fc; }
-  .day-card .shifts { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-  .day-card .shift-line { display: flex; align-items: flex-start; gap: 6px; font-size: 13px; }
-  .day-card .shift-line .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
-  .day-card .shift-line .name { flex: 1; font-weight: 500; }
-  .day-card .note-preview { 
-    font-size: 11px; color: #cbd5e1; font-style: italic; margin-top: 4px;
-    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; 
-    overflow: hidden; word-break: break-word;
+  .income-header .lbl { font-size: 14px; color: #94a3b8; font-weight: 500; }
+  .income-header .val { font-size: 26px; font-weight: 700; color: #86efac; }
+
+  /* Блок Заметки на сегодня */
+  .today-notes-card {
+    background: linear-gradient(135deg, #1e3a8a, #1e293b);
+    border: 1px solid #3b82f6;
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 12px;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
   }
-  .day-card .empty { color: #64748b; font-size: 13px; margin-top: 4px; }
+  .today-notes-card .title { font-size: 12px; color: #93c5fd; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; }
+  .today-notes-card .note-text {
+    font-size: 14px;
+    color: #e5e7eb;
+    white-space: pre-wrap;
+    line-height: 1.4;
+  }
+  .today-notes-card .no-notes { color: #64748b; font-size: 13px; font-style: italic; }
 
   /* Календарь */
-  .month-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .month-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
   .month-nav button {
-    background: #334155; border: none; color: #e5e7eb; font-size: 18px;
-    width: 36px; height: 36px; border-radius: 10px; cursor: pointer;
+    background: #334155; border: none; color: #e5e7eb; font-size: 16px;
+    width: 32px; height: 32px; border-radius: 8px; cursor: pointer;
     -webkit-user-select: none; user-select: none;
   }
-  .month-title { font-weight: 600; font-size: 16px; }
+  .month-title { font-weight: 600; font-size: 15px; }
   
-  .grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
-  .dow { text-align: center; font-size: 11px; color: #94a3b8; padding: 4px 0; }
+  .grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
+  .dow { text-align: center; font-size: 10px; color: #94a3b8; padding: 2px 0; }
   
   .calendar-wrapper {
     position: relative;
     width: 100%;
-    height: 420px; /* Увеличили высоту, чтобы ячейки были больше */
+    height: 396px;
     overflow: hidden;
   }
   
@@ -116,35 +120,35 @@
   .slide-in-right { transform: translateX(20%); opacity: 0; }
 
   .day {
-    height: 68px; width: 100%; min-width: 0;
+    height: 64px; width: 100%; min-width: 0;
     display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start;
-    border-radius: 10px; background: #273449;
-    font-size: 12px; cursor: pointer; position: relative;
-    padding: 4px 4px 3px; overflow: hidden;
+    border-radius: 8px; background: #273449;
+    font-size: 11px; cursor: pointer; position: relative;
+    padding: 2px 2px 1px; overflow: hidden;
     contain: layout style paint;
   }
   .day.other-month { opacity: 0.3; }
   .day.today { box-shadow: 0 0 0 2px #38bdf8 inset; }
   .day.tomorrow-highlight { box-shadow: 0 0 0 2px #f59e0b inset; }
   .day .num {
-    line-height: 1; font-weight: 600; font-size: 13px;
-    color: #e5e7eb; text-align: center; margin-bottom: 2px; flex-shrink: 0;
+    line-height: 1; font-weight: 600; font-size: 12px;
+    color: #e5e7eb; text-align: center; margin-bottom: 1px; flex-shrink: 0;
   }
   .day.has-shift .num { color: #fff; }
   
   .day .warning-badge {
-    position: absolute; top: 3px; right: 3px;
-    width: 6px; height: 6px; border-radius: 50%;
+    position: absolute; top: 2px; right: 2px;
+    width: 5px; height: 5px; border-radius: 50%;
     background: #fbbf24; box-shadow: 0 0 4px #fbbf24;
   }
 
   .day .labels {
     display: flex; flex-direction: column; gap: 1px;
     flex: 1; justify-content: flex-start; overflow: hidden;
-    padding-bottom: 14px; 
+    padding-bottom: 12px; 
   }
   .day .lbl {
-    font-size: 9px; line-height: 1.15; font-weight: 700;
+    font-size: 8px; line-height: 1.1; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.3px;
     color: #fff; text-shadow: 0 1px 1px rgba(0,0,0,0.5);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -156,7 +160,7 @@
     top: 50%;
     left: 0; right: 0;
     transform: translateY(-50%);
-    font-size: 11px; line-height: 1; text-align: center;
+    font-size: 10px; line-height: 1; text-align: center;
     text-shadow: 0 1px 1px rgba(0,0,0,0.5);
     opacity: 0.9;
     z-index: 1;
@@ -164,12 +168,12 @@
   }
   
   .day .sum {
-    font-size: 10px; line-height: 1.1; color: #fff; font-weight: 600;
+    font-size: 9px; line-height: 1.1; color: #fff; font-weight: 600;
     text-align: center; text-shadow: 0 1px 1px rgba(0,0,0,0.5);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     flex-shrink: 0;
     position: absolute;
-    bottom: 2px;
+    bottom: 1px;
     left: 0; right: 0;
   }
 
@@ -181,7 +185,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: auto; /* Прижимает к низу, заполняя пустоту */
+    margin-top: auto;
     margin-bottom: 8px;
   }
   .month-summary-card .label { font-size: 14px; color: #94a3b8; }
@@ -613,15 +617,16 @@
 <!-- ========== СТРАНИЦА 1: КАЛЕНДАРЬ ========== -->
 <div class="page active" id="page-calendar">
 
-  <div class="today-tomorrow">
-    <div class="day-card" id="todayCard" onclick="openDay(todayKey())">
-      <div class="title">Сегодня</div>
-      <div class="shifts" id="todayShifts"></div>
-    </div>
-    <div class="day-card tomorrow" id="tomorrowCard" onclick="openDay(tomorrowKey())">
-      <div class="title">Завтра</div>
-      <div class="shifts" id="tomorrowShifts"></div>
-    </div>
+  <!-- Доход сверху -->
+  <div class="income-header">
+    <div class="lbl">Доход за месяц</div>
+    <div class="val" id="headerMonthTotal">0 ₽</div>
+  </div>
+
+  <!-- Заметки на сегодня -->
+  <div class="today-notes-card" onclick="openDay(todayKey())">
+    <div class="title">Заметки на сегодня</div>
+    <div class="note-text" id="todayNotesText"></div>
   </div>
 
   <div class="card" id="calendarCard">
@@ -639,15 +644,6 @@
 
   </div>
 
-  <!-- Блок Итог за месяц -->
-  <div class="month-summary-card" id="monthSummaryCard" onclick="jumpToSalaryMonthFromCalendar()">
-    <div>
-      <div class="label">Доход за <span id="summaryMonthName">этот месяц</span></div>
-      <div class="sub" id="summaryShiftCount">0 смен</div>
-    </div>
-    <div class="value" id="summaryTotal">0 ₽</div>
-  </div>
-
 </div>
 
 <!-- Плавающая кнопка выставления смены -->
@@ -659,7 +655,7 @@
 <!-- ========== СТРАНИЦА 2: ЗП ========== -->
 <div class="page" id="page-salary">
 
-  <div class="warning-banner" id="salaryWarningBanner" onclick="openMissingList()">
+  <div class="warning-banner" id="salaryWarningBanner" onclick="openMissingList()" style="display: none;">
     <div>У вас есть <span id="missingCount">0</span> смен без указанной ЗП</div>
     <div class="arrow">›</div>
   </div>
@@ -1431,7 +1427,7 @@ function onDayTap(key){
     }
     localStorage.setItem(STORE_KEY, JSON.stringify(shifts));
     updateCalendarGrid();
-    renderTodayTomorrow();
+    renderTodayNotes();
     renderSalaryPage();
   } else {
     openDay(key);
@@ -1443,63 +1439,44 @@ function renderCalendar(){
   document.getElementById('monthTitle').textContent =
     d.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
   document.getElementById('calendar').innerHTML = buildCalendarHtml();
-  renderTodayTomorrow();
+  renderTodayNotes();
   updatePlaceUI();
-  renderMonthSummaryCard();
+  
+  // Обновляем верхнюю цифру дохода
+  const { total } = collectMonthData(currentYear, currentMonth);
+  document.getElementById('headerMonthTotal').textContent = total.toLocaleString('ru-RU') + ' ₽';
 }
 
 function updateCalendarGrid(){
   document.getElementById('calendar').innerHTML = buildCalendarHtml();
-  renderMonthSummaryCard();
-}
-
-function renderMonthSummaryCard(){
-  const { total, countByShop } = collectMonthData(currentYear, currentMonth);
   
-  const totalShifts = Object.values(countByShop).reduce((a,b)=>a+b, 0);
-  
-  document.getElementById('summaryMonthName').textContent = MONTHS[currentMonth];
-  document.getElementById('summaryShiftCount').textContent = `${totalShifts} ${shiftWord(totalShifts)}`;
-  document.getElementById('summaryTotal').textContent = total.toLocaleString('ru-RU') + ' ₽';
+  const { total } = collectMonthData(currentYear, currentMonth);
+  document.getElementById('headerMonthTotal').textContent = total.toLocaleString('ru-RU') + ' ₽';
 }
 
-function jumpToSalaryMonthFromCalendar(){
-  salaryYear = currentYear;
-  salaryMonth = currentMonth;
-  switchTab('salary');
-}
-
-function renderTodayTomorrow(){
+function renderTodayNotes(){
   const tKey = todayKey();
-  const tmKey = tomorrowKey();
+  const list = shifts[tKey] || [];
+  const dayNote = dayNotes[tKey] || '';
+  const el = document.getElementById('todayNotesText');
   
-  renderDaySummary(tKey, 'todayShifts');
-  renderDaySummary(tmKey, 'tomorrowShifts');
-}
-
-function renderDaySummary(key, elementId){
-  const list = shifts[key] || [];
-  const note = dayNotes[key] || '';
-  const el = document.getElementById(elementId);
+  let notesArr = [];
   
-  let html = '';
+  if (dayNote.trim()) {
+    notesArr.push(dayNote.trim());
+  }
   
-  if (list.length === 0){
-    html += `<div class="empty">Нет смен</div>`;
+  list.forEach(s => {
+    if (s.note && s.note.trim()) {
+      notesArr.push(`[${s.name}] ${s.note.trim()}`);
+    }
+  });
+  
+  if (notesArr.length === 0) {
+    el.innerHTML = '<span class="no-notes">Нет заметок</span>';
   } else {
-    html += list.map(s => `
-      <div class="shift-line">
-        <span class="dot" style="background:${s.color}"></span>
-        <span class="name">${s.name}</span>
-      </div>
-    `).join('');
+    el.textContent = notesArr.join('\n');
   }
-  
-  if (note){
-    html += `<div class="note-preview">📝 ${escapeHtml(note)}</div>`;
-  }
-  
-  el.innerHTML = html;
 }
 
 function escapeHtml(s){
@@ -1647,9 +1624,9 @@ function checkMissingIncome() {
   const banner = document.getElementById('salaryWarningBanner');
   if (missingCount > 0) {
     document.getElementById('missingCount').textContent = missingCount;
-    banner.classList.add('show');
+    banner.style.display = 'flex';
   } else {
-    banner.classList.remove('show');
+    banner.style.display = 'none';
   }
 }
 
@@ -1792,7 +1769,7 @@ function setDayNote(value){
   }
   localStorage.setItem(DAY_NOTES_KEY, JSON.stringify(dayNotes));
   updateCalendarGrid();
-  renderTodayTomorrow();
+  renderTodayNotes();
 }
 
 function renderDayShifts(){
@@ -1832,7 +1809,7 @@ function setIncome(index, value){
   if (!shifts[selectedDate]?.[index]) return;
   shifts[selectedDate][index].income = isNaN(v) ? null : v;
   localStorage.setItem(STORE_KEY, JSON.stringify(shifts));
-  renderTodayTomorrow();
+  renderTodayNotes();
   updateCalendarGrid();
   renderSalaryPage();
 }
@@ -1879,7 +1856,7 @@ function pickTemplate(id){
   localStorage.setItem(STORE_KEY, JSON.stringify(shifts));
   renderDayShifts();
   updateCalendarGrid();
-  renderTodayTomorrow();
+  renderTodayNotes();
   renderSalaryPage();
 }
 
@@ -1890,7 +1867,7 @@ function removeShift(index){
   localStorage.setItem(STORE_KEY, JSON.stringify(shifts));
   renderDayShifts();
   updateCalendarGrid();
-  renderTodayTomorrow();
+  renderTodayNotes();
   renderSalaryPage();
 }
 
