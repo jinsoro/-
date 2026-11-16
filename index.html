@@ -13,14 +13,13 @@
   body {
     margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     background: #0f172a; color: #e5e7eb;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-    position: fixed;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     -webkit-font-smoothing: antialiased;
   }
   
-  /* Отключаем скролл для страницы календаря */
+  /* Скрываем скролл для страницы календаря, чтобы не было оттягивания */
   #page-calendar {
     overflow: hidden !important;
   }
@@ -28,10 +27,11 @@
   .card { background: #1e293b; border-radius: 14px; padding: 12px; margin-bottom: 12px; overflow: hidden; }
   .card-title { font-size: 13px; color: #94a3b8; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 
-  /* Каждая страница теперь скроллится внутри себя */
+  /* Каждая страница */
   .page { 
     display: none; 
-    height: 100vh;
+    flex: 1;
+    min-height: calc(100vh - 120px); 
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     padding: calc(env(safe-area-inset-top) + 12px) 12px;
@@ -96,11 +96,10 @@
   .grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
   .dow { text-align: center; font-size: 10px; color: #94a3b8; padding: 2px 0; }
   
-  /* Уменьшили высоту календаря под 6 рядов компактных ячеек */
   .calendar-wrapper {
     position: relative;
     width: 100%;
-    height: 396px; /* 6 * 64 + 5 * 2 */
+    height: 396px;
     overflow: hidden;
   }
   
@@ -189,11 +188,12 @@
     font-size: 24px;
     cursor: pointer;
     z-index: 14;
-    display: flex;
+    display: none; /* Скрыта по умолчанию */
     align-items: center;
     justify-content: center;
     transition: background 0.2s, transform 0.1s;
   }
+  .fab-place-btn.show { display: flex; }
   .fab-place-btn.active {
     background: #22c55e;
     color: #052e16;
@@ -627,7 +627,7 @@
 </div>
 
 <!-- Плавающая кнопка выставления смены -->
-<button class="fab-place-btn" id="placeBtn" onclick="togglePlaceMode()">
+<button class="fab-place-btn show" id="placeBtn" onclick="togglePlaceMode()">
   ✏️
 </button>
 <div class="place-mode-hint hidden" id="placeHint"></div>
@@ -849,6 +849,15 @@ function switchTab(tab){
   }
   else { renderTemplates(); }
   
+  // Управление видимостью кнопки-карандаша
+  const fab = document.getElementById('placeBtn');
+  if (tab === 'calendar') {
+    fab.classList.add('show');
+  } else {
+    fab.classList.remove('show');
+    if (placeMode) exitPlaceMode();
+  }
+
   const activePage = document.querySelector('.page.active');
   if (activePage) activePage.scrollTop = 0;
 }
