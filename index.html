@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#111827">
-<title>Смены</title>
+<title>Смены и Планер</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   
@@ -19,9 +19,7 @@
     -webkit-font-smoothing: antialiased;
   }
   
-  #page-calendar {
-    overflow: hidden !important;
-  }
+  #page-calendar { overflow: hidden !important; }
 
   .card { background: #1e293b; border-radius: 14px; padding: 12px; margin-bottom: 12px; overflow: hidden; }
   .card-title { font-size: 13px; color: #94a3b8; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -35,84 +33,45 @@
     padding: calc(env(safe-area-inset-top) + 12px) 12px;
     padding-bottom: calc(90px + env(safe-area-inset-bottom));
   }
-  .page.active { 
-    display: flex; 
-    flex-direction: column;
-  }
+  .page.active { display: flex; flex-direction: column; }
 
   /* Уведомление о незаполненной ЗП */
   .warning-banner {
-    background: #422006;
-    border: 1px solid #b45309;
-    color: #fde68a;
-    padding: 10px 14px;
-    border-radius: 12px;
-    font-size: 13px;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    cursor: pointer;
+    background: #422006; border: 1px solid #b45309; color: #fde68a;
+    padding: 10px 14px; border-radius: 12px; font-size: 13px; margin-bottom: 12px;
+    display: flex; align-items: center; justify-content: space-between; cursor: pointer;
   }
   .warning-banner span { font-weight: 600; }
   .warning-banner .arrow { font-size: 18px; }
 
   /* Блок Дохода */
-  .income-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-    padding: 0 4px;
-  }
+  .income-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 0 4px; }
   .income-header .lbl { font-size: 14px; color: #94a3b8; font-weight: 500; }
   .income-header .val { font-size: 26px; font-weight: 700; color: #86efac; }
 
   /* Блок Заметки на сегодня */
   .today-notes-card {
     background: linear-gradient(135deg, #1e3a8a, #1e293b);
-    border: 1px solid #3b82f6;
-    border-radius: 14px;
-    padding: 12px;
-    margin-bottom: 12px;
-    min-height: 80px;
-    display: flex;
-    flex-direction: column;
+    border: 1px solid #3b82f6; border-radius: 14px; padding: 12px; margin-bottom: 12px; min-height: 80px;
+    display: flex; flex-direction: column;
   }
   .today-notes-card .title { font-size: 12px; color: #93c5fd; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; }
-  .today-notes-card .note-text {
-    font-size: 14px;
-    color: #e5e7eb;
-    white-space: pre-wrap;
-    line-height: 1.4;
-  }
+  .today-notes-card .note-text { font-size: 14px; color: #e5e7eb; white-space: pre-wrap; line-height: 1.4; }
   .today-notes-card .no-notes { color: #64748b; font-size: 13px; font-style: italic; }
 
   /* Календарь */
   .month-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
   .month-nav button {
     background: #334155; border: none; color: #e5e7eb; font-size: 16px;
-    width: 32px; height: 32px; border-radius: 8px; cursor: pointer;
-    -webkit-user-select: none; user-select: none;
+    width: 32px; height: 32px; border-radius: 8px; cursor: pointer; -webkit-user-select: none; user-select: none;
   }
   .month-title { font-weight: 600; font-size: 15px; }
   
   .grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
   .dow { text-align: center; font-size: 10px; color: #94a3b8; padding: 2px 0; }
   
-  .calendar-wrapper {
-    position: relative;
-    width: 100%;
-    height: 396px;
-    overflow: hidden;
-  }
-  
-  #calendar {
-    width: 100%;
-    height: 100%;
-    align-content: start;
-    transition: transform 0.2s ease-out, opacity 0.2s ease-out;
-  }
+  .calendar-wrapper { position: relative; width: 100%; height: 396px; overflow: hidden; }
+  #calendar { width: 100%; height: 100%; align-content: start; transition: transform 0.2s ease-out, opacity 0.2s ease-out; }
   
   .slide-out-left { transform: translateX(-20%); opacity: 0; }
   .slide-out-right { transform: translateX(20%); opacity: 0; }
@@ -122,129 +81,58 @@
   .day {
     height: 64px; width: 100%; min-width: 0;
     display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start;
-    border-radius: 8px; background: #273449;
-    font-size: 11px; cursor: pointer; position: relative;
-    padding: 2px 2px 1px; overflow: hidden;
-    contain: layout style paint;
+    border-radius: 8px; background: #273449; font-size: 11px; cursor: pointer; position: relative;
+    padding: 2px 2px 1px; overflow: hidden; contain: layout style paint;
   }
   .day.other-month { opacity: 0.3; }
   .day.today { box-shadow: 0 0 0 2px #38bdf8 inset; }
-  .day.tomorrow-highlight { box-shadow: 0 0 0 2px #f59e0b inset; }
-  .day .num {
-    line-height: 1; font-weight: 600; font-size: 12px;
-    color: #e5e7eb; text-align: center; margin-bottom: 1px; flex-shrink: 0;
-  }
+  .day .num { line-height: 1; font-weight: 600; font-size: 12px; color: #e5e7eb; text-align: center; margin-bottom: 1px; flex-shrink: 0; }
   .day.has-shift .num { color: #fff; }
   
-  .day .warning-badge {
-    position: absolute; top: 2px; right: 2px;
-    width: 5px; height: 5px; border-radius: 50%;
-    background: #fbbf24; box-shadow: 0 0 4px #fbbf24;
-  }
+  .day .warning-badge { position: absolute; top: 2px; right: 2px; width: 5px; height: 5px; border-radius: 50%; background: #fbbf24; box-shadow: 0 0 4px #fbbf24; }
 
-  .day .labels {
-    display: flex; flex-direction: column; gap: 1px;
-    flex: 1; justify-content: flex-start; overflow: hidden;
-    padding-bottom: 12px; 
-  }
+  .day .labels { display: flex; flex-direction: column; gap: 1px; flex: 1; justify-content: flex-start; overflow: hidden; padding-bottom: 12px; }
   .day .lbl {
-    font-size: 8px; line-height: 1.1; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.3px;
-    color: #fff; text-shadow: 0 1px 1px rgba(0,0,0,0.5);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    text-align: center;
+    font-size: 8px; line-height: 1.1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;
+    color: #fff; text-shadow: 0 1px 1px rgba(0,0,0,0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center;
   }
   
   .day .note-icon {
-    position: absolute;
-    top: 50%;
-    left: 0; right: 0;
-    transform: translateY(-50%);
-    text-align: center;
-    opacity: 0.9;
-    z-index: 1;
-    pointer-events: none;
-    display: flex;
-    justify-content: center;
+    position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%);
+    text-align: center; opacity: 0.9; z-index: 1; pointer-events: none; display: flex; justify-content: center;
   }
-  
   .day .note-icon svg { width: 10px; height: 10px; fill: #fff; }
   
   .day .sum {
-    font-size: 9px; line-height: 1.1; color: #fff; font-weight: 600;
-    text-align: center; text-shadow: 0 1px 1px rgba(0,0,0,0.5);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    flex-shrink: 0;
-    position: absolute;
-    bottom: 1px;
-    left: 0; right: 0;
+    font-size: 9px; line-height: 1.1; color: #fff; font-weight: 600; text-align: center; text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0;
+    position: absolute; bottom: 1px; left: 0; right: 0;
   }
-
-  /* Блок Итог за месяц (под календарем) */
-  .month-summary-card {
-    background: #1e293b;
-    border-radius: 14px;
-    padding: 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: auto;
-    margin-bottom: 8px;
-  }
-  .month-summary-card .label { font-size: 14px; color: #94a3b8; }
-  .month-summary-card .value { font-size: 24px; font-weight: 700; color: #86efac; text-align: right; }
-  .month-summary-card .sub { font-size: 12px; color: #64748b; margin-top: 2px; }
 
   /* Плавающая кнопка */
   .fab-place-btn {
-    position: fixed;
-    right: 16px;
-    bottom: calc(80px + env(safe-area-inset-bottom));
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: #334155;
-    color: #fff;
-    border: none;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    cursor: pointer;
-    z-index: 14;
-    display: none; 
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s, transform 0.1s;
+    position: fixed; right: 16px; bottom: calc(80px + env(safe-area-inset-bottom));
+    width: 56px; height: 56px; border-radius: 50%; background: #334155; color: #fff; border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4); cursor: pointer; z-index: 14; display: none; 
+    align-items: center; justify-content: center; transition: background 0.2s, transform 0.1s;
   }
   .fab-place-btn.show { display: flex; }
   .fab-place-btn.active { background: #22c55e; color: #052e16; }
   .fab-place-btn:active { transform: scale(0.95); }
-  
   .fab-place-btn svg { width: 24px; height: 24px; fill: currentColor; }
 
   .place-mode-hint {
-    position: fixed;
-    left: 16px;
-    right: 80px;
-    bottom: calc(80px + env(safe-area-inset-bottom));
-    font-size: 11px;
-    color: #86efac;
-    text-align: center;
-    padding: 8px;
-    background: #14532d;
-    border-radius: 8px;
-    z-index: 14;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    position: fixed; left: 16px; right: 80px; bottom: calc(80px + env(safe-area-inset-bottom));
+    font-size: 11px; color: #86efac; text-align: center; padding: 8px; background: #14532d; border-radius: 8px;
+    z-index: 14; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
   }
   .place-mode-hint.hidden { display: none; }
 
-  .place-picker {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none;
-    align-items: flex-end; z-index: 20;
-  }
+  .place-picker { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; z-index: 20; }
   .place-picker.open { display: flex; }
   .place-picker .inner {
     background: #1e293b; width: 100%; border-radius: 18px 18px 0 0; padding: 16px;
-    padding-bottom: calc(16px + env(safe-area-inset-bottom));
-    max-height: 70vh; overflow-y: auto;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom)); max-height: 70vh; overflow-y: auto;
   }
   .place-picker h2 { font-size: 16px; margin: 0 0 12px; }
 
@@ -252,8 +140,7 @@
   .salary-month-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
   .salary-month-nav button {
     background: #334155; border: none; color: #e5e7eb; font-size: 18px;
-    width: 36px; height: 36px; border-radius: 10px; cursor: pointer;
-    -webkit-user-select: none; user-select: none;
+    width: 36px; height: 36px; border-radius: 10px; cursor: pointer; -webkit-user-select: none; user-select: none;
   }
   .salary-month-nav .title { font-weight: 600; font-size: 16px; }
 
@@ -261,17 +148,11 @@
   .total-big .lbl { font-size: 13px; color: #94a3b8; margin-bottom: 4px; }
   .total-big .val { font-size: 32px; font-weight: 700; color: #86efac; }
   
-  .stats-row {
-    display: flex; justify-content: center; gap: 16px; margin-top: 4px; margin-bottom: 8px;
-    font-size: 12px; color: #94a3b8;
-  }
+  .stats-row { display: flex; justify-content: center; gap: 16px; margin-top: 4px; margin-bottom: 8px; font-size: 12px; color: #94a3b8; }
   .stats-row span b { color: #e5e7eb; }
 
   .shops { font-size: 13px; color: #cbd5e1; margin-top: 6px; border-top: 1px solid #334155; padding-top: 8px; }
-  .shops .shop-line {
-    display: flex; align-items: center; gap: 8px; justify-content: space-between;
-    padding: 8px 0; border-bottom: 1px solid #1e293b;
-  }
+  .shops .shop-line { display: flex; align-items: center; gap: 8px; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #1e293b; }
   .shops .shop-line:last-child { border-bottom: none; }
   .shops .left { display: flex; align-items: center; gap: 8px; min-width: 0; }
   .shops .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
@@ -282,61 +163,18 @@
 
   /* График */
   .chart-container {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    height: 120px;
-    margin-top: 16px;
-    padding-bottom: 24px;
-    position: relative;
-    border-bottom: 1px solid #334155;
+    display: flex; align-items: flex-end; justify-content: space-between;
+    height: 120px; margin-top: 16px; padding-bottom: 24px; position: relative; border-bottom: 1px solid #334155;
   }
-  .chart-bar-wrapper {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;
-    height: 100%;
-    position: relative;
-    cursor: pointer;
-  }
-  .chart-bar {
-    width: 60%;
-    max-width: 40px;
-    background: #3b82f6;
-    border-radius: 4px 4px 0 0;
-    transition: height 0.3s ease-out, background 0.2s;
-    min-height: 2px;
-    opacity: 0.8;
-  }
+  .chart-bar-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; position: relative; cursor: pointer; }
+  .chart-bar { width: 60%; max-width: 40px; background: #3b82f6; border-radius: 4px 4px 0 0; transition: height 0.3s ease-out, background 0.2s; min-height: 2px; opacity: 0.8; }
   .chart-bar.zero { background: #334155; opacity: 1; }
   
-  /* Выделение выбранного столбца */
-  .chart-bar-wrapper.selected .chart-bar {
-    background: #22c55e;
-    opacity: 1;
-    box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
-  }
-  .chart-bar-wrapper.selected .chart-value {
-    color: #22c55e;
-    font-weight: 700;
-  }
+  .chart-bar-wrapper.selected .chart-bar { background: #22c55e; opacity: 1; box-shadow: 0 0 8px rgba(34, 197, 94, 0.4); }
+  .chart-bar-wrapper.selected .chart-value { color: #22c55e; font-weight: 700; }
 
-  .chart-value {
-    font-size: 10px;
-    color: #e5e7eb;
-    position: absolute;
-    top: -16px;
-    white-space: nowrap;
-  }
-  .chart-label {
-    position: absolute;
-    bottom: -22px;
-    font-size: 10px;
-    color: #94a3b8;
-    text-transform: uppercase;
-  }
+  .chart-value { font-size: 10px; color: #e5e7eb; position: absolute; top: -16px; white-space: nowrap; }
+  .chart-label { position: absolute; bottom: -22px; font-size: 10px; color: #94a3b8; text-transform: uppercase; }
 
   .past-months { display: flex; flex-direction: column; gap: 6px; }
   .past-month-row {
@@ -347,206 +185,98 @@
   .past-month-row .name { color: #cbd5e1; }
   .past-month-row .sum { color: #86efac; font-weight: 600; }
 
-  .show-all-btn {
-    background: none; border: none; color: #38bdf8; font-size: 14px;
-    padding: 10px 0 0; cursor: pointer; text-align: center; width: 100%;
-  }
+  .show-all-btn { background: none; border: none; color: #38bdf8; font-size: 14px; padding: 10px 0 0; cursor: pointer; text-align: center; width: 100%; }
 
   /* Анимация смены месяца на ЗП */
-  .salary-content-wrapper {
-    transition: transform 0.2s ease-out, opacity 0.2s ease-out;
-  }
-  .slide-out-left { transform: translateX(-20%); opacity: 0; }
-  .slide-out-right { transform: translateX(20%); opacity: 0; }
-  .slide-in-left { transform: translateX(-20%); opacity: 0; }
-  .slide-in-right { transform: translateX(20%); opacity: 0; }
+  .salary-content-wrapper { transition: transform 0.2s ease-out, opacity 0.2s ease-out; }
 
   /* Шаблоны */
   .template-list { display: flex; flex-direction: column; gap: 6px; position: relative; }
-  
-  .swipe-container {
-    position: relative;
-    overflow: hidden;
-    border-radius: 10px;
-  }
-  
+  .swipe-container { position: relative; overflow: hidden; border-radius: 10px; }
   .swipe-content {
-    background: #0f172a;
-    border: 1px solid #334155;
-    border-radius: 10px;
-    padding: 10px 12px;
-    font-size: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: transform 0.2s ease-out;
-    position: relative;
-    z-index: 2;
-    touch-action: pan-y;
+    background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 10px 12px; font-size: 15px;
+    display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s ease-out; position: relative; z-index: 2; touch-action: pan-y;
   }
-  
   .swipe-content.swiping { transition: none; }
-
   .swipe-action {
-    position: absolute;
-    top: 0; right: 0; bottom: 0;
-    width: 100px;
-    background: #ef4444;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: 600;
-    border-radius: 0 10px 10px 0;
-    cursor: pointer;
-    z-index: 1;
+    position: absolute; top: 0; right: 0; bottom: 0; width: 100px; background: #ef4444; color: white;
+    display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; border-radius: 0 10px 10px 0; cursor: pointer; z-index: 1;
   }
-
-  .template-item-content {
-    display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;
-  }
+  .template-item-content { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
   .template-item-content .dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
   .template-item-content .name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .template-item-content .default-hours { font-size: 11px; color: #94a3b8; margin-left: 6px; white-space: nowrap; }
-  
-  .template-edit-hint {
-    font-size: 18px; color: #64748b; padding-left: 10px;
-  }
+  .template-edit-hint { font-size: 18px; color: #64748b; padding-left: 10px; }
 
-  .template-buttons {
-    display: flex; gap: 8px; margin-top: 12px;
-  }
-  .show-add-btn {
-    flex: 1; background: #22c55e; color: #052e16; border: none; border-radius: 12px;
-    padding: 14px; font-size: 16px; font-weight: 700; cursor: pointer;
-  }
-  .show-archive-btn {
-    flex: 1; background: #334155; color: #e5e7eb; border: none; border-radius: 12px;
-    padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer;
-  }
+  .template-buttons { display: flex; gap: 8px; margin-top: 12px; }
+  .show-add-btn { flex: 1; background: #22c55e; color: #052e16; border: none; border-radius: 12px; padding: 14px; font-size: 16px; font-weight: 700; cursor: pointer; }
+  .show-archive-btn { flex: 1; background: #334155; color: #e5e7eb; border: none; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; }
   .show-archive-btn:active { background: #475569; }
 
-  .add-template {
-    display: none;
-    flex-direction: column; gap: 8px; margin-top: 12px;
-    padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 12px;
-  }
+  .add-template { display: none; flex-direction: column; gap: 8px; margin-top: 12px; padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 12px; }
   .add-template.open { display: flex; }
-  .add-template input {
-    width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155;
-    background: #1e293b; color: #e5e7eb; font-size: 16px;
-  }
-  .add-template .hours-input {
-    width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155;
-    background: #1e293b; color: #e5e7eb; font-size: 16px;
-  }
+  .add-template input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #1e293b; color: #e5e7eb; font-size: 16px; }
+  .add-template .hours-input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #1e293b; color: #e5e7eb; font-size: 16px; }
   .color-row { display: flex; align-items: center; gap: 8px; }
   .color-row .clabel { font-size: 12px; color: #94a3b8; }
   .colors { display: flex; gap: 8px; flex-wrap: wrap; }
-  .color-swatch {
-    width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
-    border: 2px solid transparent;
-  }
+  .color-swatch { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
   .color-swatch.selected { border-color: #ffffff; }
-  .add-btn {
-    background: #22c55e; color: #052e16; border: none; border-radius: 10px;
-    padding: 12px; font-size: 16px; font-weight: 700; cursor: pointer;
-  }
-  .cancel-add-btn {
-    background: #334155; color: #e5e7eb; border: none; border-radius: 10px;
-    padding: 12px; font-size: 15px; font-weight: 600; cursor: pointer;
-  }
+  .add-btn { background: #22c55e; color: #052e16; border: none; border-radius: 10px; padding: 12px; font-size: 16px; font-weight: 700; cursor: pointer; }
+  .cancel-add-btn { background: #334155; color: #e5e7eb; border: none; border-radius: 10px; padding: 12px; font-size: 15px; font-weight: 600; cursor: pointer; }
 
   /* Модалка Архива */
-  .archive-modal {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none;
-    align-items: flex-end; z-index: 20;
-  }
+  .archive-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; z-index: 20; }
   .archive-modal.open { display: flex; }
   .archive-modal .inner {
     background: #1e293b; width: 100%; border-radius: 18px 18px 0 0; padding: 16px;
-    padding-bottom: calc(16px + env(safe-area-inset-bottom));
-    max-height: 80vh; overflow-y: auto;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom)); max-height: 80vh; overflow-y: auto;
   }
   .archive-modal h2 { font-size: 16px; margin: 0 0 12px; }
-  
   .archive-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-  .archive-item {
-    display: flex; justify-content: space-between; align-items: center;
-    background: #0f172a; border: 1px solid #334155; border-radius: 10px;
-    padding: 12px; font-size: 14px;
-  }
+  .archive-item { display: flex; justify-content: space-between; align-items: center; background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 12px; font-size: 14px; }
   .archive-item .left { display: flex; align-items: center; gap: 10px; flex: 1; }
   .archive-item .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
   .archive-item .name { color: #94a3b8; text-decoration: line-through; }
-  .archive-item .restore-btn {
-    background: #334155; color: #e5e7eb; border: none; border-radius: 8px;
-    padding: 8px 12px; font-size: 13px; cursor: pointer;
-  }
+  .archive-item .restore-btn { background: #334155; color: #e5e7eb; border: none; border-radius: 8px; padding: 8px 12px; font-size: 13px; cursor: pointer; }
 
   /* Модалка дня */
-  .modal-bg {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none;
-    align-items: flex-end; z-index: 20;
-  }
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; z-index: 20; }
   .modal-bg.open { display: flex; }
   .modal {
     background: #1e293b; width: 100%; border-radius: 18px 18px 0 0; padding: 16px;
-    padding-bottom: calc(16px + env(safe-area-inset-bottom));
-    max-height: 90vh; overflow-y: auto;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom)); max-height: 90vh; overflow-y: auto;
   }
   .modal h2 { font-size: 16px; margin: 0 0 8px; }
   
-  .day-note-block {
-    margin-bottom: 16px; background: #0f172a; border-radius: 12px; padding: 10px 12px;
-    border: 1px solid #334155;
-  }
-  .day-note-block label {
-    display: block; font-size: 11px; color: #94a3b8; text-transform: uppercase;
-    margin-bottom: 6px; font-weight: 600;
-  }
+  .day-note-block { margin-bottom: 16px; background: #0f172a; border-radius: 12px; padding: 10px 12px; border: 1px solid #334155; }
+  .day-note-block label { display: block; font-size: 11px; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px; font-weight: 600; }
   .day-note-block textarea {
-    width: 100%; min-height: 40px; padding: 8px 10px; border-radius: 8px;
-    border: 1px solid #334155; background: #1e293b; color: #e5e7eb;
-    font-size: 15px; font-family: inherit; resize: vertical;
+    width: 100%; min-height: 40px; padding: 8px 10px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #e5e7eb; font-size: 15px; font-family: inherit; resize: vertical;
   }
 
   .pick-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
-  .pick-item {
-    display: flex; justify-content: space-between; align-items: center;
-    background: #0f172a; border: 1px solid #334155; border-radius: 12px;
-    padding: 14px 16px; font-size: 16px; cursor: pointer;
-  }
+  .pick-item { display: flex; justify-content: space-between; align-items: center; background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 14px 16px; font-size: 16px; cursor: pointer; }
   .pick-item:active { background: #1e3a8a; }
   .pick-item .left { display: flex; align-items: center; gap: 10px; }
   .pick-item .dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
   .pick-item .add { color: #38bdf8; font-size: 22px; font-weight: 300; }
 
-  .shift-row {
-    background: #0f172a; border: 1px solid #334155; border-radius: 12px;
-    padding: 10px 12px; margin-bottom: 8px;
-    border-left: 4px solid #334155;
-  }
+  .shift-row { background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; border-left: 4px solid #334155; }
   .shift-row .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
   .shift-row .top .left { display: flex; align-items: center; gap: 8px; }
   .shift-row .top .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
   .shift-row .name { font-weight: 600; font-size: 15px; }
   .shift-row .del { color: #f87171; font-size: 20px; background: none; border: none; cursor: pointer; padding: 0 4px; }
-  
   .shift-row .fields { display: flex; gap: 8px; }
   .shift-row .field { flex: 1; display: flex; flex-direction: column; gap: 4px; }
   .shift-row .field label { font-size: 10px; color: #94a3b8; padding-left: 2px; text-transform: uppercase; }
   .shift-row .field input {
-    width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #334155;
-    background: #1e293b; color: #86efac; font-size: 16px; font-weight: 600;
+    width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #86efac; font-size: 16px; font-weight: 600;
   }
   .shift-row .field.hours input { color: #e5e7eb; }
   
-  .btn {
-    padding: 14px; border-radius: 12px; border: none; font-size: 15px;
-    font-weight: 600; cursor: pointer; width: 100%;
-  }
+  .btn { padding: 14px; border-radius: 12px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; }
   .btn-cancel { background: #334155; color: #e5e7eb; }
   .btn-export { background: #1d4ed8; color: #dbeafe; margin-top: 16px; }
   .btn-import { background: #0f766e; color: #ccfbf1; margin-top: 8px; }
@@ -555,47 +285,23 @@
 
   /* Нижняя навигация */
   .tabbar {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 15;
-    background: #0f172a; border-top: 1px solid #1e293b;
-    display: flex; padding: 6px 8px;
-    padding-bottom: calc(6px + env(safe-area-inset-bottom));
-    gap: 6px;
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 15; background: #0f172a; border-top: 1px solid #1e293b;
+    display: flex; padding: 6px 8px; padding-bottom: calc(6px + env(safe-area-inset-bottom)); gap: 6px;
   }
   .tabbar button {
     flex: 1; background: none; border: 1px solid transparent; color: #64748b; cursor: pointer;
-    padding: 8px 0 6px; font-family: inherit;
-    display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 3px;
-    -webkit-user-select: none; user-select: none;
-    border-radius: 12px; transition: all 0.2s;
+    padding: 8px 0 6px; font-family: inherit; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 3px;
+    -webkit-user-select: none; user-select: none; border-radius: 12px; transition: all 0.2s;
   }
-  .tabbar button .ico {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 24px;
-  }
+  .tabbar button .ico { display: flex; align-items: center; justify-content: center; height: 24px; }
   .tabbar button .ico svg { width: 22px; height: 22px; fill: currentColor; }
-  .tabbar button span:last-child {
-    font-size: 10px;
-    line-height: 1.2;
-    height: 12px;      
-  }
-  .tabbar button.active {
-    color: #38bdf8; 
-    background: rgba(56, 189, 248, 0.1);
-    border: 1px solid #38bdf8;
-  }
+  .tabbar button span:last-child { font-size: 10px; line-height: 1.2; height: 12px; }
+  .tabbar button.active { color: #38bdf8; background: rgba(56, 189, 248, 0.1); border: 1px solid #38bdf8; }
 
   /* Напоминание о бэкапе */
-  .backup-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none;
-    align-items: center; justify-content: center; z-index: 30; padding: 20px;
-  }
+  .backup-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 30; padding: 20px; }
   .backup-overlay.open { display: flex; }
-  .backup-modal {
-    background: #1e293b; width: 100%; max-width: 340px; border-radius: 16px;
-    padding: 20px; text-align: center;
-  }
+  .backup-modal { background: #1e293b; width: 100%; max-width: 340px; border-radius: 16px; padding: 20px; text-align: center; }
   .backup-modal .icon { margin-bottom: 10px; display: flex; justify-content: center; }
   .backup-modal .icon svg { width: 48px; height: 48px; fill: #94a3b8; }
   .backup-modal h2 { font-size: 18px; margin: 0 0 10px; color: #e5e7eb; }
@@ -604,40 +310,116 @@
   .backup-modal .btn-secondary { background: #334155; color: #e5e7eb; }
 
   /* Окно синхронизации */
-  .sync-confirm-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none;
-    align-items: center; justify-content: center; z-index: 30; padding: 20px;
-  }
+  .sync-confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 30; padding: 20px; }
   .sync-confirm-overlay.open { display: flex; }
-  .sync-confirm-modal {
-    background: #1e293b; width: 100%; max-width: 340px; border-radius: 16px;
-    padding: 20px; text-align: center;
-  }
+  .sync-confirm-modal { background: #1e293b; width: 100%; max-width: 340px; border-radius: 16px; padding: 20px; text-align: center; }
   .sync-confirm-modal h2 { font-size: 18px; margin: 0 0 10px; color: #e5e7eb; }
   .sync-confirm-modal p { font-size: 14px; color: #94a3b8; margin: 0 0 20px; line-height: 1.4; }
   .sync-confirm-modal .btn-primary { background: #22c55e; color: #052e16; margin-bottom: 8px; }
   .sync-confirm-modal .btn-secondary { background: #334155; color: #e5e7eb; }
 
   /* Список незаполненных смен */
-  .missing-list {
-    display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;
-    max-height: 60vh; overflow-y: auto;
-  }
-  .missing-item {
-    display: flex; justify-content: space-between; align-items: center;
-    background: #0f172a; border: 1px solid #334155; border-radius: 10px;
-    padding: 12px; cursor: pointer;
-  }
+  .missing-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; max-height: 60vh; overflow-y: auto; }
+  .missing-item { display: flex; justify-content: space-between; align-items: center; background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 12px; cursor: pointer; }
   .missing-item .date { font-weight: 600; color: #e5e7eb; }
   .missing-item .shop { font-size: 12px; color: #94a3b8; margin-top: 2px; }
   .missing-item .arrow { color: #38bdf8; font-size: 18px; }
+
+  /* ===== ПЛАНЕР ===== */
+  .planner-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+  }
+  .planner-date-title { font-weight: 600; font-size: 16px; color: #e5e7eb; }
+
+  .time-grid-card { padding: 0; overflow: hidden; transition: transform 0.2s ease-out, opacity 0.2s ease-out; }
+  
+  .time-row {
+    display: flex;
+    border-bottom: 1px solid #334155;
+    min-height: 60px;
+  }
+  .time-row:last-child { border-bottom: none; }
+  .time-row.past-hour .time-label { color: #334155; }
+  .time-row.past-hour .time-content { opacity: 0.5; }
+  
+  .time-label {
+    width: 60px;
+    flex-shrink: 0;
+    padding: 12px 0 0 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    border-right: 1px solid #334155;
+    background: #1e293b;
+    transition: color 0.3s;
+  }
+  
+  .time-content {
+    flex: 1;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: #0f172a;
+    overflow: hidden;
+    transition: opacity 0.3s;
+  }
+
+  /* Плашка со сменами в планере */
+  .planner-shifts-row {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
+  }
+  .planner-shift-badge {
+    display: flex; align-items: center; gap: 6px; padding: 6px 10px;
+    background: #1e293b; border: 1px solid #334155; border-radius: 8px; font-size: 12px;
+  }
+  .planner-shift-badge .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .planner-shift-badge .time { color: #94a3b8; font-size: 11px; margin-left: 4px; }
+
+  /* Карточки задач (свайп) */
+  .task-swipe-container { position: relative; overflow: hidden; border-radius: 6px; }
+  .task-swipe-content {
+    background: #1e3a8a; border-left: 3px solid #38bdf8; border-radius: 6px; padding: 8px 10px;
+    position: relative; z-index: 2; transition: transform 0.2s ease-out; cursor: pointer;
+  }
+  .task-swipe-content.swiping { transition: none; }
+  .task-swipe-action {
+    position: absolute; top: 0; right: 0; bottom: 0; width: 80px; background: #ef4444; color: white;
+    display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; border-radius: 0 6px 6px 0; cursor: pointer; z-index: 1;
+  }
+  .task-swipe-content .t-text { font-size: 13px; font-weight: 600; color: #e5e7eb; line-height: 1.3; }
+  .task-swipe-content .t-desc { font-size: 11px; color: #93c5fd; margin-top: 2px; line-height: 1.2; }
+
+  .task-action-buttons { display: flex; gap: 6px; margin-top: 6px; }
+  .task-btn {
+    display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 6px;
+    font-size: 11px; font-weight: 600; text-decoration: none; cursor: pointer;
+    background: rgba(255,255,255,0.1); color: #e5e7eb; border: none;
+  }
+  .task-btn svg { width: 12px; height: 12px; fill: currentColor; }
+  .task-btn:hover { background: rgba(255,255,255,0.2); }
+
+  /* Модалка добавления/редактирования задачи */
+  .add-task-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; z-index: 25; }
+  .add-task-modal.open { display: flex; }
+  .add-task-modal .inner {
+    background: #1e293b; width: 100%; border-radius: 18px 18px 0 0; padding: 16px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  }
+  .add-task-modal h2 { font-size: 16px; margin: 0 0 12px; }
+  
+  .form-group { margin-bottom: 12px; }
+  .form-group label { display: block; font-size: 11px; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; font-weight: 600; }
+  .form-group input, .form-group textarea {
+    width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: #e5e7eb; font-size: 15px; font-family: inherit;
+  }
+  .form-group textarea { resize: vertical; min-height: 60px; }
 </style>
 </head>
 <body>
 
 <!-- ========== СТРАНИЦА 1: КАЛЕНДАРЬ ========== -->
 <div class="page active" id="page-calendar">
-
   <div class="income-header">
     <div class="lbl">Доход за месяц</div>
     <div class="val" id="headerMonthTotal">0 ₽</div>
@@ -654,15 +436,11 @@
       <span class="month-title" id="monthTitle"></span>
       <button onclick="changeMonth(1)">›</button>
     </div>
-
     <div class="grid" id="dowRow"></div>
-    
     <div class="calendar-wrapper">
       <div class="grid" id="calendar" style="margin-top:4px;"></div>
     </div>
-
   </div>
-
 </div>
 
 <!-- Плавающая кнопка выставления смены -->
@@ -673,7 +451,6 @@
 
 <!-- ========== СТРАНИЦА 2: ЗП ========== -->
 <div class="page" id="page-salary">
-
   <div class="warning-banner" id="salaryWarningBanner" onclick="openMissingList()" style="display: none;">
     <div>У вас есть <span id="missingCount">0</span> смен без указанной ЗП</div>
     <div class="arrow">›</div>
@@ -686,19 +463,15 @@
         <span class="title" id="salaryMonthTitle"></span>
         <button onclick="changeSalaryMonth(1)">›</button>
       </div>
-
       <div class="total-big">
         <div class="lbl">Доход за месяц</div>
         <div class="val" id="salaryTotal">0 ₽</div>
       </div>
-      
       <div class="stats-row" id="salaryStats"></div>
-
       <div class="card-title" style="margin-top:8px;">По объектам</div>
       <div class="shops" id="salaryBreakdown"></div>
     </div>
 
-    <!-- График -->
     <div class="card">
       <div class="card-title">Динамика за 6 месяцев</div>
       <div class="chart-container" id="chartContainer"></div>
@@ -710,12 +483,61 @@
       <button class="show-all-btn" id="showAllMonthsBtn" style="display:none" onclick="toggleAllMonths()">Показать все ↓</button>
     </div>
   </div>
-
 </div>
 
-<!-- ========== СТРАНИЦА 3: МОИ СМЕНЫ ========== -->
-<div class="page" id="page-templates">
+<!-- ========== СТРАНИЦА 3: ПЛАНЕР ========== -->
+<div class="page" id="page-planner">
+  <div class="planner-header">
+    <div class="planner-date-nav" style="display:flex;align-items:center;gap:10px;">
+      <button onclick="changePlannerDay(-1)" style="background:#334155;border:none;color:#e5e7eb;font-size:16px;width:32px;height:32px;border-radius:8px;cursor:pointer;">‹</button>
+      <span class="planner-date-title" id="plannerDateTitle"></span>
+      <button onclick="changePlannerDay(1)" style="background:#334155;border:none;color:#e5e7eb;font-size:16px;width:32px;height:32px;border-radius:8px;cursor:pointer;">›</button>
+    </div>
+    <button onclick="goToTodayPlanner()" style="background:#334155;border:none;color:#e5e7eb;padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer;">Сегодня</button>
+  </div>
 
+  <!-- Плашка со сменами дня -->
+  <div id="plannerShiftsContainer"></div>
+
+  <div class="card time-grid-card" id="plannerGridCard">
+    <div id="plannerTimeGrid"></div>
+  </div>
+</div>
+
+<!-- Плавающая кнопка добавления задачи -->
+<button class="fab-place-btn" id="addTaskFab" onclick="openTaskModal()" style="display:none;">
+  <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+</button>
+
+<!-- Модалка добавления/редактирования задачи -->
+<div class="add-task-modal" id="addTaskModal">
+  <div class="inner">
+    <h2 id="taskModalTitle">Новая задача</h2>
+    
+    <div class="form-group">
+      <label>Время</label>
+      <input type="time" id="taskTimeInput" value="09:00">
+    </div>
+    
+    <div class="form-group">
+      <label>Что нужно сделать? (Заказ, встреча, звонок)</label>
+      <input type="text" id="taskTitleInput" placeholder="Например: Выезд к клиенту, Заказ №123">
+    </div>
+
+    <div class="form-group">
+      <label>Адрес или детали (Необязательно)</label>
+      <textarea id="taskDescInput" placeholder="ул. Ленина 10, кв 5 (домофон 12) или телефон +7 999 123-45-67"></textarea>
+    </div>
+
+    <input type="hidden" id="editingTaskId" value="">
+
+    <button class="btn btn-primary" id="saveTaskBtn" onclick="saveTask()" style="background:#22c55e;color:#052e16;margin-bottom:8px;">Сохранить</button>
+    <button class="btn btn-cancel" onclick="closeTaskModal()">Отмена</button>
+  </div>
+</div>
+
+<!-- ========== СТРАНИЦА 4: МОИ СМЕНЫ ========== -->
+<div class="page" id="page-templates">
   <div class="card">
     <div class="card-title">Мои смены (для календаря)</div>
     <div class="template-list" id="templateList"></div>
@@ -728,9 +550,7 @@
     <div class="add-template" id="addTemplateForm">
       <input type="hidden" id="editingTemplateId" value="">
       <input id="newTemplateName" placeholder="Название (объект/место)">
-      
       <input id="newTemplateHours" class="hours-input" type="number" inputmode="decimal" placeholder="Часы по умолчанию (необязательно)">
-      
       <div class="color-row">
         <span class="clabel">Цвет:</span>
         <div class="colors" id="newColors"></div>
@@ -742,35 +562,30 @@
 
   <div class="card">
     <div class="card-title">Резервная копия</div>
-    <p style="font-size:12px;color:#94a3b8;margin:0 0 8px;line-height:1.4;">
-      Экспорт сохранит все смены в файл. Импорт восстановит их, если данные потеряются.
-    </p>
+    <p style="font-size:12px;color:#94a3b8;margin:0 0 8px;line-height:1.4;">Экспорт сохранит все смены в файл. Импорт восстановит их, если данные потеряются.</p>
     <button class="btn btn-export" onclick="exportData()">📥 Экспорт данных</button>
     <button class="btn btn-import" onclick="document.getElementById('importFile').click()">📤 Импорт данных</button>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
   </div>
-
 </div>
 
 <!-- ========== НИЖНЯЯ НАВИГАЦИЯ ========== -->
 <div class="tabbar">
   <button id="tab-calendar" class="active" onclick="switchTab('calendar')">
-    <span class="ico">
-      <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>
-    </span>
+    <span class="ico"><svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg></span>
     <span>Календарь</span>
   </button>
+  <button id="tab-planner" onclick="switchTab('planner')">
+    <span class="ico"><svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></span>
+    <span>Планер</span>
+  </button>
   <button id="tab-salary" onclick="switchTab('salary')">
-    <span class="ico">
-      <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
-    </span>
+    <span class="ico"><svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg></span>
     <span>ЗП</span>
   </button>
   <button id="tab-templates" onclick="switchTab('templates')">
-    <span class="ico">
-      <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
-    </span>
-    <span>Мои смены</span>
+    <span class="ico"><svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg></span>
+    <span>Смены</span>
   </button>
 </div>
 
@@ -796,17 +611,17 @@
 <div class="modal-bg" id="modalBg">
   <div class="modal">
     <h2 id="modalTitle">Смена</h2>
-    
     <div class="day-note-block">
       <label>Заметка на день</label>
       <textarea id="dayNoteInput" placeholder="Например: выходной, отвезти документы..." onchange="setDayNote(this.value)"></textarea>
     </div>
-
     <div id="dayShiftsBlock"></div>
+    
+    <!-- Блок задач из планера -->
+    <div id="dayPlannerBlock"></div>
 
     <div class="card-title" style="margin-top:14px;">Добавить смену</div>
     <div class="pick-list" id="pickList"></div>
-
     <button class="btn btn-cancel" onclick="closeModal()">Закрыть</button>
   </div>
 </div>
@@ -823,9 +638,7 @@
 <!-- Напоминание о бэкапе -->
 <div class="backup-overlay" id="backupOverlay">
   <div class="backup-modal">
-    <div class="icon">
-      <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>
-    </div>
+    <div class="icon"><svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg></div>
     <h2>Новый месяц!</h2>
     <p>Начался новый месяц. Рекомендуем сделать резервную копию данных, чтобы ничего не потерять.</p>
     <button class="btn btn-primary" onclick="backupFromReminder()">📥 Скачать копию</button>
@@ -847,6 +660,7 @@
 const STORE_KEY = 'shifts_v4';
 const TEMPLATES_KEY = 'templates_v4';
 const DAY_NOTES_KEY = 'day_notes_v4';
+const PLANNER_KEY = 'planner_v3';
 const DOW = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const MONTHS = ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
 const SHORT_MONTHS = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
@@ -855,6 +669,7 @@ const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#a855f7', '#ec4899'
 let templates = JSON.parse(localStorage.getItem(TEMPLATES_KEY) || '[]');
 let shifts = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
 let dayNotes = JSON.parse(localStorage.getItem(DAY_NOTES_KEY) || '{}');
+let plannerTasks = JSON.parse(localStorage.getItem(PLANNER_KEY) || '{}');
 
 let currentYear = new Date().getFullYear();
 let currentMonth = new Date().getMonth();
@@ -871,6 +686,10 @@ let showAllPastMonths = false;
 
 let pendingSyncTemplateId = null;
 
+// Планер
+let plannerDate = new Date();
+let editingTaskId = null;
+
 document.getElementById('dowRow').innerHTML = DOW.map(d => `<div class="dow">${d}</div>`).join('');
 
 function pad(n){ return String(n).padStart(2,'0'); }
@@ -879,19 +698,16 @@ function todayKey(){
   const t = new Date();
   return dateKey(t.getFullYear(), t.getMonth(), t.getDate());
 }
-function tomorrowKey(){
-  const t = new Date();
-  t.setDate(t.getDate()+1);
-  return dateKey(t.getFullYear(), t.getMonth(), t.getDate());
-}
 
 function switchTab(tab){
   document.getElementById('page-calendar').classList.toggle('active', tab==='calendar');
   document.getElementById('page-salary').classList.toggle('active', tab==='salary');
+  document.getElementById('page-planner').classList.toggle('active', tab==='planner');
   document.getElementById('page-templates').classList.toggle('active', tab==='templates');
   
   document.getElementById('tab-calendar').classList.toggle('active', tab==='calendar');
   document.getElementById('tab-salary').classList.toggle('active', tab==='salary');
+  document.getElementById('tab-planner').classList.toggle('active', tab==='planner');
   document.getElementById('tab-templates').classList.toggle('active', tab==='templates');
   
   if (tab==='calendar'){ renderCalendar(); }
@@ -899,13 +715,23 @@ function switchTab(tab){
     shifts = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
     renderSalaryPage(); 
   }
+  else if (tab==='planner'){ renderPlanner(); }
   else { renderTemplates(); }
   
-  const fab = document.getElementById('placeBtn');
+  // Управление FAB кнопками
+  const fabPlace = document.getElementById('placeBtn');
+  const fabTask = document.getElementById('addTaskFab');
+  
   if (tab === 'calendar') {
-    fab.classList.add('show');
+    fabPlace.classList.add('show');
+    fabTask.style.display = 'none';
+  } else if (tab === 'planner') {
+    fabPlace.classList.remove('show');
+    fabTask.style.display = 'flex';
+    if (placeMode) exitPlaceMode();
   } else {
-    fab.classList.remove('show');
+    fabPlace.classList.remove('show');
+    fabTask.style.display = 'none';
     if (placeMode) exitPlaceMode();
   }
 
@@ -914,225 +740,212 @@ function switchTab(tab){
 }
 
 /* ---------- Свайпы и анимация календаря ---------- */
-let touchStartX = 0;
-let touchStartY = 0;
+let touchStartX = 0; let touchStartY = 0;
 const calendarEl = document.getElementById('calendar');
 
 document.getElementById('calendarCard').addEventListener('touchstart', e => {
-  touchStartX = e.changedTouches[0].screenX;
-  touchStartY = e.changedTouches[0].screenY;
+  touchStartX = e.changedTouches[0].screenX; touchStartY = e.changedTouches[0].screenY;
 }, {passive: true});
 
 document.getElementById('calendarCard').addEventListener('touchend', e => {
-  const touchEndX = e.changedTouches[0].screenX;
-  const touchEndY = e.changedTouches[0].screenY;
-  
-  const diffX = touchEndX - touchStartX;
-  const diffY = touchEndY - touchStartY;
-
+  const touchEndX = e.changedTouches[0].screenX; const touchEndY = e.changedTouches[0].screenY;
+  const diffX = touchEndX - touchStartX; const diffY = touchEndY - touchStartY;
   if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
-    if (diffX > 0) {
-      animateMonthChange(-1);
-    } else {
-      animateMonthChange(1);
-    }
+    if (diffX > 0) animateMonthChange(-1); else animateMonthChange(1);
   }
 }, {passive: true});
 
 function animateMonthChange(direction) {
   calendarEl.classList.add(direction > 0 ? 'slide-out-left' : 'slide-out-right');
-  
   setTimeout(() => {
     changeMonth(direction, false); 
     calendarEl.classList.remove('slide-out-left', 'slide-out-right');
     calendarEl.classList.add(direction > 0 ? 'slide-in-right' : 'slide-in-left');
-    
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
+    requestAnimationFrame(() => { requestAnimationFrame(() => {
         calendarEl.classList.remove('slide-in-right', 'slide-in-left');
-      });
-    });
+    }); });
   }, 150);
 }
 
 /* ---------- Свайпы для ЗП ---------- */
-let salaryTouchStartX = 0;
-let salaryTouchStartY = 0;
+let salaryTouchStartX = 0; let salaryTouchStartY = 0;
 const salaryWrapper = document.getElementById('salaryContentWrapper');
 
 document.getElementById('page-salary').addEventListener('touchstart', e => {
-  salaryTouchStartX = e.changedTouches[0].screenX;
-  salaryTouchStartY = e.changedTouches[0].screenY;
+  salaryTouchStartX = e.changedTouches[0].screenX; salaryTouchStartY = e.changedTouches[0].screenY;
 }, {passive: true});
 
 document.getElementById('page-salary').addEventListener('touchend', e => {
-  const touchEndX = e.changedTouches[0].screenX;
-  const touchEndY = e.changedTouches[0].screenY;
-  
-  const diffX = touchEndX - salaryTouchStartX;
-  const diffY = touchEndY - salaryTouchStartY;
-
+  const touchEndX = e.changedTouches[0].screenX; const touchEndY = e.changedTouches[0].screenY;
+  const diffX = touchEndX - salaryTouchStartX; const diffY = touchEndY - salaryTouchStartY;
   if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
-    if (diffX > 0) {
-      animateSalaryMonthChange(-1);
-    } else {
-      animateSalaryMonthChange(1);
-    }
+    if (diffX > 0) animateSalaryMonthChange(-1); else animateSalaryMonthChange(1);
   }
 }, {passive: true});
 
 function animateSalaryMonthChange(direction) {
   salaryWrapper.classList.add(direction > 0 ? 'slide-out-left' : 'slide-out-right');
-  
   setTimeout(() => {
     changeSalaryMonth(direction, false); 
     salaryWrapper.classList.remove('slide-out-left', 'slide-out-right');
     salaryWrapper.classList.add(direction > 0 ? 'slide-in-right' : 'slide-in-left');
-    
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
+    requestAnimationFrame(() => { requestAnimationFrame(() => {
         salaryWrapper.classList.remove('slide-in-right', 'slide-in-left');
-      });
-    });
+    }); });
   }, 150);
 }
 
-/* ---------- Свайп для удаления шаблонов ---------- */
-let swipeStartX = 0;
-let swipeCurrentX = 0;
-let activeSwipeEl = null;
-let activeSwipeId = null;
+/* ---------- Свайп для удаления шаблонов и задач ---------- */
+let swipeStartX = 0; let swipeCurrentX = 0; let activeSwipeEl = null;
 
 function initSwipeHandlers() {
   const containers = document.querySelectorAll('.swipe-container');
-  
   containers.forEach(container => {
     const content = container.querySelector('.swipe-content');
     const id = container.dataset.id;
     
     content.addEventListener('touchstart', e => {
-      document.querySelectorAll('.swipe-content').forEach(el => {
-        if (el !== content) el.style.transform = 'translateX(0)';
-      });
-      
-      swipeStartX = e.touches[0].clientX;
-      activeSwipeEl = content;
-      activeSwipeId = id;
-      content.classList.add('swiping');
+      document.querySelectorAll('.swipe-content, .task-swipe-content').forEach(el => { if (el !== content) el.style.transform = 'translateX(0)'; });
+      swipeStartX = e.touches[0].clientX; activeSwipeEl = content; content.classList.add('swiping');
     }, { passive: true });
     
     content.addEventListener('touchmove', e => {
       if (!activeSwipeEl) return;
-      swipeCurrentX = e.touches[0].clientX;
-      const diff = swipeCurrentX - swipeStartX;
-      
-      if (diff < 0) {
-        const translate = Math.max(diff, -100);
-        content.style.transform = `translateX(${translate}px)`;
-      }
+      swipeCurrentX = e.touches[0].clientX; const diff = swipeCurrentX - swipeStartX;
+      if (diff < 0) { const translate = Math.max(diff, -100); content.style.transform = `translateX(${translate}px)`; }
     }, { passive: true });
     
     content.addEventListener('touchend', () => {
       if (!activeSwipeEl) return;
-      content.classList.remove('swiping');
-      
-      const diff = swipeCurrentX - swipeStartX;
-      
-      if (diff < -50) {
-        content.style.transform = 'translateX(-100px)';
-      } else {
-        content.style.transform = 'translateX(0)';
-      }
-      
+      content.classList.remove('swiping'); const diff = swipeCurrentX - swipeStartX;
+      if (diff < -50) content.style.transform = 'translateX(-100px)'; else content.style.transform = 'translateX(0)';
       activeSwipeEl = null;
     });
     
     content.addEventListener('click', (e) => {
       const currentTranslate = content.style.transform;
-      if (currentTranslate === 'translateX(-100px)') {
-        content.style.transform = 'translateX(0)';
-      } else {
-        showEditForm(id);
+      if (currentTranslate === 'translateX(-100px)') { content.style.transform = 'translateX(0)'; } 
+      else { showEditForm(id); }
+    });
+  });
+}
+
+function initTaskSwipeHandlers() {
+  const containers = document.querySelectorAll('.task-swipe-container');
+  containers.forEach(container => {
+    const content = container.querySelector('.task-swipe-content');
+    const dateKeyStr = container.dataset.date;
+    const taskId = container.dataset.id;
+    
+    content.addEventListener('touchstart', e => {
+      document.querySelectorAll('.swipe-content, .task-swipe-content').forEach(el => { if (el !== content) el.style.transform = 'translateX(0)'; });
+      swipeStartX = e.touches[0].clientX; activeSwipeEl = content; content.classList.add('swiping');
+    }, { passive: true });
+    
+    content.addEventListener('touchmove', e => {
+      if (!activeSwipeEl) return;
+      swipeCurrentX = e.touches[0].clientX; const diff = swipeCurrentX - swipeStartX;
+      if (diff < 0) { const translate = Math.max(diff, -80); content.style.transform = `translateX(${translate}px)`; }
+    }, { passive: true });
+    
+    content.addEventListener('touchend', () => {
+      if (!activeSwipeEl) return;
+      content.classList.remove('swiping'); const diff = swipeCurrentX - swipeStartX;
+      if (diff < -40) content.style.transform = 'translateX(-80px)'; else content.style.transform = 'translateX(0)';
+      activeSwipeEl = null;
+    });
+    
+    content.addEventListener('click', (e) => {
+      const currentTranslate = content.style.transform;
+      if (currentTranslate === 'translateX(-80px)') { 
+        content.style.transform = 'translateX(0)'; 
+      } else { 
+        openTaskModal(taskId, dateKeyStr); 
       }
     });
   });
 }
 
+/* ---------- Свайп для Планера (смена дней) ---------- */
+let plannerTouchStartX = 0; let plannerTouchStartY = 0;
+const plannerGridCard = document.getElementById('plannerGridCard');
+
+document.getElementById('page-planner').addEventListener('touchstart', e => {
+  if (e.target.closest('.task-swipe-content')) return;
+  plannerTouchStartX = e.changedTouches[0].screenX; 
+  plannerTouchStartY = e.changedTouches[0].screenY;
+}, {passive: true});
+
+document.getElementById('page-planner').addEventListener('touchend', e => {
+  if (e.target.closest('.task-swipe-content')) return;
+  
+  const touchEndX = e.changedTouches[0].screenX; 
+  const touchEndY = e.changedTouches[0].screenY;
+  const diffX = touchEndX - plannerTouchStartX; 
+  const diffY = touchEndY - plannerTouchStartY;
+  
+  if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
+    if (diffX > 0) {
+      animatePlannerDayChange(-1);
+    } else {
+      animatePlannerDayChange(1);
+    }
+  }
+}, {passive: true});
+
+function animatePlannerDayChange(direction) {
+  plannerGridCard.classList.add(direction > 0 ? 'slide-out-left' : 'slide-out-right');
+  
+  setTimeout(() => {
+    changePlannerDay(direction, false); 
+    plannerGridCard.classList.remove('slide-out-left', 'slide-out-right');
+    plannerGridCard.classList.add(direction > 0 ? 'slide-in-right' : 'slide-in-left');
+    
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        plannerGridCard.classList.remove('slide-in-right', 'slide-in-left');
+      });
+    });
+  }, 150);
+}
+
 /* ---------- Бэкап и напоминание ---------- */
 function checkBackupReminder(){
-  const now = new Date();
-  const currentMonthStr = now.getFullYear() + '-' + pad(now.getMonth() + 1);
+  const now = new Date(); const currentMonthStr = now.getFullYear() + '-' + pad(now.getMonth() + 1);
   const lastPromptMonth = localStorage.getItem('last_backup_prompt_month');
-  const hasData = Object.keys(shifts).length > 0 || Object.keys(dayNotes).length > 0;
-  
+  const hasData = Object.keys(shifts).length > 0 || Object.keys(dayNotes).length > 0 || Object.keys(plannerTasks).length > 0;
   if (hasData && lastPromptMonth !== currentMonthStr){
-    setTimeout(() => {
-      document.getElementById('backupOverlay').classList.add('open');
-    }, 1000);
+    setTimeout(() => { document.getElementById('backupOverlay').classList.add('open'); }, 1000);
   }
 }
-
 function backupFromReminder(){
-  exportData();
-  const now = new Date();
-  const currentMonthStr = now.getFullYear() + '-' + pad(now.getMonth() + 1);
-  localStorage.setItem('last_backup_prompt_month', currentMonthStr);
-  closeBackupReminder();
+  exportData(); const now = new Date(); const currentMonthStr = now.getFullYear() + '-' + pad(now.getMonth() + 1);
+  localStorage.setItem('last_backup_prompt_month', currentMonthStr); closeBackupReminder();
 }
-
 function closeBackupReminder(){
-  const now = new Date();
-  const currentMonthStr = now.getFullYear() + '-' + pad(now.getMonth() + 1);
-  localStorage.setItem('last_backup_prompt_month', currentMonthStr);
-  document.getElementById('backupOverlay').classList.remove('open');
+  const now = new Date(); const currentMonthStr = now.getFullYear() + '-' + pad(now.getMonth() + 1);
+  localStorage.setItem('last_backup_prompt_month', currentMonthStr); document.getElementById('backupOverlay').classList.remove('open');
 }
-
 function exportData(){
-  const data = {
-    shifts: shifts,
-    templates: templates,
-    dayNotes: dayNotes,
-    exportDate: new Date().toISOString()
-  };
+  const data = { shifts, templates, dayNotes, plannerTasks, exportDate: new Date().toISOString() };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'backup-smeny.json';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  const url = URL.createObjectURL(blob); const a = document.createElement('a');
+  a.href = url; a.download = 'backup-smeny.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
 }
-
 function importData(event){
-  const file = event.target.files[0];
-  if (!file) return;
+  const file = event.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = function(e) {
     try {
       const data = JSON.parse(e.target.result);
-      if (!data.shifts || !data.templates) {
-        alert('Неверный формат файла');
-        return;
-      }
+      if (!data.shifts || !data.templates) { alert('Неверный формат файла'); return; }
       if (confirm('Вы уверены? Текущие данные будут заменены данными из файла.')) {
-        shifts = data.shifts;
-        templates = data.templates;
-        dayNotes = data.dayNotes || {};
-        
-        localStorage.setItem(STORE_KEY, JSON.stringify(shifts));
-        localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
-        localStorage.setItem(DAY_NOTES_KEY, JSON.stringify(dayNotes));
-        
-        alert('Данные успешно восстановлены!');
-        renderTemplates();
-        renderCalendar();
-        renderSalaryPage();
+        shifts = data.shifts; templates = data.templates; dayNotes = data.dayNotes || {}; plannerTasks = data.plannerTasks || {};
+        localStorage.setItem(STORE_KEY, JSON.stringify(shifts)); localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
+        localStorage.setItem(DAY_NOTES_KEY, JSON.stringify(dayNotes)); localStorage.setItem(PLANNER_KEY, JSON.stringify(plannerTasks));
+        alert('Данные успешно восстановлены!'); renderTemplates(); renderCalendar(); renderSalaryPage(); renderPlanner();
       }
-    } catch (err) {
-      alert('Ошибка чтения файла. Возможно, он поврежден.');
-    }
+    } catch (err) { alert('Ошибка чтения файла. Возможно, он поврежден.'); }
     event.target.value = '';
   };
   reader.readAsText(file);
@@ -1141,129 +954,73 @@ function importData(event){
 /* ---------- Палитра ---------- */
 function renderColorPicker(){
   document.getElementById('newColors').innerHTML = COLORS.map(c =>
-    `<div class="color-swatch ${c===newColor?'selected':''}"
-          style="background:${c}" onclick="setNewColor('${c}')"></div>`
+    `<div class="color-swatch ${c===newColor?'selected':''}" style="background:${c}" onclick="setNewColor('${c}')"></div>`
   ).join('');
 }
 function setNewColor(c){ newColor = c; renderColorPicker(); }
 
-/* ---------- Форма добавления/редактирования ---------- */
+/* ---------- Форма добавления/редактирования смены ---------- */
 function showAddForm(){
-  document.getElementById('addTemplateForm').classList.add('open');
-  document.getElementById('showAddBtn').style.display = 'none';
-  document.getElementById('editingTemplateId').value = '';
-  document.getElementById('newTemplateName').value = '';
-  document.getElementById('newTemplateHours').value = '';
-  document.getElementById('saveTemplateBtn').textContent = 'Добавить';
-  renderColorPicker();
-  setTimeout(()=>document.getElementById('newTemplateName').focus(), 100);
+  document.getElementById('addTemplateForm').classList.add('open'); document.getElementById('showAddBtn').style.display = 'none';
+  document.getElementById('editingTemplateId').value = ''; document.getElementById('newTemplateName').value = '';
+  document.getElementById('newTemplateHours').value = ''; document.getElementById('saveTemplateBtn').textContent = 'Добавить';
+  renderColorPicker(); setTimeout(()=>document.getElementById('newTemplateName').focus(), 100);
 }
-
 function showEditForm(id){
-  const t = templates.find(x => x.id === id);
-  if (!t) return;
-  
-  document.querySelectorAll('.swipe-content').forEach(el => {
-    el.style.transform = 'translateX(0)';
-  });
-  
-  document.getElementById('addTemplateForm').classList.add('open');
-  document.getElementById('showAddBtn').style.display = 'none';
-  document.getElementById('editingTemplateId').value = t.id;
-  document.getElementById('newTemplateName').value = t.name;
-  document.getElementById('newTemplateHours').value = t.defaultHours || '';
-  document.getElementById('saveTemplateBtn').textContent = 'Сохранить';
-  
-  newColor = t.color;
-  renderColorPicker();
-  
-  setTimeout(()=>document.getElementById('newTemplateName').focus(), 100);
+  const t = templates.find(x => x.id === id); if (!t) return;
+  document.querySelectorAll('.swipe-content').forEach(el => { el.style.transform = 'translateX(0)'; });
+  document.getElementById('addTemplateForm').classList.add('open'); document.getElementById('showAddBtn').style.display = 'none';
+  document.getElementById('editingTemplateId').value = t.id; document.getElementById('newTemplateName').value = t.name;
+  document.getElementById('newTemplateHours').value = t.defaultHours || ''; document.getElementById('saveTemplateBtn').textContent = 'Сохранить';
+  newColor = t.color; renderColorPicker(); setTimeout(()=>document.getElementById('newTemplateName').focus(), 100);
 }
-
 function hideAddForm(){
-  document.getElementById('addTemplateForm').classList.remove('open');
-  document.getElementById('showAddBtn').style.display = 'block';
+  document.getElementById('addTemplateForm').classList.remove('open'); document.getElementById('showAddBtn').style.display = 'block';
   document.getElementById('editingTemplateId').value = '';
 }
-
 function saveTemplate(){
   const id = document.getElementById('editingTemplateId').value;
   const name = document.getElementById('newTemplateName').value.trim();
   const hoursInput = document.getElementById('newTemplateHours').value;
   const defaultHours = parseFloat(hoursInput) || null;
-  
   if (!name){ alert('Введи название смены'); return; }
-  
   let hoursChanged = false;
-
   if (id) {
     const idx = templates.findIndex(t => t.id === id);
     if (idx !== -1) {
-      if (templates[idx].defaultHours !== defaultHours) {
-        hoursChanged = true;
-      }
-      templates[idx].name = name;
-      templates[idx].color = newColor;
-      templates[idx].defaultHours = defaultHours;
+      if (templates[idx].defaultHours !== defaultHours) hoursChanged = true;
+      templates[idx].name = name; templates[idx].color = newColor; templates[idx].defaultHours = defaultHours;
     }
   } else {
     if (templates.some(t => t.name === name)){ alert('Такая смена уже есть'); return; }
     templates.push({ id: 't' + Date.now(), name, color: newColor, defaultHours, archived: false });
   }
-  
-  localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
-  hideAddForm();
-  renderTemplates();
-  
-  renderCalendar();
-  renderSalaryPage();
-
+  localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates)); hideAddForm(); renderTemplates();
+  renderCalendar(); renderSalaryPage();
   if (id && hoursChanged && defaultHours) {
-    pendingSyncTemplateId = id;
-    document.getElementById('syncOverlay').classList.add('open');
+    pendingSyncTemplateId = id; document.getElementById('syncOverlay').classList.add('open');
   }
 }
 
 /* ---------- Синхронизация ---------- */
 function confirmSync() {
-  document.getElementById('syncOverlay').classList.remove('open');
-  
-  if (!pendingSyncTemplateId) return;
-  
-  const t = templates.find(x => x.id === pendingSyncTemplateId);
-  if (!t) return;
-  
+  document.getElementById('syncOverlay').classList.remove('open'); if (!pendingSyncTemplateId) return;
+  const t = templates.find(x => x.id === pendingSyncTemplateId); if (!t) return;
   let updatedCount = 0;
-  
   for (const dateStr in shifts) {
     for (const s of shifts[dateStr]) {
-      if (s.name === t.name) {
-        s.hours = t.defaultHours;
-        updatedCount++;
-      }
+      if (s.name === t.name) { s.hours = t.defaultHours; updatedCount++; }
     }
   }
-  
-  localStorage.setItem(STORE_KEY, JSON.stringify(shifts));
-  renderCalendar();
-  renderSalaryPage();
-  
+  localStorage.setItem(STORE_KEY, JSON.stringify(shifts)); renderCalendar(); renderSalaryPage();
   pendingSyncTemplateId = null;
-  
-  if (updatedCount > 0) {
-    alert(`Готово! Обновлено смен: ${updatedCount}`);
-  }
+  if (updatedCount > 0) alert(`Готово! Обновлено смен: ${updatedCount}`);
 }
-
-function closeSyncOverlay() {
-  document.getElementById('syncOverlay').classList.remove('open');
-  pendingSyncTemplateId = null;
-}
+function closeSyncOverlay() { document.getElementById('syncOverlay').classList.remove('open'); pendingSyncTemplateId = null; }
 
 /* ---------- Шаблоны ---------- */
 function renderTemplates(){
   const activeTemplates = templates.filter(t => !t.archived);
-  
   const el = document.getElementById('templateList');
   if (!activeTemplates.length){
     el.innerHTML = '<div class="empty-hint">Пока нет смен. Нажми «+ Добавить».</div>';
@@ -1281,79 +1038,53 @@ function renderTemplates(){
         </div>
       </div>
     `).join('');
-    
     initSwipeHandlers();
   }
 }
-
 function archiveTemplate(id){
-  const t = templates.find(x => x.id === id);
-  if (!t) return;
+  const t = templates.find(x => x.id === id); if (!t) return;
   if (!confirm('Убрать смену «' + t.name + '» в архив? В календаре все записи сохранятся.')) return;
   const idx = templates.findIndex(x => x.id === id);
-  if (idx !== -1) {
-    templates[idx].archived = true;
-    localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
-    renderTemplates();
-  }
+  if (idx !== -1) { templates[idx].archived = true; localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates)); renderTemplates(); }
 }
-
 function restoreTemplate(id){
   const idx = templates.findIndex(x => x.id === id);
-  if (idx !== -1) {
-    templates[idx].archived = false;
-    localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
-    renderTemplates();
-    openArchive(); // Обновляем список в модалке
-  }
+  if (idx !== -1) { templates[idx].archived = false; localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates)); renderTemplates(); openArchive(); }
 }
 
 /* ---------- Модалка Архива ---------- */
 function openArchive() {
   const archivedTemplates = templates.filter(t => t.archived);
   const archiveList = document.getElementById('archiveList');
-  
   if (!archivedTemplates.length) {
     archiveList.innerHTML = '<div class="empty-hint">Архив пуст.</div>';
   } else {
     archiveList.innerHTML = archivedTemplates.map(t => `
       <div class="archive-item">
-        <div class="left">
-          <span class="dot" style="background:${t.color}"></span>
-          <span class="name">${t.name}</span>
-        </div>
+        <div class="left"><span class="dot" style="background:${t.color}"></span><span class="name">${t.name}</span></div>
         <button class="restore-btn" onclick="restoreTemplate('${t.id}')">Вернуть</button>
       </div>
     `).join('');
   }
   document.getElementById('archiveModal').classList.add('open');
 }
-
-function closeArchive() {
-  document.getElementById('archiveModal').classList.remove('open');
-}
+function closeArchive() { document.getElementById('archiveModal').classList.remove('open'); }
 
 /* ---------- Режим выставления ---------- */
 function togglePlaceMode(){
-  if (placeMode){
-    exitPlaceMode();
-  } else {
+  if (placeMode){ exitPlaceMode(); } 
+  else {
     const active = templates.filter(t => !t.archived);
-    if (!active.length){
-      alert('Сначала добавь смены на вкладке «Мои смены»');
-      return;
-    }
+    if (!active.length){ alert('Сначала добавь смены на вкладке «Мои смены»'); return; }
     openPlacePicker();
   }
 }
-
 function openPlacePicker(){
   const active = templates.filter(t => !t.archived);
   document.getElementById('placePickList').innerHTML = active.map(t=>`
     <div class="pick-item" onclick="selectPlaceTemplate('${t.id}')">
       <div class="left">
-        <span class="dot" style="background:${t.color}"></span>
-        <span>${t.name}</span>
+        <span class="dot" style="background:${t.color}"></span><span>${t.name}</span>
         ${t.defaultHours ? `<span style="font-size:12px;color:#94a3b8;margin-left:4px">(${t.defaultHours} ч)</span>` : ''}
       </div>
       <span class="add">→</span>
@@ -1361,28 +1092,15 @@ function openPlacePicker(){
   `).join('');
   document.getElementById('placePicker').classList.add('open');
 }
-
-function closePlacePicker(){
-  document.getElementById('placePicker').classList.remove('open');
-}
-
+function closePlacePicker(){ document.getElementById('placePicker').classList.remove('open'); }
 function selectPlaceTemplate(id){
-  const t = templates.find(x => x.id === id);
-  if (!t) return;
+  const t = templates.find(x => x.id === id); if (!t) return;
   placeTemplate = { id: t.id, name: t.name, color: t.color, defaultHours: t.defaultHours };
-  placeMode = true;
-  closePlacePicker();
-  updatePlaceUI();
-  renderCalendar();
+  placeMode = true; closePlacePicker(); updatePlaceUI(); renderCalendar();
 }
-
 function exitPlaceMode(){
-  placeMode = false;
-  placeTemplate = null;
-  updatePlaceUI();
-  renderCalendar();
+  placeMode = false; placeTemplate = null; updatePlaceUI(); renderCalendar();
 }
-
 function updatePlaceUI(){
   const btn = document.getElementById('placeBtn');
   const hint = document.getElementById('placeHint');
@@ -1404,80 +1122,64 @@ function buildCalendarHtml(){
   const first = new Date(y, m, 1);
   let startDow = (first.getDay() + 6) % 7;
   const daysInMonth = new Date(y, m+1, 0).getDate();
-
   const prevMonthDays = new Date(y, m, 0).getDate();
   const totalCells = startDow + daysInMonth;
   const trailing = (7 - (totalCells % 7)) % 7;
-
   const tKey = todayKey();
-  const tmKey = tomorrowKey();
-
   let html = '';
-
   for (let i = startDow - 1; i >= 0; i--){
-    const d = prevMonthDays - i;
-    const pd = new Date(y, m-1, d);
-    const key = dateKey(pd.getFullYear(), pd.getMonth(), d);
-    html += buildDayCell(key, d, true, tKey, tmKey);
+    const d = prevMonthDays - i; const pd = new Date(y, m-1, d);
+    html += buildDayCell(dateKey(pd.getFullYear(), pd.getMonth(), d), d, true, tKey);
   }
-
-  for (let d=1; d<=daysInMonth; d++){
-    const key = dateKey(y,m,d);
-    html += buildDayCell(key, d, false, tKey, tmKey);
-  }
-
+  for (let d=1; d<=daysInMonth; d++){ html += buildDayCell(dateKey(y,m,d), d, false, tKey); }
   for (let d=1; d<=trailing; d++){
-    const nd = new Date(y, m+1, d);
-    const key = dateKey(nd.getFullYear(), nd.getMonth(), d);
-    html += buildDayCell(key, d, true, tKey, tmKey);
+    const nd = new Date(y, m+1, d); html += buildDayCell(dateKey(nd.getFullYear(), nd.getMonth(), d), d, true, tKey);
   }
-
   return html;
 }
 
-function buildDayCell(key, dayNum, otherMonth, tKey, tmKey){
+function buildDayCell(key, dayNum, otherMonth, tKey){
   const list = shifts[key] || [];
   const total = list.reduce((s,x)=>s+(+x.income||0),0);
   const dayNote = dayNotes[key] || '';
   const hasNote = list.some(s => s.note && s.note.trim().length > 0) || dayNote.trim().length > 0;
   
+  const dayTasks = plannerTasks[key] || [];
+  const hasTasks = dayTasks.length > 0;
+
   const isPastOrToday = key <= tKey;
   const hasMissingIncome = isPastOrToday && list.some(s => s.income === null || s.income === undefined || s.income === '');
 
   let cls = 'day';
   if (otherMonth) cls += ' other-month';
   if (key===tKey) cls += ' today';
-  if (key===tmKey) cls += ' tomorrow-highlight';
   if (list.length) cls += ' has-shift';
 
   let bg = '';
-  if (list.length === 1){
-    bg = list[0].color;
-  } else if (list.length > 1){
+  if (list.length === 1){ bg = list[0].color; } 
+  else if (list.length > 1){
     const cols = list.map(s=>s.color);
     const step = 100 / cols.length;
-    const stops = cols.map((c,i)=>`${c} ${i*step}%, ${c} ${(i+1)*step}%`).join(', ');
-    bg = `linear-gradient(90deg, ${stops})`;
+    bg = `linear-gradient(90deg, ${cols.map((c,i)=>`${c} ${i*step}%, ${c} ${(i+1)*step}%`).join(', ')})`;
   }
 
   let labels = '';
   if (list.length){
-    labels = `<div class="labels">${list.slice(0,3).map(s=>{
-      const short = (s.name || '').slice(0,3).toUpperCase();
-      return `<div class="lbl">${short}</div>`;
-    }).join('')}</div>`;
+    labels = `<div class="labels">${list.slice(0,3).map(s=>`<div class="lbl">${(s.name || '').slice(0,3).toUpperCase()}</div>`).join('')}</div>`;
   }
 
-  const noteIcon = hasNote ? `<div class="note-icon"><svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></div>` : '';
+  let iconHtml = '';
+  if (hasTasks) {
+    iconHtml = `<div class="note-icon" style="opacity:1; color:#38bdf8;"><svg viewBox="0 0 24 24" style="fill:#38bdf8;width:12px;height:12px;"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg></div>`;
+  } else if (hasNote) {
+    iconHtml = `<div class="note-icon"><svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></div>`;
+  }
+
   const sum = total ? `<div class="sum">${total.toLocaleString('ru-RU')}₽</div>` : '';
   const badge = hasMissingIncome ? `<div class="warning-badge"></div>` : '';
 
   return `<div class="${cls}" style="${bg?`background:${bg};`:''}" onclick="onDayTap('${key}')">
-    ${badge}
-    <div class="num">${dayNum}</div>
-    ${labels}
-    ${noteIcon}
-    ${sum}
+    ${badge}<div class="num">${dayNum}</div>${labels}${iconHtml}${sum}
   </div>`;
 }
 
@@ -1489,39 +1191,23 @@ function onDayTap(key){
       shifts[key].splice(idx, 1);
       if (!shifts[key].length) delete shifts[key];
     } else {
-      shifts[key].push({ 
-        templateId: placeTemplate.id, 
-        name: placeTemplate.name, 
-        color: placeTemplate.color, 
-        income: null, 
-        hours: placeTemplate.defaultHours || null,
-        note: '' 
-      });
+      shifts[key].push({ templateId: placeTemplate.id, name: placeTemplate.name, color: placeTemplate.color, income: null, hours: placeTemplate.defaultHours || null, note: '' });
     }
-    localStorage.setItem(STORE_KEY, JSON.stringify(shifts));
-    updateCalendarGrid();
-    renderTodayNotes();
-    renderSalaryPage();
-  } else {
-    openDay(key);
-  }
+    localStorage.setItem(STORE_KEY, JSON.stringify(shifts)); updateCalendarGrid(); renderTodayNotes(); renderSalaryPage();
+  } else { openDay(key); }
 }
 
 function renderCalendar(){
   const d = new Date(currentYear, currentMonth, 1);
-  document.getElementById('monthTitle').textContent =
-    d.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
+  document.getElementById('monthTitle').textContent = d.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
   document.getElementById('calendar').innerHTML = buildCalendarHtml();
-  renderTodayNotes();
-  updatePlaceUI();
-  
+  renderTodayNotes(); updatePlaceUI();
   const { total } = collectMonthData(currentYear, currentMonth);
   document.getElementById('headerMonthTotal').textContent = total.toLocaleString('ru-RU') + ' ₽';
 }
 
 function updateCalendarGrid(){
   document.getElementById('calendar').innerHTML = buildCalendarHtml();
-  
   const { total } = collectMonthData(currentYear, currentMonth);
   document.getElementById('headerMonthTotal').textContent = total.toLocaleString('ru-RU') + ' ₽';
 }
@@ -1531,24 +1217,414 @@ function renderTodayNotes(){
   const list = shifts[tKey] || [];
   const dayNote = dayNotes[tKey] || '';
   const el = document.getElementById('todayNotesText');
-  
   let notesArr = [];
+  if (dayNote.trim()) notesArr.push(dayNote.trim());
+  list.forEach(s => { if (s.note && s.note.trim()) notesArr.push(`[${s.name}] ${s.note.trim()}`); });
   
-  if (dayNote.trim()) {
-    notesArr.push(dayNote.trim());
-  }
-  
-  list.forEach(s => {
-    if (s.note && s.note.trim()) {
-      notesArr.push(`[${s.name}] ${s.note.trim()}`);
-    }
+  const tasks = plannerTasks[tKey] || [];
+  tasks.sort((a, b) => a.time.localeCompare(b.time));
+  tasks.forEach(t => {
+    let text = `⏰ ${t.time} ${t.title}`;
+    if(t.desc) text += ` (${t.desc})`;
+    notesArr.push(text);
   });
   
-  if (notesArr.length === 0) {
-    el.innerHTML = '<span class="no-notes">Нет заметок</span>';
-  } else {
-    el.textContent = notesArr.join('\n');
+  if (notesArr.length === 0) el.innerHTML = '<span class="no-notes">Нет заметок</span>';
+  else el.textContent = notesArr.join('\n');
+}
+
+function changeMonth(delta, animate = true){
+  let m = currentMonth + delta; let y = currentYear;
+  if (m < 0){ m = 11; y--; } if (m > 11){ m = 0; y++; }
+  currentMonth = m; currentYear = y; renderCalendar(); 
+}
+
+/* ---------- Страница ЗП ---------- */
+function collectMonthData(y, m){
+  let total = 0; let totalHours = 0; const byShop = {}; const colorByShop = {}; const countByShop = {};
+  const tKey = todayKey();
+  for (const key in shifts){
+    const [ky,km] = key.split('-').map(Number);
+    if (ky===y && km===m+1){
+      for (const s of shifts[key]){
+        const inc = +s.income || 0; total += inc; byShop[s.name] = (byShop[s.name]||0) + inc;
+        countByShop[s.name] = (countByShop[s.name]||0) + 1; if (!colorByShop[s.name]) colorByShop[s.name] = s.color;
+        if (key <= tKey) totalHours += (+s.hours || 0);
+      }
+    }
   }
+  return { total, totalHours, byShop, colorByShop, countByShop };
+}
+
+function renderSalaryPage(){
+  document.getElementById('salaryMonthTitle').textContent = MONTHS[salaryMonth] + ' ' + salaryYear;
+  const { total, totalHours, byShop, colorByShop, countByShop } = collectMonthData(salaryYear, salaryMonth);
+  document.getElementById('salaryTotal').textContent = total.toLocaleString('ru-RU') + ' ₽';
+  const statsEl = document.getElementById('salaryStats');
+  if (totalHours > 0) {
+    const rate = Math.round(total / totalHours);
+    statsEl.innerHTML = `<span>Часов: <b>${totalHours}</b></span> <span>Ставка: <b>${rate} ₽/ч</b></span>`;
+  } else { statsEl.innerHTML = ''; }
+  const bd = Object.entries(byShop).sort((a,b)=>b[1]-a[1]).map(([name,sum])=>{
+      const cnt = countByShop[name] || 0; const word = shiftWord(cnt);
+      return `<div class="shop-line">
+        <div class="left"><span class="dot" style="background:${colorByShop[name]||'#64748b'}"></span>
+          <div class="shop-info"><div class="shop-name">${name}</div><div class="shop-count">${cnt} ${word}</div></div>
+        </div><span class="sum">${sum.toLocaleString('ru-RU')} ₽</span>
+      </div>`;
+    }).join('');
+  document.getElementById('salaryBreakdown').innerHTML = bd || `<div class="empty-hint">Нет смен в ${MONTHS[salaryMonth]} ${salaryYear}</div>`;
+  renderChart(); renderPastMonths(); checkMissingIncome();
+}
+
+function shiftWord(n){
+  const mod10 = n % 10; const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return 'смена';
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'смены';
+  return 'смен';
+}
+
+function renderChart() {
+  const container = document.getElementById('chartContainer'); const monthsData = [];
+  for (let i = 5; i >= 0; i--) {
+    let y = salaryYear; let m = salaryMonth - i;
+    if (m < 0) { const offset = Math.ceil(Math.abs(m) / 12); y -= offset; m = 12 - (Math.abs(m) % 12); if (m === 12) m = 0; }
+    const { total } = collectMonthData(y, m); monthsData.push({ y, m, total });
+  }
+  const maxVal = Math.max(...monthsData.map(d => d.total), 1);
+  container.innerHTML = monthsData.map(d => {
+    const heightPercent = (d.total / maxVal) * 100; const isZero = d.total === 0; const isSelected = (d.y === salaryYear && d.m === salaryMonth);
+    return `<div class="chart-bar-wrapper ${isSelected ? 'selected' : ''}" onclick="jumpToChartMonth(${d.y}, ${d.m})">
+        ${!isZero ? `<div class="chart-value">${Math.round(d.total/1000)}к</div>` : ''}
+        <div class="chart-bar ${isZero ? 'zero' : ''}" style="height: ${isZero ? 2 : heightPercent}%"></div>
+        <div class="chart-label">${SHORT_MONTHS[d.m]}</div>
+      </div>`;
+  }).join('');
+}
+function jumpToChartMonth(y, m) { salaryYear = y; salaryMonth = m; renderSalaryPage(); }
+
+function checkMissingIncome() {
+  const tKey = todayKey(); let missingCount = 0;
+  for (const key in shifts) { if (key <= tKey) { for (const s of shifts[key]) { if (s.income === null || s.income === undefined || s.income === '') missingCount++; } } }
+  const banner = document.getElementById('salaryWarningBanner');
+  if (missingCount > 0) { document.getElementById('missingCount').textContent = missingCount; banner.style.display = 'flex'; } 
+  else { banner.style.display = 'none'; }
+}
+
+function openMissingList() {
+  const tKey = todayKey(); const list = [];
+  for (const key in shifts) { if (key <= tKey) { for (const s of shifts[key]) { if (s.income === null || s.income === undefined || s.income === '') list.push({ date: key, shift: s }); } } }
+  list.sort((a,b) => b.date.localeCompare(a.date));
+  const container = document.getElementById('missingList');
+  if (!list.length) { container.innerHTML = '<div class="empty-hint">Все ЗП заполнены! 🎉</div>'; } 
+  else {
+    container.innerHTML = list.map(item => {
+      const d = new Date(item.date + 'T00:00:00'); const formattedDate = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+      return `<div class="missing-item" onclick="jumpToMissing('${item.date}')">
+          <div><div class="date">${formattedDate}</div><div class="shop">${item.shift.name}</div></div><div class="arrow">›</div>
+        </div>`;
+    }).join('');
+  }
+  document.getElementById('missingModalBg').classList.add('open');
+}
+function jumpToMissing(dateKeyStr) { closeMissingList(); switchTab('calendar'); const [y, m] = dateKeyStr.split('-').map(Number); currentYear = y; currentMonth = m - 1; renderCalendar(); setTimeout(() => { openDay(dateKeyStr); }, 100); }
+function closeMissingList() { document.getElementById('missingModalBg').classList.remove('open'); }
+
+function renderPastMonths(){
+  const monthsMap = {};
+  for (const key in shifts){ const [ky,km] = key.split('-').map(Number); const mk = ky + '-' + pad(km); if (!monthsMap[mk]) monthsMap[mk] = 0; for (const s of shifts[key]) monthsMap[mk] += (+s.income || 0); }
+  const currentMk = salaryYear + '-' + pad(salaryMonth+1); if (!monthsMap[currentMk]) monthsMap[currentMk] = 0;
+  let sorted = Object.entries(monthsMap).sort((a,b)=> b[0].localeCompare(a[0])); sorted = sorted.filter(([mk, sum]) => sum > 0 || mk === currentMk);
+  const toShow = showAllPastMonths ? sorted : sorted.slice(0, 3);
+  document.getElementById('pastMonths').innerHTML = toShow.map(([mk,sum])=>{
+    const [y,m] = mk.split('-').map(Number); const isCurrent = (y===salaryYear && m===salaryMonth+1);
+    return `<div class="past-month-row" style="${isCurrent?'border-color:#38bdf8':''}" onclick="jumpToSalaryMonth(${y}, ${m-1})"><span class="name">${MONTHS[m-1]} ${y}${isCurrent?' •':''}</span><span class="sum">${sum.toLocaleString('ru-RU')} ₽</span></div>`;
+  }).join('');
+  const showAllBtn = document.getElementById('showAllMonthsBtn');
+  if (sorted.length > 3) { showAllBtn.style.display = 'block'; showAllBtn.textContent = showAllPastMonths ? 'Свернуть ↑' : 'Показать все ↓'; } else { showAllBtn.style.display = 'none'; }
+}
+function toggleAllMonths(){ showAllPastMonths = !showAllPastMonths; renderPastMonths(); }
+function changeSalaryMonth(delta, animate = true){ let m = salaryMonth + delta; let y = salaryYear; if (m < 0){ m = 11; y--; } if (m > 11){ m = 0; y++; } salaryMonth = m; salaryYear = y; renderSalaryPage(); }
+function jumpToSalaryMonth(y, m){ salaryYear = y; salaryMonth = m; renderSalaryPage(); }
+
+/* ---------- Модалка дня ---------- */
+function openDay(key){
+  selectedDate = key; const t = new Date(key+'T00:00:00');
+  document.getElementById('modalTitle').textContent = t.toLocaleDateString('ru-RU', { day:'numeric', month:'long', weekday:'long' });
+  document.getElementById('dayNoteInput').value = dayNotes[key] || ''; 
+  
+  renderDayShifts(); 
+  renderDayPlannerTasks(key);
+  renderPickList(); 
+  
+  document.getElementById('modalBg').classList.add('open');
+}
+
+function renderDayPlannerTasks(dateKeyStr) {
+  const block = document.getElementById('dayPlannerBlock');
+  const tasks = plannerTasks[dateKeyStr] || [];
+  
+  if (tasks.length === 0) {
+    block.innerHTML = '';
+    return;
+  }
+  
+  tasks.sort((a, b) => a.time.localeCompare(b.time));
+  
+  block.innerHTML = `
+    <div class="card-title" style="margin-top:14px;">Задачи из планера</div>
+    <div class="pick-list" style="background:#0f172a;border:1px solid #334155;padding:10px;border-radius:12px;">
+      ${tasks.map(t => `
+        <div style="display:flex; gap:8px; margin-bottom:6px; align-items:flex-start;">
+          <span style="font-size:12px; font-weight:700; color:#38bdf8; margin-top:2px;">${t.time}</span>
+          <div style="flex:1;">
+            <div style="font-size:14px; color:#e5e7eb;">${escapeHtml(t.title)}</div>
+            ${t.desc ? `<div style="font-size:12px; color:#94a3b8; margin-top:2px;">${escapeHtml(t.desc)}</div>` : ''}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function setDayNote(value){
+  if (!selectedDate) return; const trimmed = value.trim();
+  if (trimmed) dayNotes[selectedDate] = trimmed; else delete dayNotes[selectedDate];
+  localStorage.setItem(DAY_NOTES_KEY, JSON.stringify(dayNotes)); updateCalendarGrid(); renderTodayNotes();
+}
+function renderDayShifts(){
+  const list = shifts[selectedDate] || []; const block = document.getElementById('dayShiftsBlock');
+  if (!list.length){ block.innerHTML = '<div class="empty-hint">На этот день смен нет. Выбери ниже.</div>'; return; }
+  block.innerHTML = list.map((s,i)=>`
+    <div class="shift-row" style="border-left-color:${s.color}">
+      <div class="top"><div class="left"><span class="dot" style="background:${s.color}"></span><span class="name">${s.name}</span></div><button class="del" onclick="removeShift(${i})">×</button></div>
+      <div class="fields">
+        <div class="field"><label>ЗП (₽)</label><input type="number" inputmode="decimal" placeholder="0" value="${s.income || ''}" onchange="setIncome(${i}, this.value)"></div>
+        <div class="field hours"><label>Часы</label><input type="number" inputmode="decimal" placeholder="0" value="${s.hours || ''}" onchange="setHours(${i}, this.value)"></div>
+      </div>
+    </div>
+  `).join('');
+}
+function setIncome(index, value){ const v = parseFloat(value); if (!shifts[selectedDate]?.[index]) return; shifts[selectedDate][index].income = isNaN(v) ? null : v; localStorage.setItem(STORE_KEY, JSON.stringify(shifts)); renderTodayNotes(); updateCalendarGrid(); renderSalaryPage(); }
+function setHours(index, value){ const v = parseFloat(value); if (!shifts[selectedDate]?.[index]) return; shifts[selectedDate][index].hours = isNaN(v) ? null : v; localStorage.setItem(STORE_KEY, JSON.stringify(shifts)); renderSalaryPage(); }
+function renderPickList(){
+  const el = document.getElementById('pickList'); const active = templates.filter(t => !t.archived);
+  if (!active.length){ el.innerHTML = '<div class="empty-hint">Сначала добавь смены на вкладке «Мои смены».</div>'; return; }
+  el.innerHTML = active.map(t=>`
+    <div class="pick-item" onclick="pickTemplate('${t.id}')">
+      <div class="left"><span class="dot" style="background:${t.color}"></span><span>${t.name}</span>${t.defaultHours ? `<span style="font-size:12px;color:#94a3b8;margin-left:4px">(${t.defaultHours} ч)</span>` : ''}</div><span class="add">+</span>
+    </div>
+  `).join('');
+}
+function pickTemplate(id){
+  const t = templates.find(x => x.id === id); if (!t) return;
+  if (!shifts[selectedDate]) shifts[selectedDate] = [];
+  shifts[selectedDate].push({ templateId: t.id, name: t.name, color: t.color, income: null, hours: t.defaultHours || null, note: '' });
+  localStorage.setItem(STORE_KEY, JSON.stringify(shifts)); renderDayShifts(); updateCalendarGrid(); renderTodayNotes(); renderSalaryPage();
+}
+function removeShift(index){
+  if (!shifts[selectedDate]) return; shifts[selectedDate].splice(index,1); if (!shifts[selectedDate].length) delete shifts[selectedDate];
+  localStorage.setItem(STORE_KEY, JSON.stringify(shifts)); renderDayShifts(); updateCalendarGrid(); renderTodayNotes(); renderSalaryPage();
+}
+function closeModal(){ document.getElementById('modalBg').classList.remove('open'); renderCalendar(); }
+
+document.getElementById('modalBg').addEventListener('click', e=>{ if (e.target.id==='modalBg') closeModal(); });
+document.getElementById('missingModalBg').addEventListener('click', e=>{ if (e.target.id==='missingModalBg') closeMissingList(); });
+document.getElementById('placePicker').addEventListener('click', e=>{ if (e.target.id==='placePicker') closePlacePicker(); });
+document.getElementById('archiveModal').addEventListener('click', e=>{ if (e.target.id==='archiveModal') closeArchive(); });
+
+/* ========== ПЛАНЕР ========== */
+function renderPlanner() {
+  const dateKeyStr = dateKey(plannerDate.getFullYear(), plannerDate.getMonth(), plannerDate.getDate());
+  const isToday = dateKeyStr === todayKey();
+  
+  const titleEl = document.getElementById('plannerDateTitle');
+  const options = { day: 'numeric', month: 'long', weekday: 'short' };
+  titleEl.textContent = plannerDate.toLocaleDateString('ru-RU', options);
+
+  // Блок со сменами на этот день
+  const dayShifts = shifts[dateKeyStr] || [];
+  const shiftsContainer = document.getElementById('plannerShiftsContainer');
+  if (dayShifts.length > 0) {
+    shiftsContainer.innerHTML = `
+      <div class="planner-shifts-row">
+        ${dayShifts.map(s => `
+          <div class="planner-shift-badge">
+            <span class="dot" style="background:${s.color}"></span>
+            <span>${s.name}</span>
+            ${s.hours ? `<span class="time">(${s.hours} ч)</span>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } else {
+    shiftsContainer.innerHTML = '';
+  }
+
+  const tasks = plannerTasks[dateKeyStr] || [];
+  const now = new Date();
+  const currentHour = now.getHours();
+  
+  const startHour = 6;
+  const endHour = 23;
+  let gridHtml = '';
+  
+  for (let h = startHour; h <= endHour; h++) {
+    const timeStr = `${pad(h)}:00`;
+    const isPast = isToday && h < currentHour;
+    
+    const hourTasks = tasks.filter(t => {
+      if (!t.time) return false;
+      const taskHour = parseInt(t.time.split(':')[0], 10);
+      return taskHour === h;
+    });
+    
+    hourTasks.sort((a, b) => a.time.localeCompare(b.time));
+
+    let tasksHtml = '';
+    if (hourTasks.length > 0) {
+      tasksHtml = hourTasks.map(task => {
+        // Поиск телефона и адреса для кнопок
+        let actionButtons = '';
+        const phoneRegex = /(\+?\d[\d\s\-\(\)]{8,}\d)/g;
+        const phoneMatch = task.desc ? task.desc.match(phoneRegex) : null;
+        
+        if (phoneMatch) {
+          const cleanPhone = phoneMatch[0].replace(/[^\d+]/g, '');
+          actionButtons += `<a href="tel:${cleanPhone}" class="task-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+            Позвонить
+          </a>`;
+        }
+
+        // Проверка на адрес (упрощенно: если есть слово "ул.", "пр.", "д.", "кв." и т.д.)
+        const addressKeywords = /(ул\.|улица|пр\.|проспект|пер\.|переулок|д\.|дом|кв\.|квартира|офис|стр\.|строение)/i;
+        if (task.desc && addressKeywords.test(task.desc)) {
+          const encodedAddr = encodeURIComponent(task.desc);
+          actionButtons += `<a href="https://yandex.ru/maps/?text=${encodedAddr}" target="_blank" class="task-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Маршрут
+          </a>`;
+        }
+
+        return `
+          <div class="task-swipe-container" data-date="${dateKeyStr}" data-id="${task.id}">
+            <div class="task-swipe-action" onclick="deleteTask('${dateKeyStr}', '${task.id}')">Удалить</div>
+            <div class="task-swipe-content">
+              <div class="t-text">${task.time} — ${escapeHtml(task.title)}</div>
+              ${task.desc ? `<div class="t-desc">${escapeHtml(task.desc)}</div>` : ''}
+              ${actionButtons ? `<div class="task-action-buttons">${actionButtons}</div>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    gridHtml += `
+      <div class="time-row ${isPast ? 'past-hour' : ''}">
+        <div class="time-label">${timeStr}</div>
+        <div class="time-content">${tasksHtml}</div>
+      </div>
+    `;
+  }
+  
+  document.getElementById('plannerTimeGrid').innerHTML = gridHtml;
+  initTaskSwipeHandlers();
+}
+
+function changePlannerDay(delta, animate = true) {
+  plannerDate.setDate(plannerDate.getDate() + delta);
+  renderPlanner();
+}
+
+function goToTodayPlanner() {
+  plannerDate = new Date();
+  renderPlanner();
+}
+
+/* Модалка задачи */
+function openTaskModal(taskId = null, dateKeyStr = null) {
+  const modalTitle = document.getElementById('taskModalTitle');
+  const timeInput = document.getElementById('taskTimeInput');
+  const titleInput = document.getElementById('taskTitleInput');
+  const descInput = document.getElementById('taskDescInput');
+  const idInput = document.getElementById('editingTaskId');
+
+  if (taskId && dateKeyStr) {
+    // Режим редактирования
+    const tasks = plannerTasks[dateKeyStr] || [];
+    const task = tasks.find(t => t.id === taskId);
+    
+    if (task) {
+      modalTitle.textContent = 'Редактировать задачу';
+      timeInput.value = task.time;
+      titleInput.value = task.title;
+      descInput.value = task.desc || '';
+      idInput.value = task.id;
+    }
+  } else {
+    // Режим создания
+    modalTitle.textContent = 'Новая задача';
+    const now = new Date();
+    timeInput.value = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    titleInput.value = '';
+    descInput.value = '';
+    idInput.value = '';
+  }
+  
+  document.getElementById('addTaskModal').classList.add('open');
+  setTimeout(() => titleInput.focus(), 100);
+}
+
+function closeTaskModal() {
+  document.getElementById('addTaskModal').classList.remove('open');
+}
+
+function saveTask() {
+  const time = document.getElementById('taskTimeInput').value;
+  const title = document.getElementById('taskTitleInput').value.trim();
+  const desc = document.getElementById('taskDescInput').value.trim();
+  const taskId = document.getElementById('editingTaskId').value;
+
+  if (!time) { alert('Укажите время'); return; }
+  if (!title) { alert('Введите название задачи'); return; }
+
+  const dateKeyStr = dateKey(plannerDate.getFullYear(), plannerDate.getMonth(), plannerDate.getDate());
+  
+  if (!plannerTasks[dateKeyStr]) {
+    plannerTasks[dateKeyStr] = [];
+  }
+  
+  if (taskId) {
+    // Редактирование существующей
+    const idx = plannerTasks[dateKeyStr].findIndex(t => t.id === taskId);
+    if (idx !== -1) {
+      plannerTasks[dateKeyStr][idx] = { ...plannerTasks[dateKeyStr][idx], time, title, desc };
+    }
+  } else {
+    // Создание новой
+    const newTaskId = 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    plannerTasks[dateKeyStr].push({ id: newTaskId, time, title, desc });
+  }
+  
+  localStorage.setItem(PLANNER_KEY, JSON.stringify(plannerTasks));
+  
+  closeTaskModal();
+  renderPlanner();
+  updateCalendarGrid(); 
+  renderTodayNotes();
+}
+
+function deleteTask(dateKeyStr, taskId) {
+  if (!plannerTasks[dateKeyStr]) return;
+  plannerTasks[dateKeyStr] = plannerTasks[dateKeyStr].filter(t => t.id !== taskId);
+  if (plannerTasks[dateKeyStr].length === 0) {
+    delete plannerTasks[dateKeyStr];
+  }
+  localStorage.setItem(PLANNER_KEY, JSON.stringify(plannerTasks));
+  renderPlanner();
+  updateCalendarGrid();
+  renderTodayNotes();
 }
 
 function escapeHtml(s){
@@ -1557,420 +1633,10 @@ function escapeHtml(s){
   }[c]));
 }
 
-function changeMonth(delta, animate = true){
-  let m = currentMonth + delta;
-  let y = currentYear;
-  if (m < 0){ m = 11; y--; }
-  if (m > 11){ m = 0; y++; }
-  currentMonth = m;
-  currentYear = y;
-  renderCalendar(); 
-}
-
-/* ---------- Страница ЗП ---------- */
-function collectMonthData(y, m){
-  let total = 0;
-  let totalHours = 0;
-  const byShop = {};
-  const colorByShop = {};
-  const countByShop = {};
-  
-  const tKey = todayKey();
-
-  for (const key in shifts){
-    const [ky,km] = key.split('-').map(Number);
-    if (ky===y && km===m+1){
-      for (const s of shifts[key]){
-        const inc = +s.income || 0;
-        total += inc;
-        byShop[s.name] = (byShop[s.name]||0) + inc;
-        countByShop[s.name] = (countByShop[s.name]||0) + 1;
-        if (!colorByShop[s.name]) colorByShop[s.name] = s.color;
-        
-        if (key <= tKey) {
-          totalHours += (+s.hours || 0);
-        }
-      }
-    }
-  }
-  return { total, totalHours, byShop, colorByShop, countByShop };
-}
-
-function renderSalaryPage(){
-  document.getElementById('salaryMonthTitle').textContent =
-    MONTHS[salaryMonth] + ' ' + salaryYear;
-
-  const { total, totalHours, byShop, colorByShop, countByShop } = collectMonthData(salaryYear, salaryMonth);
-
-  document.getElementById('salaryTotal').textContent = total.toLocaleString('ru-RU') + ' ₽';
-  
-  const statsEl = document.getElementById('salaryStats');
-  if (totalHours > 0) {
-    const rate = Math.round(total / totalHours);
-    statsEl.innerHTML = `<span>Часов: <b>${totalHours}</b></span> <span>Ставка: <b>${rate} ₽/ч</b></span>`;
-  } else {
-    statsEl.innerHTML = '';
-  }
-
-  const bd = Object.entries(byShop).sort((a,b)=>b[1]-a[1])
-    .map(([name,sum])=>{
-      const cnt = countByShop[name] || 0;
-      const word = shiftWord(cnt);
-      return `<div class="shop-line">
-        <div class="left">
-          <span class="dot" style="background:${colorByShop[name]||'#64748b'}"></span>
-          <div class="shop-info">
-            <div class="shop-name">${name}</div>
-            <div class="shop-count">${cnt} ${word}</div>
-          </div>
-        </div>
-        <span class="sum">${sum.toLocaleString('ru-RU')} ₽</span>
-      </div>`;
-    }).join('');
-  document.getElementById('salaryBreakdown').innerHTML = bd ||
-    `<div class="empty-hint">Нет смен в ${MONTHS[salaryMonth]} ${salaryYear}</div>`;
-
-  renderChart();
-  renderPastMonths();
-  checkMissingIncome();
-}
-
-function shiftWord(n){
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return 'смена';
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'смены';
-  return 'смен';
-}
-
-/* ---------- График ---------- */
-function renderChart() {
-  const container = document.getElementById('chartContainer');
-  const monthsData = [];
-  
-  for (let i = 5; i >= 0; i--) {
-    let y = salaryYear;
-    let m = salaryMonth - i;
-    
-    if (m < 0) { 
-      const offset = Math.ceil(Math.abs(m) / 12); 
-      y -= offset; 
-      m = 12 - (Math.abs(m) % 12);
-      if (m === 12) m = 0;
-    }
-    
-    const { total } = collectMonthData(y, m);
-    monthsData.push({ y, m, total });
-  }
-  
-  const maxVal = Math.max(...monthsData.map(d => d.total), 1);
-  
-  container.innerHTML = monthsData.map(d => {
-    const heightPercent = (d.total / maxVal) * 100;
-    const isZero = d.total === 0;
-    const isSelected = (d.y === salaryYear && d.m === salaryMonth);
-    
-    return `
-      <div class="chart-bar-wrapper ${isSelected ? 'selected' : ''}" onclick="jumpToChartMonth(${d.y}, ${d.m})">
-        ${!isZero ? `<div class="chart-value">${Math.round(d.total/1000)}к</div>` : ''}
-        <div class="chart-bar ${isZero ? 'zero' : ''}" style="height: ${isZero ? 2 : heightPercent}%"></div>
-        <div class="chart-label">${SHORT_MONTHS[d.m]}</div>
-      </div>
-    `;
-  }).join('');
-}
-
-function jumpToChartMonth(y, m) {
-  salaryYear = y;
-  salaryMonth = m;
-  renderSalaryPage(); // Мгновенно перерисовываем
-}
-
-/* ---------- Незаполненная ЗП ---------- */
-function checkMissingIncome() {
-  const tKey = todayKey();
-  let missingCount = 0;
-  
-  for (const key in shifts) {
-    if (key <= tKey) {
-      for (const s of shifts[key]) {
-        if (s.income === null || s.income === undefined || s.income === '') {
-          missingCount++;
-        }
-      }
-    }
-  }
-  
-  const banner = document.getElementById('salaryWarningBanner');
-  if (missingCount > 0) {
-    document.getElementById('missingCount').textContent = missingCount;
-    banner.style.display = 'flex';
-  } else {
-    banner.style.display = 'none';
-  }
-}
-
-function openMissingList() {
-  const tKey = todayKey();
-  const list = [];
-  
-  for (const key in shifts) {
-    if (key <= tKey) {
-      for (const s of shifts[key]) {
-        if (s.income === null || s.income === undefined || s.income === '') {
-          list.push({ date: key, shift: s });
-        }
-      }
-    }
-  }
-  
-  list.sort((a,b) => b.date.localeCompare(a.date));
-  
-  const container = document.getElementById('missingList');
-  if (!list.length) {
-    container.innerHTML = '<div class="empty-hint">Все ЗП заполнены! 🎉</div>';
-  } else {
-    container.innerHTML = list.map(item => {
-      const d = new Date(item.date + 'T00:00:00');
-      const formattedDate = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
-      return `
-        <div class="missing-item" onclick="jumpToMissing('${item.date}')">
-          <div>
-            <div class="date">${formattedDate}</div>
-            <div class="shop">${item.shift.name}</div>
-          </div>
-          <div class="arrow">›</div>
-        </div>
-      `;
-    }).join('');
-  }
-  
-  document.getElementById('missingModalBg').classList.add('open');
-}
-
-function jumpToMissing(dateKeyStr) {
-  closeMissingList();
-  switchTab('calendar');
-  
-  const [y, m] = dateKeyStr.split('-').map(Number);
-  currentYear = y;
-  currentMonth = m - 1;
-  renderCalendar();
-  
-  setTimeout(() => {
-    openDay(dateKeyStr);
-  }, 100);
-}
-
-function closeMissingList() {
-  document.getElementById('missingModalBg').classList.remove('open');
-}
-
-function renderPastMonths(){
-  const monthsMap = {};
-  for (const key in shifts){
-    const [ky,km] = key.split('-').map(Number);
-    const mk = ky + '-' + pad(km);
-    if (!monthsMap[mk]) monthsMap[mk] = 0;
-    for (const s of shifts[key]) monthsMap[mk] += (+s.income || 0);
-  }
-
-  const currentMk = salaryYear + '-' + pad(salaryMonth+1);
-  if (!monthsMap[currentMk]) monthsMap[currentMk] = 0;
-
-  let sorted = Object.entries(monthsMap).sort((a,b)=> b[0].localeCompare(a[0]));
-  sorted = sorted.filter(([mk, sum]) => sum > 0 || mk === currentMk);
-
-  const toShow = showAllPastMonths ? sorted : sorted.slice(0, 3);
-
-  document.getElementById('pastMonths').innerHTML = toShow.map(([mk,sum])=>{
-    const [y,m] = mk.split('-').map(Number);
-    const isCurrent = (y===salaryYear && m===salaryMonth+1);
-    return `<div class="past-month-row"
-                 style="${isCurrent?'border-color:#38bdf8':''}"
-                 onclick="jumpToSalaryMonth(${y}, ${m-1})">
-      <span class="name">${MONTHS[m-1]} ${y}${isCurrent?' •':''}</span>
-      <span class="sum">${sum.toLocaleString('ru-RU')} ₽</span>
-    </div>`;
-  }).join('');
-
-  const showAllBtn = document.getElementById('showAllMonthsBtn');
-  if (sorted.length > 3) {
-    showAllBtn.style.display = 'block';
-    showAllBtn.textContent = showAllPastMonths ? 'Свернуть ↑' : 'Показать все ↓';
-  } else {
-    showAllBtn.style.display = 'none';
-  }
-}
-
-function toggleAllMonths(){
-  showAllPastMonths = !showAllPastMonths;
-  renderPastMonths();
-}
-
-function changeSalaryMonth(delta, animate = true){
-  let m = salaryMonth + delta;
-  let y = salaryYear;
-  if (m < 0){ m = 11; y--; }
-  if (m > 11){ m = 0; y++; }
-  salaryMonth = m;
-  salaryYear = y;
-  renderSalaryPage();
-}
-
-function jumpToSalaryMonth(y, m){
-  salaryYear = y;
-  salaryMonth = m;
-  renderSalaryPage(); // Просто перерисовываем
-}
-
-/* ---------- Модалка дня ---------- */
-function openDay(key){
-  selectedDate = key;
-  const t = new Date(key+'T00:00:00');
-  document.getElementById('modalTitle').textContent =
-    t.toLocaleDateString('ru-RU', { day:'numeric', month:'long', weekday:'long' });
-  
-  document.getElementById('dayNoteInput').value = dayNotes[key] || '';
-  
-  renderDayShifts();
-  renderPickList();
-  document.getElementById('modalBg').classList.add('open');
-}
-
-function setDayNote(value){
-  if (!selectedDate) return;
-  const trimmed = value.trim();
-  if (trimmed){
-    dayNotes[selectedDate] = trimmed;
-  } else {
-    delete dayNotes[selectedDate];
-  }
-  localStorage.setItem(DAY_NOTES_KEY, JSON.stringify(dayNotes));
-  updateCalendarGrid();
-  renderTodayNotes();
-}
-
-function renderDayShifts(){
-  const list = shifts[selectedDate] || [];
-  const block = document.getElementById('dayShiftsBlock');
-  if (!list.length){
-    block.innerHTML = '<div class="empty-hint">На этот день смен нет. Выбери ниже.</div>';
-    return;
-  }
-  block.innerHTML = list.map((s,i)=>`
-    <div class="shift-row" style="border-left-color:${s.color}">
-      <div class="top">
-        <div class="left">
-          <span class="dot" style="background:${s.color}"></span>
-          <span class="name">${s.name}</span>
-        </div>
-        <button class="del" onclick="removeShift(${i})">×</button>
-      </div>
-      <div class="fields">
-        <div class="field">
-          <label>ЗП (₽)</label>
-          <input type="number" inputmode="decimal" placeholder="0"
-                 value="${s.income || ''}" onchange="setIncome(${i}, this.value)">
-        </div>
-        <div class="field hours">
-          <label>Часы</label>
-          <input type="number" inputmode="decimal" placeholder="0"
-                 value="${s.hours || ''}" onchange="setHours(${i}, this.value)">
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function setIncome(index, value){
-  const v = parseFloat(value);
-  if (!shifts[selectedDate]?.[index]) return;
-  shifts[selectedDate][index].income = isNaN(v) ? null : v;
-  localStorage.setItem(STORE_KEY, JSON.stringify(shifts));
-  renderTodayNotes();
-  updateCalendarGrid();
-  renderSalaryPage();
-}
-
-function setHours(index, value){
-  const v = parseFloat(value);
-  if (!shifts[selectedDate]?.[index]) return;
-  shifts[selectedDate][index].hours = isNaN(v) ? null : v;
-  localStorage.setItem(STORE_KEY, JSON.stringify(shifts));
-  renderSalaryPage();
-}
-
-function renderPickList(){
-  const el = document.getElementById('pickList');
-  const active = templates.filter(t => !t.archived);
-  if (!active.length){
-    el.innerHTML = '<div class="empty-hint">Сначала добавь смены на вкладке «Мои смены».</div>';
-    return;
-  }
-  el.innerHTML = active.map(t=>`
-    <div class="pick-item" onclick="pickTemplate('${t.id}')">
-      <div class="left">
-        <span class="dot" style="background:${t.color}"></span>
-        <span>${t.name}</span>
-        ${t.defaultHours ? `<span style="font-size:12px;color:#94a3b8;margin-left:4px">(${t.defaultHours} ч)</span>` : ''}
-      </div>
-      <span class="add">+</span>
-    </div>
-  `).join('');
-}
-
-function pickTemplate(id){
-  const t = templates.find(x => x.id === id);
-  if (!t) return;
-  if (!shifts[selectedDate]) shifts[selectedDate] = [];
-  shifts[selectedDate].push({ 
-    templateId: t.id, 
-    name: t.name, 
-    color: t.color, 
-    income: null, 
-    hours: t.defaultHours || null, 
-    note: '' 
-  });
-  localStorage.setItem(STORE_KEY, JSON.stringify(shifts));
-  renderDayShifts();
-  updateCalendarGrid();
-  renderTodayNotes();
-  renderSalaryPage();
-}
-
-function removeShift(index){
-  if (!shifts[selectedDate]) return;
-  shifts[selectedDate].splice(index,1);
-  if (!shifts[selectedDate].length) delete shifts[selectedDate];
-  localStorage.setItem(STORE_KEY, JSON.stringify(shifts));
-  renderDayShifts();
-  updateCalendarGrid();
-  renderTodayNotes();
-  renderSalaryPage();
-}
-
-function closeModal(){
-  document.getElementById('modalBg').classList.remove('open');
-  renderCalendar();
-}
-
-document.getElementById('modalBg').addEventListener('click', e=>{
-  if (e.target.id==='modalBg') closeModal();
-});
-document.getElementById('missingModalBg').addEventListener('click', e=>{
-  if (e.target.id==='missingModalBg') closeMissingList();
-});
-document.getElementById('placePicker').addEventListener('click', e=>{
-  if (e.target.id==='placePicker') closePlacePicker();
-});
-document.getElementById('archiveModal').addEventListener('click', e=>{
-  if (e.target.id==='archiveModal') closeArchive();
-});
-
 /* ---------- Старт ---------- */
 renderTemplates();
 renderCalendar();
+renderPlanner();
 checkBackupReminder();
 </script>
 </body>
