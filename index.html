@@ -826,7 +826,7 @@ async function exportData(){
     // На iPhone открываем системное меню «Поделиться» для сохранения файла.
     if(navigator.share&&navigator.canShare&&navigator.canShare({files:[backupFile]})){
       try{
-        await navigator.share({files:[backupFile],title:'Shift backup'});
+        await navigator.share({files:[backupFile]});
       }catch(err){
         if(err&&err.name==='AbortError')return;
         console.error('Ошибка системной отправки резервной копии:',err);
