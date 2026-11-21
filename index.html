@@ -816,51 +816,19 @@ async function exportData(){
       salary:{currency:'RUB',calculation:'sum of shift.income',monthlyTotals:monthlySalary},
       planner:{tasks:plannerTasks||{}}
     };
-    const fileName='shift_backup.json';
     const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-    const backupFile=new File([blob],fileName,{type:'application/json',lastModified:Date.now()});
-
-    // Если браузер поддерживает системный выбор файла, он позволяет выбрать
-    // существующий shift_backup.json и перезаписать его содержимое.
-    if(window.showSaveFilePicker){
-      try{
-        const handle=await window.showSaveFilePicker({
-          suggestedName:fileName,
-          types:[{description:'Резервная копия смен',accept:{'application/json':['.json']}}]
-        });
-        const writable=await handle.createWritable();
-        await writable.write(blob);
-        await writable.close();
-        alert('Резервная копия сохранена.');
-        return;
-      }catch(err){
-        if(err&&err.name==='AbortError')return;
-        console.warn('Диалог сохранения недоступен:',err);
-      }
-    }
-
-    // На iPhone передаём только один файл, без текстового заголовка.
-    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[backupFile]})){
-      try{
-        await navigator.share({files:[backupFile]});
-      }catch(err){
-        if(err&&err.name==='AbortError')return;
-        console.error('Ошибка передачи резервной копии:',err);
-        alert('Не удалось открыть меню сохранения iPhone. Попробуйте ещё раз.');
-      }
-      return;
-    }
-
-    // Последний резервный вариант для браузеров без системного диалога.
     const url=URL.createObjectURL(blob);
     const link=document.createElement('a');
     link.href=url;
-    link.download=fileName;
+    link.download='shift_backup.json';
     link.style.display='none';
     document.body.appendChild(link);
     link.click();
     link.remove();
     setTimeout(()=>URL.revokeObjectURL(url),60000);
+  }catch(err){
+    console.error('Ошибка экспорта резервной копии:',err);
+    alert('Не удалось создать резервную копию. Попробуйте ещё раз.');
   }finally{
     backupExportInProgress=false;
   }
