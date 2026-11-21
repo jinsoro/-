@@ -5,8 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#111827">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-title" content="Смены">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="./manifest.webmanifest">
 <title>Смены и Планер</title>
+
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   
@@ -17,13 +21,11 @@
     display: flex;
     flex-direction: column;
     -webkit-font-smoothing: antialiased;
+    
+    padding-bottom: env(safe-area-inset-bottom);
   }
   
   #page-calendar { overflow: hidden !important; }
-
-  .card { background: #1e293b; border-radius: 14px; padding: 12px; margin-bottom: 12px; overflow: hidden; }
-  .card-title { font-size: 13px; color: #94a3b8; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-
   .page { 
     display: none; 
     flex: 1;
@@ -35,6 +37,9 @@
   }
   .page.active { display: flex; flex-direction: column; }
 
+  .card { background: #1e293b; border-radius: 14px; padding: 12px; margin-bottom: 12px; overflow: hidden; pointer-events: auto; }
+  .card-title { font-size: 13px; color: #94a3b8; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
   /* Уведомление о незаполненной ЗП */
   .warning-banner {
     background: #422006; border: 1px solid #b45309; color: #fde68a;
@@ -42,18 +47,20 @@
     display: flex; align-items: center; justify-content: space-between; cursor: pointer;
   }
   .warning-banner span { font-weight: 600; }
-  .warning-banner .arrow { font-size: 18px; }
 
   /* Блок Дохода */
-  .income-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 0 4px; }
+  .income-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px; padding: 0 4px;
+  }
   .income-header .lbl { font-size: 14px; color: #94a3b8; font-weight: 500; }
   .income-header .val { font-size: 26px; font-weight: 700; color: #86efac; }
 
   /* Блок Заметки на сегодня */
   .today-notes-card {
     background: linear-gradient(135deg, #1e3a8a, #1e293b);
-    border: 1px solid #3b82f6; border-radius: 14px; padding: 12px; margin-bottom: 12px; min-height: 80px;
-    display: flex; flex-direction: column;
+    border: 1px solid #3b82f6; border-radius: 14px; padding: 12px; margin-bottom: 12px;
+    min-height: 80px; display: flex; flex-direction: column; cursor: pointer;
   }
   .today-notes-card .title { font-size: 12px; color: #93c5fd; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; }
   .today-notes-card .note-text { font-size: 14px; color: #e5e7eb; white-space: pre-wrap; line-height: 1.4; }
@@ -63,7 +70,7 @@
   .month-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
   .month-nav button {
     background: #334155; border: none; color: #e5e7eb; font-size: 16px;
-    width: 32px; height: 32px; border-radius: 8px; cursor: pointer; -webkit-user-select: none; user-select: none;
+    width: 32px; height: 32px; border-radius: 8px; cursor: pointer; user-select: none;
   }
   .month-title { font-weight: 600; font-size: 15px; }
   
@@ -90,31 +97,18 @@
   .day.has-shift .num { color: #fff; }
   
   .day .warning-badge { position: absolute; top: 2px; right: 2px; width: 5px; height: 5px; border-radius: 50%; background: #fbbf24; box-shadow: 0 0 4px #fbbf24; }
-
   .day .labels { display: flex; flex-direction: column; gap: 1px; flex: 1; justify-content: flex-start; overflow: hidden; padding-bottom: 12px; }
-  .day .lbl {
-    font-size: 8px; line-height: 1.1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;
-    color: #fff; text-shadow: 0 1px 1px rgba(0,0,0,0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center;
-  }
-  
-  .day .note-icon {
-    position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%);
-    text-align: center; opacity: 0.9; z-index: 1; pointer-events: none; display: flex; justify-content: center;
-  }
+  .day .lbl { font-size: 8px; line-height: 1.1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #fff; text-shadow: 0 1px 1px rgba(0,0,0,0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+  .day .note-icon { position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%); text-align: center; opacity: 0.9; z-index: 1; pointer-events: none; display: flex; justify-content: center; }
   .day .note-icon svg { width: 10px; height: 10px; fill: #fff; }
-  
-  .day .sum {
-    font-size: 9px; line-height: 1.1; color: #fff; font-weight: 600; text-align: center; text-shadow: 0 1px 1px rgba(0,0,0,0.5);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0;
-    position: absolute; bottom: 1px; left: 0; right: 0;
-  }
+  .day .sum { font-size: 9px; line-height: 1.1; color: #fff; font-weight: 600; text-align: center; text-shadow: 0 1px 1px rgba(0,0,0,0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; position: absolute; bottom: 1px; left: 0; right: 0; }
 
   /* Плавающая кнопка */
   .fab-place-btn {
-    position: fixed; right: 16px; bottom: calc(80px + env(safe-area-inset-bottom));
-    width: 56px; height: 56px; border-radius: 50%; background: #334155; color: #fff; border: none;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4); cursor: pointer; z-index: 14; display: none; 
-    align-items: center; justify-content: center; transition: background 0.2s, transform 0.1s;
+    position: fixed; right: 16px; bottom: 90px;
+    width: 56px; height: 56px; border-radius: 50%; background: #334155; color: #fff;
+    border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.4); cursor: pointer; z-index: 20;
+    display: none; align-items: center; justify-content: center; transition: background 0.2s, transform 0.1s;
   }
   .fab-place-btn.show { display: flex; }
   .fab-place-btn.active { background: #22c55e; color: #052e16; }
@@ -122,32 +116,35 @@
   .fab-place-btn svg { width: 24px; height: 24px; fill: currentColor; }
 
   .place-mode-hint {
-    position: fixed; left: 16px; right: 80px; bottom: calc(80px + env(safe-area-inset-bottom));
-    font-size: 11px; color: #86efac; text-align: center; padding: 8px; background: #14532d; border-radius: 8px;
-    z-index: 14; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    position: fixed; left: 16px; right: 80px; bottom: 90px;
+    font-size: 11px; color: #86efac; text-align: center; padding: 8px; background: #14532d;
+    border-radius: 8px; z-index: 20; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
   }
   .place-mode-hint.hidden { display: none; }
 
-  .place-picker { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; z-index: 20; }
-  .place-picker.open { display: flex; }
-  .place-picker .inner {
+  /* Модальные окна */
+  .place-picker, .modal-bg, .archive-modal, .backup-overlay, .sync-confirm-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; z-index: 30;
+  }
+  .place-picker.open, .modal-bg.open, .archive-modal.open, .backup-overlay.open, .sync-confirm-overlay.open { display: flex; }
+  
+  .backup-overlay, .sync-confirm-overlay { align-items: center; justify-content: center; padding: 20px; }
+  
+  .place-picker .inner, .modal, .archive-modal .inner {
     background: #1e293b; width: 100%; border-radius: 18px 18px 0 0; padding: 16px;
-    padding-bottom: calc(16px + env(safe-area-inset-bottom)); max-height: 70vh; overflow-y: auto;
+    padding-bottom: 30px; max-height: 90vh; overflow-y: auto;
   }
-  .place-picker h2 { font-size: 16px; margin: 0 0 12px; }
+  .backup-modal, .sync-confirm-modal {
+    background: #1e293b; width: 100%; max-width: 340px; border-radius: 16px; padding: 20px; text-align: center;
+  }
 
-  /* Страница ЗП */
+  /* Страница ЗП и прочее */
   .salary-month-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-  .salary-month-nav button {
-    background: #334155; border: none; color: #e5e7eb; font-size: 18px;
-    width: 36px; height: 36px; border-radius: 10px; cursor: pointer; -webkit-user-select: none; user-select: none;
-  }
+  .salary-month-nav button { background: #334155; border: none; color: #e5e7eb; font-size: 18px; width: 36px; height: 36px; border-radius: 10px; cursor: pointer; }
   .salary-month-nav .title { font-weight: 600; font-size: 16px; }
-
   .total-big { text-align: center; padding: 16px 0 8px; }
   .total-big .lbl { font-size: 13px; color: #94a3b8; margin-bottom: 4px; }
   .total-big .val { font-size: 32px; font-weight: 700; color: #86efac; }
-  
   .stats-row { display: flex; justify-content: center; gap: 16px; margin-top: 4px; margin-bottom: 8px; font-size: 12px; color: #94a3b8; }
   .stats-row span b { color: #e5e7eb; }
 
@@ -161,47 +158,27 @@
   .shops .shop-count { font-size: 11px; color: #94a3b8; margin-top: 2px; }
   .shops .sum { color: #86efac; font-weight: 600; white-space: nowrap; }
 
-  /* График */
-  .chart-container {
-    display: flex; align-items: flex-end; justify-content: space-between;
-    height: 120px; margin-top: 16px; padding-bottom: 24px; position: relative; border-bottom: 1px solid #334155;
-  }
+  .chart-container { display: flex; align-items: flex-end; justify-content: space-between; height: 120px; margin-top: 16px; padding-bottom: 24px; position: relative; border-bottom: 1px solid #334155; }
   .chart-bar-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; position: relative; cursor: pointer; }
   .chart-bar { width: 60%; max-width: 40px; background: #3b82f6; border-radius: 4px 4px 0 0; transition: height 0.3s ease-out, background 0.2s; min-height: 2px; opacity: 0.8; }
   .chart-bar.zero { background: #334155; opacity: 1; }
-  
   .chart-bar-wrapper.selected .chart-bar { background: #22c55e; opacity: 1; box-shadow: 0 0 8px rgba(34, 197, 94, 0.4); }
   .chart-bar-wrapper.selected .chart-value { color: #22c55e; font-weight: 700; }
-
   .chart-value { font-size: 10px; color: #e5e7eb; position: absolute; top: -16px; white-space: nowrap; }
   .chart-label { position: absolute; bottom: -22px; font-size: 10px; color: #94a3b8; text-transform: uppercase; }
 
   .past-months { display: flex; flex-direction: column; gap: 6px; }
-  .past-month-row {
-    display: flex; justify-content: space-between; align-items: center;
-    background: #0f172a; border: 1px solid #334155; border-radius: 10px;
-    padding: 12px 14px; font-size: 14px; cursor: pointer;
-  }
+  .past-month-row { display: flex; justify-content: space-between; align-items: center; background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 12px 14px; font-size: 14px; cursor: pointer; }
   .past-month-row .name { color: #cbd5e1; }
   .past-month-row .sum { color: #86efac; font-weight: 600; }
-
   .show-all-btn { background: none; border: none; color: #38bdf8; font-size: 14px; padding: 10px 0 0; cursor: pointer; text-align: center; width: 100%; }
-
-  /* Анимация смены месяца на ЗП */
-  .salary-content-wrapper { transition: transform 0.2s ease-out, opacity 0.2s ease-out; }
 
   /* Шаблоны */
   .template-list { display: flex; flex-direction: column; gap: 6px; position: relative; }
   .swipe-container { position: relative; overflow: hidden; border-radius: 10px; }
-  .swipe-content {
-    background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 10px 12px; font-size: 15px;
-    display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s ease-out; position: relative; z-index: 2; touch-action: pan-y;
-  }
+  .swipe-content { background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 10px 12px; font-size: 15px; display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s ease-out; position: relative; z-index: 2; touch-action: pan-y; }
   .swipe-content.swiping { transition: none; }
-  .swipe-action {
-    position: absolute; top: 0; right: 0; bottom: 0; width: 100px; background: #ef4444; color: white;
-    display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; border-radius: 0 10px 10px 0; cursor: pointer; z-index: 1;
-  }
+  .swipe-action { position: absolute; top: 0; right: 0; bottom: 0; width: 100px; background: #ef4444; color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; border-radius: 0 10px 10px 0; cursor: pointer; z-index: 1; }
   .template-item-content { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
   .template-item-content .dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
   .template-item-content .name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -211,7 +188,6 @@
   .template-buttons { display: flex; gap: 8px; margin-top: 12px; }
   .show-add-btn { flex: 1; background: #22c55e; color: #052e16; border: none; border-radius: 12px; padding: 14px; font-size: 16px; font-weight: 700; cursor: pointer; }
   .show-archive-btn { flex: 1; background: #334155; color: #e5e7eb; border: none; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; }
-  .show-archive-btn:active { background: #475569; }
 
   .add-template { display: none; flex-direction: column; gap: 8px; margin-top: 12px; padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 12px; }
   .add-template.open { display: flex; }
@@ -225,14 +201,6 @@
   .add-btn { background: #22c55e; color: #052e16; border: none; border-radius: 10px; padding: 12px; font-size: 16px; font-weight: 700; cursor: pointer; }
   .cancel-add-btn { background: #334155; color: #e5e7eb; border: none; border-radius: 10px; padding: 12px; font-size: 15px; font-weight: 600; cursor: pointer; }
 
-  /* Модалка Архива */
-  .archive-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; z-index: 20; }
-  .archive-modal.open { display: flex; }
-  .archive-modal .inner {
-    background: #1e293b; width: 100%; border-radius: 18px 18px 0 0; padding: 16px;
-    padding-bottom: calc(16px + env(safe-area-inset-bottom)); max-height: 80vh; overflow-y: auto;
-  }
-  .archive-modal h2 { font-size: 16px; margin: 0 0 12px; }
   .archive-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
   .archive-item { display: flex; justify-content: space-between; align-items: center; background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 12px; font-size: 14px; }
   .archive-item .left { display: flex; align-items: center; gap: 10px; flex: 1; }
@@ -240,20 +208,9 @@
   .archive-item .name { color: #94a3b8; text-decoration: line-through; }
   .archive-item .restore-btn { background: #334155; color: #e5e7eb; border: none; border-radius: 8px; padding: 8px 12px; font-size: 13px; cursor: pointer; }
 
-  /* Модалка дня */
-  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; z-index: 20; }
-  .modal-bg.open { display: flex; }
-  .modal {
-    background: #1e293b; width: 100%; border-radius: 18px 18px 0 0; padding: 16px;
-    padding-bottom: calc(16px + env(safe-area-inset-bottom)); max-height: 90vh; overflow-y: auto;
-  }
-  .modal h2 { font-size: 16px; margin: 0 0 8px; }
-  
   .day-note-block { margin-bottom: 16px; background: #0f172a; border-radius: 12px; padding: 10px 12px; border: 1px solid #334155; }
   .day-note-block label { display: block; font-size: 11px; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px; font-weight: 600; }
-  .day-note-block textarea {
-    width: 100%; min-height: 40px; padding: 8px 10px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #e5e7eb; font-size: 15px; font-family: inherit; resize: vertical;
-  }
+  .day-note-block textarea { width: 100%; min-height: 40px; padding: 8px 10px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #e5e7eb; font-size: 15px; font-family: inherit; resize: vertical; }
 
   .pick-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
   .pick-item { display: flex; justify-content: space-between; align-items: center; background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 14px 16px; font-size: 16px; cursor: pointer; }
@@ -271,149 +228,104 @@
   .shift-row .fields { display: flex; gap: 8px; }
   .shift-row .field { flex: 1; display: flex; flex-direction: column; gap: 4px; }
   .shift-row .field label { font-size: 10px; color: #94a3b8; padding-left: 2px; text-transform: uppercase; }
-  .shift-row .field input {
-    width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #86efac; font-size: 16px; font-weight: 600;
-  }
+  .shift-row .field input { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #86efac; font-size: 16px; font-weight: 600; }
   .shift-row .field.hours input { color: #e5e7eb; }
   
   .btn { padding: 14px; border-radius: 12px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; }
   .btn-cancel { background: #334155; color: #e5e7eb; }
   .btn-export { background: #1d4ed8; color: #dbeafe; margin-top: 16px; }
   .btn-import { background: #0f766e; color: #ccfbf1; margin-top: 8px; }
-
   .empty-hint { color: #64748b; font-size: 14px; padding: 4px 0; }
 
   /* Нижняя навигация */
   .tabbar {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 15; background: #0f172a; border-top: 1px solid #1e293b;
-    display: flex; padding: 6px 8px; padding-bottom: calc(6px + env(safe-area-inset-bottom)); gap: 6px;
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 25;
+    background: #0f172a; border-top: 1px solid #1e293b;
+    display: flex; padding: 6px 8px;
+    padding-bottom: 20px; /* Жесткий отступ под полоску "Домой" */
+    gap: 6px;
   }
   .tabbar button {
     flex: 1; background: none; border: 1px solid transparent; color: #64748b; cursor: pointer;
-    padding: 8px 0 6px; font-family: inherit; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 3px;
-    -webkit-user-select: none; user-select: none; border-radius: 12px; transition: all 0.2s;
+    padding: 8px 0 6px; font-family: inherit;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 3px;
+    border-radius: 12px; transition: all 0.2s;
   }
   .tabbar button .ico { display: flex; align-items: center; justify-content: center; height: 24px; }
   .tabbar button .ico svg { width: 22px; height: 22px; fill: currentColor; }
   .tabbar button span:last-child { font-size: 10px; line-height: 1.2; height: 12px; }
   .tabbar button.active { color: #38bdf8; background: rgba(56, 189, 248, 0.1); border: 1px solid #38bdf8; }
 
-  /* Напоминание о бэкапе */
-  .backup-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 30; padding: 20px; }
-  .backup-overlay.open { display: flex; }
-  .backup-modal { background: #1e293b; width: 100%; max-width: 340px; border-radius: 16px; padding: 20px; text-align: center; }
-  .backup-modal .icon { margin-bottom: 10px; display: flex; justify-content: center; }
-  .backup-modal .icon svg { width: 48px; height: 48px; fill: #94a3b8; }
-  .backup-modal h2 { font-size: 18px; margin: 0 0 10px; color: #e5e7eb; }
-  .backup-modal p { font-size: 14px; color: #94a3b8; margin: 0 0 20px; line-height: 1.4; }
-  .backup-modal .btn-primary { background: #22c55e; color: #052e16; margin-bottom: 8px; }
-  .backup-modal .btn-secondary { background: #334155; color: #e5e7eb; }
+  .backup-modal h2, .sync-confirm-modal h2 { font-size: 18px; margin: 0 0 10px; color: #e5e7eb; }
+  .backup-modal p, .sync-confirm-modal p { font-size: 14px; color: #94a3b8; margin: 0 0 20px; line-height: 1.4; }
+  .backup-modal .btn-primary, .sync-confirm-modal .btn-primary { background: #22c55e; color: #052e16; margin-bottom: 8px; }
+  .backup-modal .btn-secondary, .sync-confirm-modal .btn-secondary { background: #334155; color: #e5e7eb; }
 
-  /* Окно синхронизации */
-  .sync-confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 30; padding: 20px; }
-  .sync-confirm-overlay.open { display: flex; }
-  .sync-confirm-modal { background: #1e293b; width: 100%; max-width: 340px; border-radius: 16px; padding: 20px; text-align: center; }
-  .sync-confirm-modal h2 { font-size: 18px; margin: 0 0 10px; color: #e5e7eb; }
-  .sync-confirm-modal p { font-size: 14px; color: #94a3b8; margin: 0 0 20px; line-height: 1.4; }
-  .sync-confirm-modal .btn-primary { background: #22c55e; color: #052e16; margin-bottom: 8px; }
-  .sync-confirm-modal .btn-secondary { background: #334155; color: #e5e7eb; }
-
-  /* Список незаполненных смен */
   .missing-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; max-height: 60vh; overflow-y: auto; }
   .missing-item { display: flex; justify-content: space-between; align-items: center; background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 12px; cursor: pointer; }
   .missing-item .date { font-weight: 600; color: #e5e7eb; }
   .missing-item .shop { font-size: 12px; color: #94a3b8; margin-top: 2px; }
   .missing-item .arrow { color: #38bdf8; font-size: 18px; }
 
-  /* ===== ПЛАНЕР ===== */
-  .planner-header {
-    display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
-  }
-  .planner-date-title { font-weight: 600; font-size: 16px; color: #e5e7eb; }
+  /* Планер: почасовой список задач */
+  .planner-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px}
+  .planner-date-title{font-weight:600;font-size:16px;color:#e5e7eb}
+  .planner-date-nav{display:flex;align-items:center;gap:10px}
+  .planner-date-nav button,.planner-today-btn,.planner-pick-date-btn,.planner-today-btn{height:34px;min-width:40px;box-sizing:border-box;background:#334155;border:0;color:#e5e7eb;border-radius:8px;cursor:pointer;padding:7px 11px;font-size:14px;display:inline-flex;align-items:center;justify-content:center}
+  .planner-pick-date-btn{width:40px;padding:7px}.planner-pick-date-btn svg{width:18px;height:18px;display:block}
+  .planner-date-actions{display:flex;align-items:center;gap:6px;position:relative}.planner-date-picker-wrap{position:relative;width:40px;height:34px;flex:0 0 40px;z-index:1}.planner-today-btn{position:relative;z-index:3;pointer-events:auto;touch-action:manipulation}
+  .planner-date-input-overlay{position:absolute;inset:0;width:100%;height:100%;opacity:0;z-index:2;cursor:pointer;margin:0;padding:0;border:0;pointer-events:auto}
+  .planner-add-from-calendar{width:100%;margin-top:12px;background:#0f766e;color:#ecfeff;border:0;border-radius:10px;padding:12px;font-size:14px;font-weight:600;cursor:pointer}
+  .task-swipe-container{position:relative;overflow:hidden;border-radius:8px;margin:3px 0}.task-swipe-action{position:absolute;top:0;right:0;bottom:0;width:90px;background:#ef4444;color:#fff;border:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;border-radius:0 8px 8px 0;z-index:1}.task-swipe-content{position:relative;z-index:2;transition:transform .2s ease-out;touch-action:pan-y}.task-swipe-content.swiping{transition:none}
+  .task-form-group input[type="text"]{box-sizing:border-box}.task-form-group .field-hint{font-size:10px;color:#64748b;margin-top:4px}
+  .planner-shifts-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  .planner-shift-badge{display:flex;align-items:center;gap:6px;padding:6px 10px;background:#1e293b;border:1px solid #334155;border-radius:8px;font-size:12px}
+  .planner-shift-badge .dot{width:8px;height:8px;border-radius:50%}
+  .planner-shift-badge .time{color:#94a3b8;font-size:11px}
+  .time-grid-card{padding:0!important;overflow:visible!important;position:relative!important}
+  #plannerTimeGrid{position:relative!important;display:block!important;width:100%;height:1440px!important;min-height:1440px!important;overflow:visible!important;background-color:#0f172a;background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 59px,#334155 59px,#334155 60px)}
+  .planner-hour-rows{position:relative;z-index:1;display:block!important;width:100%;height:1440px!important;min-height:1440px!important}
+  .planner-task-layer{position:absolute!important;left:60px;right:0;top:0;height:1440px;z-index:5;pointer-events:none}
+  .planner-task-layer .task-swipe-container{pointer-events:auto}
+  .time-row{position:relative;z-index:auto;display:flex!important;flex-direction:row;flex-wrap:nowrap;width:100%;height:60px!important;min-height:60px!important;max-height:60px;box-sizing:border-box;border:0!important;overflow:visible;background:transparent!important}
+  .time-row:last-child{border-bottom:0}
+  .time-label{width:60px;min-width:60px;max-width:60px;flex:0 0 60px;padding:12px 0 0 12px;font-size:12px;font-weight:600;color:#64748b;border-right:1px solid #334155;background:#1e293b}
+  .time-content{position:relative;flex:1 1 auto;width:calc(100% - 60px);height:60px!important;min-height:60px!important;box-sizing:border-box;padding:0;display:block;background:transparent!important;min-width:0;overflow:visible}
+  .time-row.past-hour .time-label{color:#334155}.time-row.past-hour .time-content{opacity:.55}
+  .task-card{background:#1e3a8a;border-left:3px solid #38bdf8;border-radius:6px;padding:8px 10px;cursor:pointer;overflow-wrap:anywhere;box-sizing:border-box}
+  .task-swipe-container.has-duration{z-index:20;flex:0 0 auto;min-height:0;overflow:visible}.task-swipe-container.has-duration .task-swipe-content,.task-swipe-container.has-duration .task-card{height:100%;min-height:100%;box-sizing:border-box}
+  .task-duration-select{appearance:none;-webkit-appearance:none;background:#334155 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23e2e8f0' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5l3 2'/%3E%3C/svg%3E") no-repeat right 12px center;background-size:16px;padding-right:38px;border:1px solid #475569;border-radius:9px;color:#f8fafc;min-height:42px;width:100%;font-weight:600}
+  .task-card .t-text{font-size:13px;font-weight:600;color:#e5e7eb;line-height:1.3}
 
-  .time-grid-card { padding: 0; overflow: hidden; transition: transform 0.2s ease-out, opacity 0.2s ease-out; }
-  
-  .time-row {
-    display: flex;
-    border-bottom: 1px solid #334155;
-    min-height: 60px;
-  }
-  .time-row:last-child { border-bottom: none; }
-  .time-row.past-hour .time-label { color: #334155; }
-  .time-row.past-hour .time-content { opacity: 0.5; }
-  
-  .time-label {
-    width: 60px;
-    flex-shrink: 0;
-    padding: 12px 0 0 12px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #64748b;
-    border-right: 1px solid #334155;
-    background: #1e293b;
-    transition: color 0.3s;
-  }
-  
-  .time-content {
-    flex: 1;
-    padding: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    background: #0f172a;
-    overflow: hidden;
-    transition: opacity 0.3s;
-  }
+  .task-swipe-container.task-standard{position:absolute;left:8px;right:8px;margin:0;overflow:hidden}
+  .task-swipe-container.task-compact{position:absolute;left:8px;right:8px;margin:0;overflow:hidden}
+  .task-swipe-content,.task-card{height:100%;min-height:100%;box-sizing:border-box}
+  .task-card{height:100%;display:flex;flex-direction:column;justify-content:flex-start;min-width:0}
+  .task-compact .task-card,.task-standard .task-card{padding:5px 7px;display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:6px;background:#243b61;border-left-color:#60a5fa}
+  .task-compact-main{display:flex;align-items:center;gap:7px;min-width:0;flex:1}
+  .task-compact-time{font-size:11px;font-weight:700;color:#93c5fd;white-space:nowrap}
+  .task-compact-title{font-size:12px;font-weight:600;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.task-duration-note{font-size:10px;color:#94a3b8;white-space:nowrap}
+  .task-compact-actions{display:flex;align-items:center;gap:5px;flex:0 0 auto}
+  .task-icon-btn{width:34px;height:34px;min-width:34px;border:1px solid #64748b;border-radius:50%;background:#334155;color:#fff;display:inline-flex;align-items:center;justify-content:center;padding:0;cursor:pointer;touch-action:manipulation}
+  .task-icon-btn svg{width:17px;height:17px;fill:currentColor}
+  .task-phone-number{display:inline-flex;align-items:center;color:#bfdbfe;font-size:11px;font-weight:700;text-decoration:underline;text-underline-offset:2px;white-space:nowrap;touch-action:manipulation;position:relative;z-index:3}.task-phone-number-wrap{flex:0 0 auto}
+  .task-icon-btn:active{background:#475569;transform:scale(.94)}
 
-  /* Плашка со сменами в планере */
-  .planner-shifts-row {
-    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
-  }
-  .planner-shift-badge {
-    display: flex; align-items: center; gap: 6px; padding: 6px 10px;
-    background: #1e293b; border: 1px solid #334155; border-radius: 8px; font-size: 12px;
-  }
-  .planner-shift-badge .dot { width: 8px; height: 8px; border-radius: 50%; }
-  .planner-shift-badge .time { color: #94a3b8; font-size: 11px; margin-left: 4px; }
+  .task-card .t-desc{font-size:11px;color:#bfdbfe;margin-top:3px;line-height:1.3;white-space:pre-wrap}
+  .task-action-buttons{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}
+  .task-btn{display:inline-flex;align-items:center;justify-content:center;padding:7px 10px;min-height:32px;box-sizing:border-box;border:1px solid rgba(255,255,255,.95);box-shadow:0 0 0 1px rgba(255,255,255,.16);border-radius:7px;font-size:12px;font-weight:600;text-decoration:none;background:#334155;color:#fff;cursor:pointer;-webkit-tap-highlight-color:rgba(255,255,255,.18);touch-action:manipulation}.task-btn:active,.task-btn:focus{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.28);outline:none}
+  .add-task-modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:flex-end;z-index:30}
+  .add-task-modal.open{display:flex}
+  .add-task-modal .inner{background:#1e293b;width:100%;border-radius:18px 18px 0 0;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom));max-height:85vh;overflow:auto}
+  .add-task-modal h2{font-size:16px;margin:0 0 12px}
+  .task-form-group{margin-bottom:12px}
+  .task-form-group label{display:block;font-size:11px;color:#94a3b8;text-transform:uppercase;margin-bottom:4px;font-weight:600}
+  .task-form-group input,.task-form-group textarea{width:100%;padding:12px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e5e7eb;font-size:15px;font-family:inherit}
+  .task-form-group textarea{resize:vertical;min-height:65px}
+  .planner-fab{position:fixed;right:16px;bottom:90px;width:56px;height:56px;border-radius:50%;background:#334155;color:#fff;border:0;box-shadow:0 4px 12px rgba(0,0,0,.4);z-index:20;display:none;align-items:center;justify-content:center;cursor:pointer;transition:transform .1s}.planner-fab:active{transform:scale(.95)}.planner-fab svg{width:24px;height:24px;fill:currentColor}
+  .planner-fab.show{display:block}
+  .day-planner-task{padding:8px 10px;border-radius:8px;background:#0f172a;margin:6px 0;font-size:13px}
 
-  /* Карточки задач (свайп) */
-  .task-swipe-container { position: relative; overflow: hidden; border-radius: 6px; }
-  .task-swipe-content {
-    background: #1e3a8a; border-left: 3px solid #38bdf8; border-radius: 6px; padding: 8px 10px;
-    position: relative; z-index: 2; transition: transform 0.2s ease-out; cursor: pointer;
-  }
-  .task-swipe-content.swiping { transition: none; }
-  .task-swipe-action {
-    position: absolute; top: 0; right: 0; bottom: 0; width: 80px; background: #ef4444; color: white;
-    display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; border-radius: 0 6px 6px 0; cursor: pointer; z-index: 1;
-  }
-  .task-swipe-content .t-text { font-size: 13px; font-weight: 600; color: #e5e7eb; line-height: 1.3; }
-  .task-swipe-content .t-desc { font-size: 11px; color: #93c5fd; margin-top: 2px; line-height: 1.2; }
-
-  .task-action-buttons { display: flex; gap: 6px; margin-top: 6px; }
-  .task-btn {
-    display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 6px;
-    font-size: 11px; font-weight: 600; text-decoration: none; cursor: pointer;
-    background: rgba(255,255,255,0.1); color: #e5e7eb; border: none;
-  }
-  .task-btn svg { width: 12px; height: 12px; fill: currentColor; }
-  .task-btn:hover { background: rgba(255,255,255,0.2); }
-
-  /* Модалка добавления/редактирования задачи */
-  .add-task-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; z-index: 25; }
-  .add-task-modal.open { display: flex; }
-  .add-task-modal .inner {
-    background: #1e293b; width: 100%; border-radius: 18px 18px 0 0; padding: 16px;
-    padding-bottom: calc(16px + env(safe-area-inset-bottom));
-  }
-  .add-task-modal h2 { font-size: 16px; margin: 0 0 12px; }
-  
-  .form-group { margin-bottom: 12px; }
-  .form-group label { display: block; font-size: 11px; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; font-weight: 600; }
-  .form-group input, .form-group textarea {
-    width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: #e5e7eb; font-size: 15px; font-family: inherit;
-  }
-  .form-group textarea { resize: vertical; min-height: 60px; }
 </style>
 </head>
 <body>
@@ -485,63 +397,39 @@
   </div>
 </div>
 
-<!-- ========== СТРАНИЦА 3: ПЛАНЕР ========== -->
+
+<!-- ========== ПЛАНЕР ========== -->
 <div class="page" id="page-planner">
   <div class="planner-header">
-    <div class="planner-date-nav" style="display:flex;align-items:center;gap:10px;">
-      <button onclick="changePlannerDay(-1)" style="background:#334155;border:none;color:#e5e7eb;font-size:16px;width:32px;height:32px;border-radius:8px;cursor:pointer;">‹</button>
+    <div class="planner-date-nav">
+      <button onclick="changePlannerDay(-1)">‹</button>
       <span class="planner-date-title" id="plannerDateTitle"></span>
-      <button onclick="changePlannerDay(1)" style="background:#334155;border:none;color:#e5e7eb;font-size:16px;width:32px;height:32px;border-radius:8px;cursor:pointer;">›</button>
+      <button onclick="changePlannerDay(1)">›</button>
     </div>
-    <button onclick="goToTodayPlanner()" style="background:#334155;border:none;color:#e5e7eb;padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer;">Сегодня</button>
+    <div class="planner-date-actions"><div class="planner-date-picker-wrap"><button class="planner-pick-date-btn" type="button" aria-label="Выбрать день" title="Выбрать день"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 3v4M8 3v4M3 10h18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button><input class="planner-date-input-overlay" type="date" id="plannerDatePicker" onchange="selectPlannerDate(this.value)" aria-label="Выбрать день"></div><button type="button" class="planner-today-btn" onclick="event.preventDefault();event.stopPropagation();goToTodayPlanner()">Сегодня</button></div>
   </div>
-
-  <!-- Плашка со сменами дня -->
   <div id="plannerShiftsContainer"></div>
-
-  <div class="card time-grid-card" id="plannerGridCard">
-    <div id="plannerTimeGrid"></div>
-  </div>
+  <div class="card time-grid-card" id="plannerGridCard"><div id="plannerTimeGrid"></div></div>
 </div>
+<button class="planner-fab" id="addTaskFab" onclick="openTaskModal()" aria-label="Добавить задачу"><svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
+<div class="add-task-modal" id="addTaskModal"><div class="inner">
+  <h2 id="taskModalTitle">Новая задача</h2>
+  <div class="task-form-group"><label>Время</label><input type="time" id="taskTimeInput" value="09:00"></div>
+  <div class="task-form-group"><label>◷ Длительность</label><select id="taskDurationInput" class="task-duration-select"><option value="0">Не указывать</option><option value="15">15 минут</option><option value="30">30 минут</option><option value="45">45 минут</option><option value="60">1 час</option><option value="90">1 час 30 минут</option><option value="120">2 часа</option><option value="150">2 часа 30 минут</option><option value="180">3 часа</option><option value="240">4 часа</option></select></div>
+  <div class="task-form-group"><label>Что нужно сделать?</label><input type="text" id="taskTitleInput" placeholder="Встреча, заказ, звонок"></div>
+  <div class="task-form-group"><label>Адрес (необязательно)</label><input type="text" id="taskAddressInput" placeholder="Улица, дом, город" autocomplete="street-address"><div class="field-hint">Если адрес заполнен, кнопка «Маршрут» появится автоматически</div></div>
+  <div class="task-form-group"><label>Телефон (необязательно)</label><input type="tel" id="taskPhoneInput" placeholder="+7 900 123-45-67" inputmode="tel" autocomplete="tel"></div>
+  <div class="task-form-group"><label>Комментарий (необязательно)</label><textarea id="taskDescInput" placeholder="Имя контакта и дополнительные детали..."></textarea></div>
+  <input type="hidden" id="editingTaskId" value="">
+  <button class="btn btn-primary" onclick="saveTask()" style="background:#22c55e;color:#052e16;margin-bottom:8px">Сохранить</button>
+  <button class="btn btn-cancel" onclick="closeTaskModal()">Отмена</button>
+</div></div>
 
-<!-- Плавающая кнопка добавления задачи -->
-<button class="fab-place-btn" id="addTaskFab" onclick="openTaskModal()" style="display:none;">
-  <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-</button>
-
-<!-- Модалка добавления/редактирования задачи -->
-<div class="add-task-modal" id="addTaskModal">
-  <div class="inner">
-    <h2 id="taskModalTitle">Новая задача</h2>
-    
-    <div class="form-group">
-      <label>Время</label>
-      <input type="time" id="taskTimeInput" value="09:00">
-    </div>
-    
-    <div class="form-group">
-      <label>Что нужно сделать? (Заказ, встреча, звонок)</label>
-      <input type="text" id="taskTitleInput" placeholder="Например: Выезд к клиенту, Заказ №123">
-    </div>
-
-    <div class="form-group">
-      <label>Адрес или детали (Необязательно)</label>
-      <textarea id="taskDescInput" placeholder="ул. Ленина 10, кв 5 (домофон 12) или телефон +7 999 123-45-67"></textarea>
-    </div>
-
-    <input type="hidden" id="editingTaskId" value="">
-
-    <button class="btn btn-primary" id="saveTaskBtn" onclick="saveTask()" style="background:#22c55e;color:#052e16;margin-bottom:8px;">Сохранить</button>
-    <button class="btn btn-cancel" onclick="closeTaskModal()">Отмена</button>
-  </div>
-</div>
-
-<!-- ========== СТРАНИЦА 4: МОИ СМЕНЫ ========== -->
+<!-- ========== СТРАНИЦА 3: МОИ СМЕНЫ ========== -->
 <div class="page" id="page-templates">
   <div class="card">
     <div class="card-title">Мои смены (для календаря)</div>
     <div class="template-list" id="templateList"></div>
-
     <div class="template-buttons">
       <button class="show-add-btn" id="showAddBtn" onclick="showAddForm()">+ Добавить</button>
       <button class="show-archive-btn" onclick="openArchive()">Архив</button>
@@ -562,10 +450,14 @@
 
   <div class="card">
     <div class="card-title">Резервная копия</div>
-    <p style="font-size:12px;color:#94a3b8;margin:0 0 8px;line-height:1.4;">Экспорт сохранит все смены в файл. Импорт восстановит их, если данные потеряются.</p>
+    <p style="font-size:12px;color:#94a3b8;margin:0 0 8px;line-height:1.4;">
+      Экспорт сохранит все смены в файл. Импорт восстановит их, если данные потеряются.
+    </p>
     <button class="btn btn-export" onclick="exportData()">📥 Экспорт данных</button>
-    <button class="btn btn-import" onclick="document.getElementById('importFile').click()">📤 Импорт данных</button>
-    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    <div class="import-file-wrap" style="position:relative;margin-top:8px">
+      <button type="button" class="btn btn-import" style="margin-top:0">📤 Импорт данных</button>
+      <input type="file" id="importFile" accept=".json,application/json" aria-label="Выбрать файл резервной копии" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;z-index:2;cursor:pointer" onchange="importData(event)">
+    </div>
   </div>
 </div>
 
@@ -585,7 +477,7 @@
   </button>
   <button id="tab-templates" onclick="switchTab('templates')">
     <span class="ico"><svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg></span>
-    <span>Смены</span>
+    <span>Мои смены</span>
   </button>
 </div>
 
@@ -616,11 +508,9 @@
       <textarea id="dayNoteInput" placeholder="Например: выходной, отвезти документы..." onchange="setDayNote(this.value)"></textarea>
     </div>
     <div id="dayShiftsBlock"></div>
-    
-    <!-- Блок задач из планера -->
     <div id="dayPlannerBlock"></div>
-
-    <div class="card-title" style="margin-top:14px;">Добавить смену</div>
+    <button class="planner-add-from-calendar" type="button" onclick="addPlannerTaskForSelectedDate()">＋ Добавить запись в планер на этот день</button>
+    <div class="card-title" style="margin-top:14px;">Добавить смену из шаблона</div>
     <div class="pick-list" id="pickList"></div>
     <button class="btn btn-cancel" onclick="closeModal()">Закрыть</button>
   </div>
@@ -638,7 +528,6 @@
 <!-- Напоминание о бэкапе -->
 <div class="backup-overlay" id="backupOverlay">
   <div class="backup-modal">
-    <div class="icon"><svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg></div>
     <h2>Новый месяц!</h2>
     <p>Начался новый месяц. Рекомендуем сделать резервную копию данных, чтобы ничего не потерять.</p>
     <button class="btn btn-primary" onclick="backupFromReminder()">📥 Скачать копию</button>
@@ -657,6 +546,25 @@
 </div>
 
 <script>
+// Автономное хранилище: все данные остаются только в браузере этого устройства.
+// Никаких аккаунтов, серверной синхронизации или облачного хранилища.
+const Storage = {
+  async get(key) {
+    const raw = localStorage.getItem(key);
+    if (raw == null) return null;
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.__shiftAppStorage === 1 && typeof parsed.value === 'string') return parsed.value;
+    } catch (_) {}
+    return raw;
+  },
+  set(key, value) {
+    localStorage.setItem(key, String(value));
+    return Promise.resolve(true);
+  }
+};
+
+// Константы
 const STORE_KEY = 'shifts_v4';
 const TEMPLATES_KEY = 'templates_v4';
 const DAY_NOTES_KEY = 'day_notes_v4';
@@ -666,92 +574,115 @@ const MONTHS = ['январь','февраль','март','апрель','ма�
 const SHORT_MONTHS = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
 const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#a855f7', '#ec4899'];
 
-let templates = JSON.parse(localStorage.getItem(TEMPLATES_KEY) || '[]');
-let shifts = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
-let dayNotes = JSON.parse(localStorage.getItem(DAY_NOTES_KEY) || '{}');
-let plannerTasks = JSON.parse(localStorage.getItem(PLANNER_KEY) || '{}');
-
+// Переменные
+let templates = [];
+let shifts = {};
+let dayNotes = {};
+let plannerTasks = {};
+let plannerDate = new Date();
+let plannerTouchStartX = 0, plannerTouchStartY = 0;
+let taskSwipeStartX = 0;
 let currentYear = new Date().getFullYear();
 let currentMonth = new Date().getMonth();
-
 let selectedDate = null;
 let newColor = COLORS[0];
-
 let placeMode = false;
 let placeTemplate = null;
-
 let salaryYear = new Date().getFullYear();
 let salaryMonth = new Date().getMonth();
 let showAllPastMonths = false;
-
 let pendingSyncTemplateId = null;
 
-// Планер
-let plannerDate = new Date();
-let editingTaskId = null;
+// Запуск приложения
+async function initApp() {
+  const [t, s, n, pt] = await Promise.all([
+    Storage.get(TEMPLATES_KEY), Storage.get(STORE_KEY), Storage.get(DAY_NOTES_KEY), Storage.get(PLANNER_KEY)
+  ]);
 
-document.getElementById('dowRow').innerHTML = DOW.map(d => `<div class="dow">${d}</div>`).join('');
+  templates = t ? JSON.parse(t) : [];
+  shifts = s ? JSON.parse(s) : {};
+  dayNotes = n ? JSON.parse(n) : {};
+  plannerTasks = pt ? JSON.parse(pt) : {};
+
+  // Однократный перенос данных из первой готовой программы (shifts_v1 / shops_v1).
+  // Перенос старых локальных данных при первом запуске новой версии.
+  if (!t && !s) {
+    const legacyShiftsRaw = localStorage.getItem('shifts_v1');
+    const legacyShopsRaw = localStorage.getItem('shops_v1');
+    if (legacyShiftsRaw) {
+      try {
+        const legacyShifts = JSON.parse(legacyShiftsRaw) || {};
+        const legacyShops = legacyShopsRaw ? JSON.parse(legacyShopsRaw) : [];
+        const names = [...new Set([
+          ...legacyShops,
+          ...Object.values(legacyShifts).flat().map(x => x.shop).filter(Boolean)
+        ])];
+        templates = names.map((name, i) => ({
+          id: 'legacy_' + i, name, color: COLORS[i % COLORS.length], defaultHours: null, archived: false
+        }));
+        const byName = new Map(templates.map(x => [x.name, x]));
+        shifts = {};
+        for (const [date, items] of Object.entries(legacyShifts)) {
+          shifts[date] = (Array.isArray(items) ? items : []).map(item => {
+            const template = byName.get(item.shop) || { id: 'legacy_extra', name: item.shop || 'Смена', color: COLORS[0] };
+            return { templateId: template.id, name: template.name, color: template.color,
+              income: item.income == null ? null : Number(item.income), hours: null, note: '' };
+          });
+          if (!shifts[date].length) delete shifts[date];
+        }
+        dayNotes = {};
+        await Promise.all([
+          Storage.set(TEMPLATES_KEY, JSON.stringify(templates)),
+          Storage.set(STORE_KEY, JSON.stringify(shifts)),
+          Storage.set(DAY_NOTES_KEY, JSON.stringify(dayNotes))
+        ]);
+      } catch (err) {
+        console.error('Не удалось перенести данные старой версии:', err);
+        templates = []; shifts = {}; dayNotes = {};
+      }
+    }
+  }
+
+  document.getElementById('dowRow').innerHTML = DOW.map(d => `<div class="dow">${d}</div>`).join('');
+  renderTemplates();
+  renderCalendar();
+  renderPlanner();
+  checkBackupReminder();
+}
 
 function pad(n){ return String(n).padStart(2,'0'); }
 function dateKey(y,m,d){ return `${y}-${pad(m+1)}-${pad(d)}`; }
-function todayKey(){
-  const t = new Date();
-  return dateKey(t.getFullYear(), t.getMonth(), t.getDate());
-}
+function todayKey(){ const t = new Date(); return dateKey(t.getFullYear(), t.getMonth(), t.getDate()); }
 
 function switchTab(tab){
-  document.getElementById('page-calendar').classList.toggle('active', tab==='calendar');
-  document.getElementById('page-salary').classList.toggle('active', tab==='salary');
-  document.getElementById('page-planner').classList.toggle('active', tab==='planner');
-  document.getElementById('page-templates').classList.toggle('active', tab==='templates');
-  
-  document.getElementById('tab-calendar').classList.toggle('active', tab==='calendar');
-  document.getElementById('tab-salary').classList.toggle('active', tab==='salary');
-  document.getElementById('tab-planner').classList.toggle('active', tab==='planner');
-  document.getElementById('tab-templates').classList.toggle('active', tab==='templates');
-  
-  if (tab==='calendar'){ renderCalendar(); }
-  else if (tab==='salary'){ 
-    shifts = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
-    renderSalaryPage(); 
-  }
-  else if (tab==='planner'){ renderPlanner(); }
-  else { renderTemplates(); }
-  
-  // Управление FAB кнопками
-  const fabPlace = document.getElementById('placeBtn');
-  const fabTask = document.getElementById('addTaskFab');
-  
-  if (tab === 'calendar') {
-    fabPlace.classList.add('show');
-    fabTask.style.display = 'none';
-  } else if (tab === 'planner') {
-    fabPlace.classList.remove('show');
-    fabTask.style.display = 'flex';
-    if (placeMode) exitPlaceMode();
-  } else {
-    fabPlace.classList.remove('show');
-    fabTask.style.display = 'none';
-    if (placeMode) exitPlaceMode();
-  }
-
-  const activePage = document.querySelector('.page.active');
-  if (activePage) activePage.scrollTop = 0;
+  ['calendar','salary','planner','templates'].forEach(name => {
+    document.getElementById('page-'+name).classList.toggle('active', tab===name);
+    document.getElementById('tab-'+name).classList.toggle('active', tab===name);
+  });
+  if (tab==='calendar') renderCalendar();
+  else if (tab==='salary') renderSalaryPage();
+  else if (tab==='planner') renderPlanner();
+  else renderTemplates();
+  document.getElementById('placeBtn').classList.toggle('show',tab==='calendar');
+  document.getElementById('addTaskFab').classList.toggle('show',tab==='planner');
+  if (tab!=='calendar' && placeMode) exitPlaceMode();
+  const activePage=document.querySelector('.page.active'); if(activePage) activePage.scrollTop=0;
 }
 
-/* ---------- Свайпы и анимация календаря ---------- */
-let touchStartX = 0; let touchStartY = 0;
+// Свайпы и анимация
+let touchStartX = 0, touchStartY = 0;
 const calendarEl = document.getElementById('calendar');
 
 document.getElementById('calendarCard').addEventListener('touchstart', e => {
-  touchStartX = e.changedTouches[0].screenX; touchStartY = e.changedTouches[0].screenY;
+  touchStartX = e.changedTouches[0].screenX;
+  touchStartY = e.changedTouches[0].screenY;
 }, {passive: true});
 
 document.getElementById('calendarCard').addEventListener('touchend', e => {
-  const touchEndX = e.changedTouches[0].screenX; const touchEndY = e.changedTouches[0].screenY;
-  const diffX = touchEndX - touchStartX; const diffY = touchEndY - touchStartY;
+  const diffX = e.changedTouches[0].screenX - touchStartX;
+  const diffY = e.changedTouches[0].screenY - touchStartY;
   if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
-    if (diffX > 0) animateMonthChange(-1); else animateMonthChange(1);
+    if (diffX > 0) { animateMonthChange(-1); } else { animateMonthChange(1); }
   }
 }, {passive: true});
 
@@ -761,25 +692,27 @@ function animateMonthChange(direction) {
     changeMonth(direction, false); 
     calendarEl.classList.remove('slide-out-left', 'slide-out-right');
     calendarEl.classList.add(direction > 0 ? 'slide-in-right' : 'slide-in-left');
-    requestAnimationFrame(() => { requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
         calendarEl.classList.remove('slide-in-right', 'slide-in-left');
-    }); });
+      });
+    });
   }, 150);
 }
 
-/* ---------- Свайпы для ЗП ---------- */
-let salaryTouchStartX = 0; let salaryTouchStartY = 0;
+let salaryTouchStartX = 0, salaryTouchStartY = 0;
 const salaryWrapper = document.getElementById('salaryContentWrapper');
 
 document.getElementById('page-salary').addEventListener('touchstart', e => {
-  salaryTouchStartX = e.changedTouches[0].screenX; salaryTouchStartY = e.changedTouches[0].screenY;
+  salaryTouchStartX = e.changedTouches[0].screenX;
+  salaryTouchStartY = e.changedTouches[0].screenY;
 }, {passive: true});
 
 document.getElementById('page-salary').addEventListener('touchend', e => {
-  const touchEndX = e.changedTouches[0].screenX; const touchEndY = e.changedTouches[0].screenY;
-  const diffX = touchEndX - salaryTouchStartX; const diffY = touchEndY - salaryTouchStartY;
+  const diffX = e.changedTouches[0].screenX - salaryTouchStartX;
+  const diffY = e.changedTouches[0].screenY - salaryTouchStartY;
   if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
-    if (diffX > 0) animateSalaryMonthChange(-1); else animateSalaryMonthChange(1);
+    if (diffX > 0) { animateSalaryMonthChange(-1); } else { animateSalaryMonthChange(1); }
   }
 }, {passive: true});
 
@@ -789,14 +722,16 @@ function animateSalaryMonthChange(direction) {
     changeSalaryMonth(direction, false); 
     salaryWrapper.classList.remove('slide-out-left', 'slide-out-right');
     salaryWrapper.classList.add(direction > 0 ? 'slide-in-right' : 'slide-in-left');
-    requestAnimationFrame(() => { requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
         salaryWrapper.classList.remove('slide-in-right', 'slide-in-left');
-    }); });
+      });
+    });
   }, 150);
 }
 
-/* ---------- Свайп для удаления шаблонов и задач ---------- */
-let swipeStartX = 0; let swipeCurrentX = 0; let activeSwipeEl = null;
+// Свайп для удаления шаблонов
+let swipeStartX = 0, swipeCurrentX = 0, activeSwipeEl = null;
 
 function initSwipeHandlers() {
   const containers = document.querySelectorAll('.swipe-container');
@@ -805,153 +740,188 @@ function initSwipeHandlers() {
     const id = container.dataset.id;
     
     content.addEventListener('touchstart', e => {
-      document.querySelectorAll('.swipe-content, .task-swipe-content').forEach(el => { if (el !== content) el.style.transform = 'translateX(0)'; });
-      swipeStartX = e.touches[0].clientX; activeSwipeEl = content; content.classList.add('swiping');
+      document.querySelectorAll('.swipe-content').forEach(el => {
+        if (el !== content) el.style.transform = 'translateX(0)';
+      });
+      swipeStartX = e.touches[0].clientX;
+      activeSwipeEl = content;
+      content.classList.add('swiping');
     }, { passive: true });
     
     content.addEventListener('touchmove', e => {
       if (!activeSwipeEl) return;
-      swipeCurrentX = e.touches[0].clientX; const diff = swipeCurrentX - swipeStartX;
-      if (diff < 0) { const translate = Math.max(diff, -100); content.style.transform = `translateX(${translate}px)`; }
+      swipeCurrentX = e.touches[0].clientX;
+      const diff = swipeCurrentX - swipeStartX;
+      if (diff < 0) {
+        const translate = Math.max(diff, -100);
+        content.style.transform = `translateX(${translate}px)`;
+      }
     }, { passive: true });
     
     content.addEventListener('touchend', () => {
       if (!activeSwipeEl) return;
-      content.classList.remove('swiping'); const diff = swipeCurrentX - swipeStartX;
-      if (diff < -50) content.style.transform = 'translateX(-100px)'; else content.style.transform = 'translateX(0)';
+      content.classList.remove('swiping');
+      const diff = swipeCurrentX - swipeStartX;
+      if (diff < -50) { content.style.transform = 'translateX(-100px)'; } else { content.style.transform = 'translateX(0)'; }
       activeSwipeEl = null;
     });
     
-    content.addEventListener('click', (e) => {
-      const currentTranslate = content.style.transform;
-      if (currentTranslate === 'translateX(-100px)') { content.style.transform = 'translateX(0)'; } 
+    content.addEventListener('click', () => {
+      if (content.style.transform === 'translateX(-100px)') { content.style.transform = 'translateX(0)'; } 
       else { showEditForm(id); }
     });
   });
 }
 
-function initTaskSwipeHandlers() {
-  const containers = document.querySelectorAll('.task-swipe-container');
-  containers.forEach(container => {
-    const content = container.querySelector('.task-swipe-content');
-    const dateKeyStr = container.dataset.date;
-    const taskId = container.dataset.id;
-    
-    content.addEventListener('touchstart', e => {
-      document.querySelectorAll('.swipe-content, .task-swipe-content').forEach(el => { if (el !== content) el.style.transform = 'translateX(0)'; });
-      swipeStartX = e.touches[0].clientX; activeSwipeEl = content; content.classList.add('swiping');
-    }, { passive: true });
-    
-    content.addEventListener('touchmove', e => {
-      if (!activeSwipeEl) return;
-      swipeCurrentX = e.touches[0].clientX; const diff = swipeCurrentX - swipeStartX;
-      if (diff < 0) { const translate = Math.max(diff, -80); content.style.transform = `translateX(${translate}px)`; }
-    }, { passive: true });
-    
-    content.addEventListener('touchend', () => {
-      if (!activeSwipeEl) return;
-      content.classList.remove('swiping'); const diff = swipeCurrentX - swipeStartX;
-      if (diff < -40) content.style.transform = 'translateX(-80px)'; else content.style.transform = 'translateX(0)';
-      activeSwipeEl = null;
-    });
-    
-    content.addEventListener('click', (e) => {
-      const currentTranslate = content.style.transform;
-      if (currentTranslate === 'translateX(-80px)') { 
-        content.style.transform = 'translateX(0)'; 
-      } else { 
-        openTaskModal(taskId, dateKeyStr); 
-      }
-    });
-  });
-}
-
-/* ---------- Свайп для Планера (смена дней) ---------- */
-let plannerTouchStartX = 0; let plannerTouchStartY = 0;
-const plannerGridCard = document.getElementById('plannerGridCard');
-
-document.getElementById('page-planner').addEventListener('touchstart', e => {
-  if (e.target.closest('.task-swipe-content')) return;
-  plannerTouchStartX = e.changedTouches[0].screenX; 
-  plannerTouchStartY = e.changedTouches[0].screenY;
-}, {passive: true});
-
-document.getElementById('page-planner').addEventListener('touchend', e => {
-  if (e.target.closest('.task-swipe-content')) return;
-  
-  const touchEndX = e.changedTouches[0].screenX; 
-  const touchEndY = e.changedTouches[0].screenY;
-  const diffX = touchEndX - plannerTouchStartX; 
-  const diffY = touchEndY - plannerTouchStartY;
-  
-  if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
-    if (diffX > 0) {
-      animatePlannerDayChange(-1);
-    } else {
-      animatePlannerDayChange(1);
-    }
-  }
-}, {passive: true});
-
-function animatePlannerDayChange(direction) {
-  plannerGridCard.classList.add(direction > 0 ? 'slide-out-left' : 'slide-out-right');
-  
-  setTimeout(() => {
-    changePlannerDay(direction, false); 
-    plannerGridCard.classList.remove('slide-out-left', 'slide-out-right');
-    plannerGridCard.classList.add(direction > 0 ? 'slide-in-right' : 'slide-in-left');
-    
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        plannerGridCard.classList.remove('slide-in-right', 'slide-in-left');
-      });
-    });
-  }, 150);
-}
-
-/* ---------- Бэкап и напоминание ---------- */
+// Бэкап и напоминание
 function checkBackupReminder(){
-  const now = new Date(); const currentMonthStr = now.getFullYear() + '-' + pad(now.getMonth() + 1);
+  const now = new Date();
+  const currentMonthStr = now.getFullYear() + '-' + pad(now.getMonth() + 1);
   const lastPromptMonth = localStorage.getItem('last_backup_prompt_month');
   const hasData = Object.keys(shifts).length > 0 || Object.keys(dayNotes).length > 0 || Object.keys(plannerTasks).length > 0;
   if (hasData && lastPromptMonth !== currentMonthStr){
     setTimeout(() => { document.getElementById('backupOverlay').classList.add('open'); }, 1000);
   }
 }
-function backupFromReminder(){
-  exportData(); const now = new Date(); const currentMonthStr = now.getFullYear() + '-' + pad(now.getMonth() + 1);
-  localStorage.setItem('last_backup_prompt_month', currentMonthStr); closeBackupReminder();
-}
+
+function backupFromReminder(){ exportData(); closeBackupReminder(); }
 function closeBackupReminder(){
-  const now = new Date(); const currentMonthStr = now.getFullYear() + '-' + pad(now.getMonth() + 1);
-  localStorage.setItem('last_backup_prompt_month', currentMonthStr); document.getElementById('backupOverlay').classList.remove('open');
+  const now = new Date();
+  const currentMonthStr = now.getFullYear() + '-' + pad(now.getMonth() + 1);
+  localStorage.setItem('last_backup_prompt_month', currentMonthStr);
+  document.getElementById('backupOverlay').classList.remove('open');
 }
-function exportData(){
-  const data = { shifts, templates, dayNotes, plannerTasks, exportDate: new Date().toISOString() };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob); const a = document.createElement('a');
-  a.href = url; a.download = 'backup-smeny.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-}
-function importData(event){
-  const file = event.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const data = JSON.parse(e.target.result);
-      if (!data.shifts || !data.templates) { alert('Неверный формат файла'); return; }
-      if (confirm('Вы уверены? Текущие данные будут заменены данными из файла.')) {
-        shifts = data.shifts; templates = data.templates; dayNotes = data.dayNotes || {}; plannerTasks = data.plannerTasks || {};
-        localStorage.setItem(STORE_KEY, JSON.stringify(shifts)); localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
-        localStorage.setItem(DAY_NOTES_KEY, JSON.stringify(dayNotes)); localStorage.setItem(PLANNER_KEY, JSON.stringify(plannerTasks));
-        alert('Данные успешно восстановлены!'); renderTemplates(); renderCalendar(); renderSalaryPage(); renderPlanner();
+
+let backupExportInProgress=false;
+
+async function exportData(){
+  if(backupExportInProgress)return;
+  backupExportInProgress=true;
+  try{
+    // Календарь и зарплата не хранятся отдельными таблицами:
+    // календарь строится из shifts/dayNotes, а зарплата — из income каждой смены.
+    // Поэтому сохраняем исходные данные целиком, а также контрольные итоги по месяцам.
+    const monthlySalary={};
+    Object.entries(shifts||{}).forEach(([date,items])=>{
+      if(!Array.isArray(items))return;
+      const month=String(date).slice(0,7);
+      monthlySalary[month]=(monthlySalary[month]||0)+items.reduce((sum,item)=>sum+(Number(item&&item.income)||0),0);
+    });
+    const data={
+      version:4,
+      app:'Smeny-i-Planer-Local',
+      exportDate:new Date().toISOString(),
+      shifts:shifts||{},
+      templates:templates||[],
+      dayNotes:dayNotes||{},
+      plannerTasks:plannerTasks||{},
+      calendar:{shifts:shifts||{},dayNotes:dayNotes||{}},
+      salary:{currency:'RUB',calculation:'sum of shift.income',monthlyTotals:monthlySalary},
+      planner:{tasks:plannerTasks||{}}
+    };
+    const fileName='shift_backup.json';
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const backupFile=new File([blob],fileName,{type:'application/json',lastModified:Date.now()});
+
+    // На iPhone открываем системное меню «Поделиться» для сохранения файла.
+    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[backupFile]})){
+      try{
+        await navigator.share({files:[backupFile],title:'Shift backup'});
+      }catch(err){
+        if(err&&err.name==='AbortError')return;
+        console.error('Ошибка системной отправки резервной копии:',err);
+        alert('Не удалось передать файл в меню iPhone. Попробуйте ещё раз.');
       }
-    } catch (err) { alert('Ошибка чтения файла. Возможно, он поврежден.'); }
-    event.target.value = '';
+      return;
+    }
+
+    // Если системное меню файлов недоступно, используем только один способ сохранения.
+    if(window.showSaveFilePicker){
+      try{
+        const handle=await window.showSaveFilePicker({
+          suggestedName:fileName,
+          types:[{description:'Shift backup',accept:{'application/json':['.json']}}]
+        });
+        const writable=await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        alert('Backup saved.');
+        return;
+      }catch(err){
+        if(err&&err.name==='AbortError')return;
+        console.warn('Save dialog unavailable:',err);
+      }
+    }
+
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.href=url;
+    link.download=fileName;
+    link.style.display='none';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),60000);
+  }finally{
+    backupExportInProgress=false;
+  }
+}
+
+function importData(event){
+  const input=event.target,file=input.files&&input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onerror=()=>{alert('Не удалось прочитать файл. Попробуйте выбрать резервную копию ещё раз.');input.value='';};
+  reader.onload=async function(e){
+    try{
+      const parsed=JSON.parse(String(e.target.result||''));
+      const data=parsed&&typeof parsed==='object'?(parsed.backup&&typeof parsed.backup==='object'?parsed.backup:(parsed.data&&typeof parsed.data==='object'?parsed.data:parsed)):null;
+      if(!data||!data.shifts||typeof data.shifts!=='object'||Array.isArray(data.shifts)){
+        alert('Это не резервная копия приложения: в файле не найдены данные смен. Текущие данные не изменены.');return;
+      }
+      const shiftsSource=data.shifts&&typeof data.shifts==='object'&&!Array.isArray(data.shifts)?data.shifts:(data.calendar&&data.calendar.shifts&&typeof data.calendar.shifts==='object'?data.calendar.shifts:null);
+      if(!shiftsSource){alert('В резервной копии не найден календарь смен. Текущие данные не изменены.');return;}
+      const entries=Object.entries(shiftsSource).filter(([date,items])=>/^\d{4}-\d{2}-\d{2}$/.test(date)&&Array.isArray(items));
+      if(Object.keys(shiftsSource).length&&!entries.length){
+        alert('Формат смен в файле не распознан. Текущие данные не изменены.');return;
+      }
+      if(!confirm('Вы уверены? Текущие данные будут заменены данными из файла.'))return;
+      let nextShifts={},nextTemplates=[],nextDayNotes={},nextPlannerTasks={};
+      if(Array.isArray(data.templates)){
+        nextTemplates=data.templates.filter(t=>t&&typeof t==='object'&&t.name).map((t,i)=>({id:String(t.id||('import_'+i)),name:String(t.name),color:t.color||COLORS[i%COLORS.length],defaultHours:t.defaultHours??null,archived:!!t.archived}));
+        nextShifts=Object.fromEntries(entries.map(([date,items])=>[date,items.map(item=>({
+          ...item,templateId:String(item.templateId||nextTemplates.find(t=>t.name===item.name)?.id||'import_extra'),
+          name:String(item.name||item.shop||'Смена'),
+          color:item.color||nextTemplates.find(t=>t.id===item.templateId||t.name===item.name)?.color||COLORS[0],
+          income:item.income==null?null:(Number.isFinite(Number(item.income))?Number(item.income):null),
+          hours:item.hours==null?null:(Number.isFinite(Number(item.hours))?Number(item.hours):null),note:String(item.note||'')
+        }))]));
+        nextDayNotes=data.dayNotes&&typeof data.dayNotes==='object'&&!Array.isArray(data.dayNotes)?data.dayNotes:(data.calendar&&data.calendar.dayNotes&&typeof data.calendar.dayNotes==='object'?data.calendar.dayNotes:{});
+        nextPlannerTasks=data.plannerTasks&&typeof data.plannerTasks==='object'&&!Array.isArray(data.plannerTasks)?data.plannerTasks:(data.planner&&data.planner.tasks&&typeof data.planner.tasks==='object'?data.planner.tasks:{});
+      }else{
+        const names=[...new Set(entries.flatMap(([,items])=>items.map(x=>x&&(x.shop||x.name||x.store)).filter(Boolean).map(String)))];
+        nextTemplates=names.map((name,i)=>({id:'import_'+i,name,color:COLORS[i%COLORS.length],defaultHours:null,archived:false}));
+        const byName=new Map(nextTemplates.map(t=>[t.name,t]));
+        nextShifts=Object.fromEntries(entries.map(([date,items])=>[date,items.map(item=>{
+          const name=String(item.shop||item.name||item.store||'Смена'),t=byName.get(name);
+          return {templateId:t?t.id:'import_extra',name,color:item.color||t?.color||COLORS[0],income:item.income==null?null:(Number.isFinite(Number(item.income))?Number(item.income):null),hours:item.hours==null?null:(Number.isFinite(Number(item.hours))?Number(item.hours):null),note:String(item.note||'')};
+        })]));
+        nextDayNotes=data.dayNotes&&typeof data.dayNotes==='object'?data.dayNotes:{};
+        nextPlannerTasks=data.plannerTasks&&typeof data.plannerTasks==='object'?data.plannerTasks:{};
+      }
+      shifts=nextShifts;templates=nextTemplates;dayNotes=nextDayNotes;plannerTasks=nextPlannerTasks;
+      await Promise.all([Storage.set(STORE_KEY,JSON.stringify(shifts)),Storage.set(TEMPLATES_KEY,JSON.stringify(templates)),Storage.set(DAY_NOTES_KEY,JSON.stringify(dayNotes)),Storage.set(PLANNER_KEY,JSON.stringify(plannerTasks))]);
+      renderTemplates();renderCalendar();renderSalaryPage();renderPlanner();renderTodayNotes();
+      alert('Данные успешно восстановлены!');
+    }catch(err){
+      console.error('Ошибка импорта резервной копии:',err);
+      alert('Не удалось импортировать файл. Проверьте, что это целая JSON-копия приложения.');
+    }finally{input.value='';}
   };
   reader.readAsText(file);
 }
 
-/* ---------- Палитра ---------- */
+// Палитра
 function renderColorPicker(){
   document.getElementById('newColors').innerHTML = COLORS.map(c =>
     `<div class="color-swatch ${c===newColor?'selected':''}" style="background:${c}" onclick="setNewColor('${c}')"></div>`
@@ -959,66 +929,90 @@ function renderColorPicker(){
 }
 function setNewColor(c){ newColor = c; renderColorPicker(); }
 
-/* ---------- Форма добавления/редактирования смены ---------- */
+// Форма добавления/редактирования
 function showAddForm(){
-  document.getElementById('addTemplateForm').classList.add('open'); document.getElementById('showAddBtn').style.display = 'none';
-  document.getElementById('editingTemplateId').value = ''; document.getElementById('newTemplateName').value = '';
-  document.getElementById('newTemplateHours').value = ''; document.getElementById('saveTemplateBtn').textContent = 'Добавить';
-  renderColorPicker(); setTimeout(()=>document.getElementById('newTemplateName').focus(), 100);
+  document.getElementById('addTemplateForm').classList.add('open');
+  document.getElementById('showAddBtn').style.display = 'none';
+  document.getElementById('editingTemplateId').value = '';
+  document.getElementById('newTemplateName').value = '';
+  document.getElementById('newTemplateHours').value = '';
+  document.getElementById('saveTemplateBtn').textContent = 'Добавить';
+  renderColorPicker();
+  setTimeout(()=>document.getElementById('newTemplateName').focus(), 100);
 }
+
 function showEditForm(id){
-  const t = templates.find(x => x.id === id); if (!t) return;
+  const t = templates.find(x => x.id === id);
+  if (!t) return;
   document.querySelectorAll('.swipe-content').forEach(el => { el.style.transform = 'translateX(0)'; });
-  document.getElementById('addTemplateForm').classList.add('open'); document.getElementById('showAddBtn').style.display = 'none';
-  document.getElementById('editingTemplateId').value = t.id; document.getElementById('newTemplateName').value = t.name;
-  document.getElementById('newTemplateHours').value = t.defaultHours || ''; document.getElementById('saveTemplateBtn').textContent = 'Сохранить';
-  newColor = t.color; renderColorPicker(); setTimeout(()=>document.getElementById('newTemplateName').focus(), 100);
+  document.getElementById('addTemplateForm').classList.add('open');
+  document.getElementById('showAddBtn').style.display = 'none';
+  document.getElementById('editingTemplateId').value = t.id;
+  document.getElementById('newTemplateName').value = t.name;
+  document.getElementById('newTemplateHours').value = t.defaultHours || '';
+  document.getElementById('saveTemplateBtn').textContent = 'Сохранить';
+  newColor = t.color;
+  renderColorPicker();
+  setTimeout(()=>document.getElementById('newTemplateName').focus(), 100);
 }
+
 function hideAddForm(){
-  document.getElementById('addTemplateForm').classList.remove('open'); document.getElementById('showAddBtn').style.display = 'block';
+  document.getElementById('addTemplateForm').classList.remove('open');
+  document.getElementById('showAddBtn').style.display = 'block';
   document.getElementById('editingTemplateId').value = '';
 }
+
 function saveTemplate(){
   const id = document.getElementById('editingTemplateId').value;
   const name = document.getElementById('newTemplateName').value.trim();
   const hoursInput = document.getElementById('newTemplateHours').value;
   const defaultHours = parseFloat(hoursInput) || null;
+  
   if (!name){ alert('Введи название смены'); return; }
   let hoursChanged = false;
+
   if (id) {
     const idx = templates.findIndex(t => t.id === id);
     if (idx !== -1) {
-      if (templates[idx].defaultHours !== defaultHours) hoursChanged = true;
-      templates[idx].name = name; templates[idx].color = newColor; templates[idx].defaultHours = defaultHours;
+      if (templates[idx].defaultHours !== defaultHours) { hoursChanged = true; }
+      templates[idx].name = name;
+      templates[idx].color = newColor;
+      templates[idx].defaultHours = defaultHours;
     }
   } else {
     if (templates.some(t => t.name === name)){ alert('Такая смена уже есть'); return; }
     templates.push({ id: 't' + Date.now(), name, color: newColor, defaultHours, archived: false });
   }
-  localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates)); hideAddForm(); renderTemplates();
-  renderCalendar(); renderSalaryPage();
+  
+  Storage.set(TEMPLATES_KEY, JSON.stringify(templates));
+  hideAddForm(); renderTemplates(); renderCalendar(); renderSalaryPage();
+
   if (id && hoursChanged && defaultHours) {
-    pendingSyncTemplateId = id; document.getElementById('syncOverlay').classList.add('open');
+    pendingSyncTemplateId = id;
+    document.getElementById('syncOverlay').classList.add('open');
   }
 }
 
-/* ---------- Синхронизация ---------- */
+// Синхронизация
 function confirmSync() {
-  document.getElementById('syncOverlay').classList.remove('open'); if (!pendingSyncTemplateId) return;
-  const t = templates.find(x => x.id === pendingSyncTemplateId); if (!t) return;
+  document.getElementById('syncOverlay').classList.remove('open');
+  if (!pendingSyncTemplateId) return;
+  const t = templates.find(x => x.id === pendingSyncTemplateId);
+  if (!t) return;
   let updatedCount = 0;
   for (const dateStr in shifts) {
     for (const s of shifts[dateStr]) {
       if (s.name === t.name) { s.hours = t.defaultHours; updatedCount++; }
     }
   }
-  localStorage.setItem(STORE_KEY, JSON.stringify(shifts)); renderCalendar(); renderSalaryPage();
-  pendingSyncTemplateId = null;
-  if (updatedCount > 0) alert(`Готово! Обновлено смен: ${updatedCount}`);
+  Storage.set(STORE_KEY, JSON.stringify(shifts));
+  renderCalendar(); renderSalaryPage(); pendingSyncTemplateId = null;
+  if (updatedCount > 0) { alert(`Готово! Обновлено смен: ${updatedCount}`); }
 }
+
 function closeSyncOverlay() { document.getElementById('syncOverlay').classList.remove('open'); pendingSyncTemplateId = null; }
 
-/* ---------- Шаблоны ---------- */
+// Шаблоны
 function renderTemplates(){
   const activeTemplates = templates.filter(t => !t.archived);
   const el = document.getElementById('templateList');
@@ -1041,24 +1035,25 @@ function renderTemplates(){
     initSwipeHandlers();
   }
 }
+
 function archiveTemplate(id){
-  const t = templates.find(x => x.id === id); if (!t) return;
+  const t = templates.find(x => x.id === id);
+  if (!t) return;
   if (!confirm('Убрать смену «' + t.name + '» в архив? В календаре все записи сохранятся.')) return;
   const idx = templates.findIndex(x => x.id === id);
-  if (idx !== -1) { templates[idx].archived = true; localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates)); renderTemplates(); }
-}
-function restoreTemplate(id){
-  const idx = templates.findIndex(x => x.id === id);
-  if (idx !== -1) { templates[idx].archived = false; localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates)); renderTemplates(); openArchive(); }
+  if (idx !== -1) { templates[idx].archived = true; Storage.set(TEMPLATES_KEY, JSON.stringify(templates)); renderTemplates(); }
 }
 
-/* ---------- Модалка Архива ---------- */
+function restoreTemplate(id){
+  const idx = templates.findIndex(x => x.id === id);
+  if (idx !== -1) { templates[idx].archived = false; Storage.set(TEMPLATES_KEY, JSON.stringify(templates)); renderTemplates(); openArchive(); }
+}
+
 function openArchive() {
   const archivedTemplates = templates.filter(t => t.archived);
   const archiveList = document.getElementById('archiveList');
-  if (!archivedTemplates.length) {
-    archiveList.innerHTML = '<div class="empty-hint">Архив пуст.</div>';
-  } else {
+  if (!archivedTemplates.length) { archiveList.innerHTML = '<div class="empty-hint">Архив пуст.</div>'; } 
+  else {
     archiveList.innerHTML = archivedTemplates.map(t => `
       <div class="archive-item">
         <div class="left"><span class="dot" style="background:${t.color}"></span><span class="name">${t.name}</span></div>
@@ -1068,9 +1063,10 @@ function openArchive() {
   }
   document.getElementById('archiveModal').classList.add('open');
 }
+
 function closeArchive() { document.getElementById('archiveModal').classList.remove('open'); }
 
-/* ---------- Режим выставления ---------- */
+// Режим выставления
 function togglePlaceMode(){
   if (placeMode){ exitPlaceMode(); } 
   else {
@@ -1079,12 +1075,14 @@ function togglePlaceMode(){
     openPlacePicker();
   }
 }
+
 function openPlacePicker(){
   const active = templates.filter(t => !t.archived);
   document.getElementById('placePickList').innerHTML = active.map(t=>`
     <div class="pick-item" onclick="selectPlaceTemplate('${t.id}')">
       <div class="left">
-        <span class="dot" style="background:${t.color}"></span><span>${t.name}</span>
+        <span class="dot" style="background:${t.color}"></span>
+        <span>${t.name}</span>
         ${t.defaultHours ? `<span style="font-size:12px;color:#94a3b8;margin-left:4px">(${t.defaultHours} ч)</span>` : ''}
       </div>
       <span class="add">→</span>
@@ -1092,15 +1090,19 @@ function openPlacePicker(){
   `).join('');
   document.getElementById('placePicker').classList.add('open');
 }
+
 function closePlacePicker(){ document.getElementById('placePicker').classList.remove('open'); }
+
 function selectPlaceTemplate(id){
-  const t = templates.find(x => x.id === id); if (!t) return;
+  const t = templates.find(x => x.id === id);
+  if (!t) return;
   placeTemplate = { id: t.id, name: t.name, color: t.color, defaultHours: t.defaultHours };
-  placeMode = true; closePlacePicker(); updatePlaceUI(); renderCalendar();
+  placeMode = true;
+  closePlacePicker(); updatePlaceUI(); renderCalendar();
 }
-function exitPlaceMode(){
-  placeMode = false; placeTemplate = null; updatePlaceUI(); renderCalendar();
-}
+
+function exitPlaceMode(){ placeMode = false; placeTemplate = null; updatePlaceUI(); renderCalendar(); }
+
 function updatePlaceUI(){
   const btn = document.getElementById('placeBtn');
   const hint = document.getElementById('placeHint');
@@ -1116,7 +1118,7 @@ function updatePlaceUI(){
   }
 }
 
-/* ---------- Календарь ---------- */
+// Календарь
 function buildCalendarHtml(){
   const y = currentYear, m = currentMonth;
   const first = new Date(y, m, 1);
@@ -1127,13 +1129,21 @@ function buildCalendarHtml(){
   const trailing = (7 - (totalCells % 7)) % 7;
   const tKey = todayKey();
   let html = '';
+
   for (let i = startDow - 1; i >= 0; i--){
-    const d = prevMonthDays - i; const pd = new Date(y, m-1, d);
-    html += buildDayCell(dateKey(pd.getFullYear(), pd.getMonth(), d), d, true, tKey);
+    const d = prevMonthDays - i;
+    const pd = new Date(y, m-1, d);
+    const key = dateKey(pd.getFullYear(), pd.getMonth(), d);
+    html += buildDayCell(key, d, true, tKey);
   }
-  for (let d=1; d<=daysInMonth; d++){ html += buildDayCell(dateKey(y,m,d), d, false, tKey); }
+  for (let d=1; d<=daysInMonth; d++){
+    const key = dateKey(y,m,d);
+    html += buildDayCell(key, d, false, tKey);
+  }
   for (let d=1; d<=trailing; d++){
-    const nd = new Date(y, m+1, d); html += buildDayCell(dateKey(nd.getFullYear(), nd.getMonth(), d), d, true, tKey);
+    const nd = new Date(y, m+1, d);
+    const key = dateKey(nd.getFullYear(), nd.getMonth(), d);
+    html += buildDayCell(key, d, true, tKey);
   }
   return html;
 }
@@ -1142,11 +1152,7 @@ function buildDayCell(key, dayNum, otherMonth, tKey){
   const list = shifts[key] || [];
   const total = list.reduce((s,x)=>s+(+x.income||0),0);
   const dayNote = dayNotes[key] || '';
-  const hasNote = list.some(s => s.note && s.note.trim().length > 0) || dayNote.trim().length > 0;
-  
-  const dayTasks = plannerTasks[key] || [];
-  const hasTasks = dayTasks.length > 0;
-
+  const hasNote = list.some(s => s.note && s.note.trim().length > 0) || dayNote.trim().length > 0 || (plannerTasks[key] || []).length > 0;
   const isPastOrToday = key <= tKey;
   const hasMissingIncome = isPastOrToday && list.some(s => s.income === null || s.income === undefined || s.income === '');
 
@@ -1160,26 +1166,28 @@ function buildDayCell(key, dayNum, otherMonth, tKey){
   else if (list.length > 1){
     const cols = list.map(s=>s.color);
     const step = 100 / cols.length;
-    bg = `linear-gradient(90deg, ${cols.map((c,i)=>`${c} ${i*step}%, ${c} ${(i+1)*step}%`).join(', ')})`;
+    const stops = cols.map((c,i)=>`${c} ${i*step}%, ${c} ${(i+1)*step}%`).join(', ');
+    bg = `linear-gradient(90deg, ${stops})`;
   }
 
   let labels = '';
   if (list.length){
-    labels = `<div class="labels">${list.slice(0,3).map(s=>`<div class="lbl">${(s.name || '').slice(0,3).toUpperCase()}</div>`).join('')}</div>`;
+    labels = `<div class="labels">${list.slice(0,3).map(s=>{
+      const short = (s.name || '').slice(0,3).toUpperCase();
+      return `<div class="lbl">${short}</div>`;
+    }).join('')}</div>`;
   }
 
-  let iconHtml = '';
-  if (hasTasks) {
-    iconHtml = `<div class="note-icon" style="opacity:1; color:#38bdf8;"><svg viewBox="0 0 24 24" style="fill:#38bdf8;width:12px;height:12px;"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg></div>`;
-  } else if (hasNote) {
-    iconHtml = `<div class="note-icon"><svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></div>`;
-  }
-
+  const noteIcon = hasNote ? `<div class="note-icon"><svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></div>` : '';
   const sum = total ? `<div class="sum">${total.toLocaleString('ru-RU')}₽</div>` : '';
   const badge = hasMissingIncome ? `<div class="warning-badge"></div>` : '';
 
   return `<div class="${cls}" style="${bg?`background:${bg};`:''}" onclick="onDayTap('${key}')">
-    ${badge}<div class="num">${dayNum}</div>${labels}${iconHtml}${sum}
+    ${badge}
+    <div class="num">${dayNum}</div>
+    ${labels}
+    ${noteIcon}
+    ${sum}
   </div>`;
 }
 
@@ -1191,9 +1199,13 @@ function onDayTap(key){
       shifts[key].splice(idx, 1);
       if (!shifts[key].length) delete shifts[key];
     } else {
-      shifts[key].push({ templateId: placeTemplate.id, name: placeTemplate.name, color: placeTemplate.color, income: null, hours: placeTemplate.defaultHours || null, note: '' });
+      shifts[key].push({ 
+        templateId: placeTemplate.id, name: placeTemplate.name, color: placeTemplate.color, 
+        income: null, hours: placeTemplate.defaultHours || null, note: '' 
+      });
     }
-    localStorage.setItem(STORE_KEY, JSON.stringify(shifts)); updateCalendarGrid(); renderTodayNotes(); renderSalaryPage();
+    Storage.set(STORE_KEY, JSON.stringify(shifts));
+    updateCalendarGrid(); renderTodayNotes(); renderSalaryPage();
   } else { openDay(key); }
 }
 
@@ -1218,38 +1230,37 @@ function renderTodayNotes(){
   const dayNote = dayNotes[tKey] || '';
   const el = document.getElementById('todayNotesText');
   let notesArr = [];
-  if (dayNote.trim()) notesArr.push(dayNote.trim());
-  list.forEach(s => { if (s.note && s.note.trim()) notesArr.push(`[${s.name}] ${s.note.trim()}`); });
-  
-  const tasks = plannerTasks[tKey] || [];
-  tasks.sort((a, b) => a.time.localeCompare(b.time));
-  tasks.forEach(t => {
-    let text = `⏰ ${t.time} ${t.title}`;
-    if(t.desc) text += ` (${t.desc})`;
-    notesArr.push(text);
-  });
-  
-  if (notesArr.length === 0) el.innerHTML = '<span class="no-notes">Нет заметок</span>';
-  else el.textContent = notesArr.join('\n');
+  if (dayNote.trim()) { notesArr.push(dayNote.trim()); }
+  list.forEach(s => { if (s.note && s.note.trim()) { notesArr.push(`[${s.name}] ${s.note.trim()}`); } });
+  (plannerTasks[tKey] || []).slice().sort((a,b)=>a.time.localeCompare(b.time)).forEach(t=>notesArr.push(`⏰ ${t.time} ${t.title}${t.desc ? ' ('+t.desc+')' : ''}`));
+  if (notesArr.length === 0) { el.innerHTML = '<span class="no-notes">Нет заметок</span>'; } 
+  else { el.textContent = notesArr.join('\n'); }
 }
 
 function changeMonth(delta, animate = true){
-  let m = currentMonth + delta; let y = currentYear;
-  if (m < 0){ m = 11; y--; } if (m > 11){ m = 0; y++; }
-  currentMonth = m; currentYear = y; renderCalendar(); 
+  let m = currentMonth + delta;
+  let y = currentYear;
+  if (m < 0){ m = 11; y--; }
+  if (m > 11){ m = 0; y++; }
+  currentMonth = m; currentYear = y;
+  renderCalendar(); 
 }
 
-/* ---------- Страница ЗП ---------- */
+// Страница ЗП
 function collectMonthData(y, m){
-  let total = 0; let totalHours = 0; const byShop = {}; const colorByShop = {}; const countByShop = {};
+  let total = 0, totalHours = 0;
+  const byShop = {}, colorByShop = {}, countByShop = {};
   const tKey = todayKey();
   for (const key in shifts){
     const [ky,km] = key.split('-').map(Number);
     if (ky===y && km===m+1){
       for (const s of shifts[key]){
-        const inc = +s.income || 0; total += inc; byShop[s.name] = (byShop[s.name]||0) + inc;
-        countByShop[s.name] = (countByShop[s.name]||0) + 1; if (!colorByShop[s.name]) colorByShop[s.name] = s.color;
-        if (key <= tKey) totalHours += (+s.hours || 0);
+        const inc = +s.income || 0;
+        total += inc;
+        byShop[s.name] = (byShop[s.name]||0) + inc;
+        countByShop[s.name] = (countByShop[s.name]||0) + 1;
+        if (!colorByShop[s.name]) colorByShop[s.name] = s.color;
+        if (key <= tKey) { totalHours += (+s.hours || 0); }
       }
     }
   }
@@ -1260,384 +1271,428 @@ function renderSalaryPage(){
   document.getElementById('salaryMonthTitle').textContent = MONTHS[salaryMonth] + ' ' + salaryYear;
   const { total, totalHours, byShop, colorByShop, countByShop } = collectMonthData(salaryYear, salaryMonth);
   document.getElementById('salaryTotal').textContent = total.toLocaleString('ru-RU') + ' ₽';
+  
   const statsEl = document.getElementById('salaryStats');
   if (totalHours > 0) {
     const rate = Math.round(total / totalHours);
     statsEl.innerHTML = `<span>Часов: <b>${totalHours}</b></span> <span>Ставка: <b>${rate} ₽/ч</b></span>`;
   } else { statsEl.innerHTML = ''; }
+
   const bd = Object.entries(byShop).sort((a,b)=>b[1]-a[1]).map(([name,sum])=>{
-      const cnt = countByShop[name] || 0; const word = shiftWord(cnt);
-      return `<div class="shop-line">
-        <div class="left"><span class="dot" style="background:${colorByShop[name]||'#64748b'}"></span>
-          <div class="shop-info"><div class="shop-name">${name}</div><div class="shop-count">${cnt} ${word}</div></div>
-        </div><span class="sum">${sum.toLocaleString('ru-RU')} ₽</span>
-      </div>`;
-    }).join('');
+    const cnt = countByShop[name] || 0;
+    const word = shiftWord(cnt);
+    return `<div class="shop-line">
+      <div class="left"><span class="dot" style="background:${colorByShop[name]||'#64748b'}"></span>
+      <div class="shop-info"><div class="shop-name">${name}</div><div class="shop-count">${cnt} ${word}</div></div></div>
+      <span class="sum">${sum.toLocaleString('ru-RU')} ₽</span>
+    </div>`;
+  }).join('');
   document.getElementById('salaryBreakdown').innerHTML = bd || `<div class="empty-hint">Нет смен в ${MONTHS[salaryMonth]} ${salaryYear}</div>`;
+
   renderChart(); renderPastMonths(); checkMissingIncome();
 }
 
 function shiftWord(n){
-  const mod10 = n % 10; const mod100 = n % 100;
+  const mod10 = n % 10, mod100 = n % 100;
   if (mod10 === 1 && mod100 !== 11) return 'смена';
   if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'смены';
   return 'смен';
 }
 
 function renderChart() {
-  const container = document.getElementById('chartContainer'); const monthsData = [];
+  const container = document.getElementById('chartContainer');
+  const monthsData = [];
+  
   for (let i = 5; i >= 0; i--) {
-    let y = salaryYear; let m = salaryMonth - i;
-    if (m < 0) { const offset = Math.ceil(Math.abs(m) / 12); y -= offset; m = 12 - (Math.abs(m) % 12); if (m === 12) m = 0; }
-    const { total } = collectMonthData(y, m); monthsData.push({ y, m, total });
+    let y = salaryYear;
+    let m = salaryMonth - i;
+    
+    if (m < 0) { 
+      const offset = Math.ceil(Math.abs(m) / 12); 
+      y -= offset; 
+      m = 12 - (Math.abs(m) % 12);
+      if (m === 12) m = 0;
+    }
+    
+    const { total } = collectMonthData(y, m);
+    monthsData.push({ y, m, total });
   }
+  
   const maxVal = Math.max(...monthsData.map(d => d.total), 1);
+  
   container.innerHTML = monthsData.map(d => {
-    const heightPercent = (d.total / maxVal) * 100; const isZero = d.total === 0; const isSelected = (d.y === salaryYear && d.m === salaryMonth);
-    return `<div class="chart-bar-wrapper ${isSelected ? 'selected' : ''}" onclick="jumpToChartMonth(${d.y}, ${d.m})">
+    const heightPercent = (d.total / maxVal) * 100;
+    const isZero = d.total === 0;
+    const isSelected = (d.y === salaryYear && d.m === salaryMonth);
+    
+    return `
+      <div class="chart-bar-wrapper ${isSelected ? 'selected' : ''}" onclick="jumpToChartMonth(${d.y}, ${d.m})">
         ${!isZero ? `<div class="chart-value">${Math.round(d.total/1000)}к</div>` : ''}
         <div class="chart-bar ${isZero ? 'zero' : ''}" style="height: ${isZero ? 2 : heightPercent}%"></div>
         <div class="chart-label">${SHORT_MONTHS[d.m]}</div>
-      </div>`;
+      </div>
+    `;
   }).join('');
 }
-function jumpToChartMonth(y, m) { salaryYear = y; salaryMonth = m; renderSalaryPage(); }
+
+function jumpToChartMonth(y, m) {
+  salaryYear = y;
+  salaryMonth = m;
+  renderSalaryPage();
+}
 
 function checkMissingIncome() {
-  const tKey = todayKey(); let missingCount = 0;
-  for (const key in shifts) { if (key <= tKey) { for (const s of shifts[key]) { if (s.income === null || s.income === undefined || s.income === '') missingCount++; } } }
+  const tKey = todayKey();
+  let missingCount = 0;
+  for (const key in shifts) {
+    if (key <= tKey) {
+      for (const s of shifts[key]) {
+        if (s.income === null || s.income === undefined || s.income === '') { missingCount++; }
+      }
+    }
+  }
   const banner = document.getElementById('salaryWarningBanner');
-  if (missingCount > 0) { document.getElementById('missingCount').textContent = missingCount; banner.style.display = 'flex'; } 
-  else { banner.style.display = 'none'; }
+  if (missingCount > 0) {
+    document.getElementById('missingCount').textContent = missingCount;
+    banner.style.display = 'flex';
+  } else { banner.style.display = 'none'; }
 }
 
 function openMissingList() {
-  const tKey = todayKey(); const list = [];
-  for (const key in shifts) { if (key <= tKey) { for (const s of shifts[key]) { if (s.income === null || s.income === undefined || s.income === '') list.push({ date: key, shift: s }); } } }
+  const tKey = todayKey();
+  const list = [];
+  for (const key in shifts) {
+    if (key <= tKey) {
+      for (const s of shifts[key]) {
+        if (s.income === null || s.income === undefined || s.income === '') { list.push({ date: key, shift: s }); }
+      }
+    }
+  }
   list.sort((a,b) => b.date.localeCompare(a.date));
   const container = document.getElementById('missingList');
   if (!list.length) { container.innerHTML = '<div class="empty-hint">Все ЗП заполнены! 🎉</div>'; } 
   else {
     container.innerHTML = list.map(item => {
-      const d = new Date(item.date + 'T00:00:00'); const formattedDate = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
-      return `<div class="missing-item" onclick="jumpToMissing('${item.date}')">
-          <div><div class="date">${formattedDate}</div><div class="shop">${item.shift.name}</div></div><div class="arrow">›</div>
-        </div>`;
+      const d = new Date(item.date + 'T00:00:00');
+      const formattedDate = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+      return `
+        <div class="missing-item" onclick="jumpToMissing('${item.date}')">
+          <div><div class="date">${formattedDate}</div><div class="shop">${item.shift.name}</div></div>
+          <div class="arrow">›</div>
+        </div>
+      `;
     }).join('');
   }
   document.getElementById('missingModalBg').classList.add('open');
 }
-function jumpToMissing(dateKeyStr) { closeMissingList(); switchTab('calendar'); const [y, m] = dateKeyStr.split('-').map(Number); currentYear = y; currentMonth = m - 1; renderCalendar(); setTimeout(() => { openDay(dateKeyStr); }, 100); }
+
+function jumpToMissing(dateKeyStr) {
+  closeMissingList();
+  switchTab('calendar');
+  const [y, m] = dateKeyStr.split('-').map(Number);
+  currentYear = y; currentMonth = m - 1;
+  renderCalendar();
+  setTimeout(() => { openDay(dateKeyStr); }, 100);
+}
+
 function closeMissingList() { document.getElementById('missingModalBg').classList.remove('open'); }
 
 function renderPastMonths(){
   const monthsMap = {};
-  for (const key in shifts){ const [ky,km] = key.split('-').map(Number); const mk = ky + '-' + pad(km); if (!monthsMap[mk]) monthsMap[mk] = 0; for (const s of shifts[key]) monthsMap[mk] += (+s.income || 0); }
-  const currentMk = salaryYear + '-' + pad(salaryMonth+1); if (!monthsMap[currentMk]) monthsMap[currentMk] = 0;
-  let sorted = Object.entries(monthsMap).sort((a,b)=> b[0].localeCompare(a[0])); sorted = sorted.filter(([mk, sum]) => sum > 0 || mk === currentMk);
+  for (const key in shifts){
+    const [ky,km] = key.split('-').map(Number);
+    const mk = ky + '-' + pad(km);
+    if (!monthsMap[mk]) monthsMap[mk] = 0;
+    for (const s of shifts[key]) monthsMap[mk] += (+s.income || 0);
+  }
+  const currentMk = salaryYear + '-' + pad(salaryMonth+1);
+  if (!monthsMap[currentMk]) monthsMap[currentMk] = 0;
+  let sorted = Object.entries(monthsMap).sort((a,b)=> b[0].localeCompare(a[0]));
+  sorted = sorted.filter(([mk, sum]) => sum > 0 || mk === currentMk);
   const toShow = showAllPastMonths ? sorted : sorted.slice(0, 3);
   document.getElementById('pastMonths').innerHTML = toShow.map(([mk,sum])=>{
-    const [y,m] = mk.split('-').map(Number); const isCurrent = (y===salaryYear && m===salaryMonth+1);
-    return `<div class="past-month-row" style="${isCurrent?'border-color:#38bdf8':''}" onclick="jumpToSalaryMonth(${y}, ${m-1})"><span class="name">${MONTHS[m-1]} ${y}${isCurrent?' •':''}</span><span class="sum">${sum.toLocaleString('ru-RU')} ₽</span></div>`;
+    const [y,m] = mk.split('-').map(Number);
+    const isCurrent = (y===salaryYear && m===salaryMonth+1);
+    return `<div class="past-month-row" style="${isCurrent?'border-color:#38bdf8':''}" onclick="jumpToSalaryMonth(${y}, ${m-1})">
+      <span class="name">${MONTHS[m-1]} ${y}${isCurrent?' •':''}</span>
+      <span class="sum">${sum.toLocaleString('ru-RU')} ₽</span>
+    </div>`;
   }).join('');
   const showAllBtn = document.getElementById('showAllMonthsBtn');
-  if (sorted.length > 3) { showAllBtn.style.display = 'block'; showAllBtn.textContent = showAllPastMonths ? 'Свернуть ↑' : 'Показать все ↓'; } else { showAllBtn.style.display = 'none'; }
+  if (sorted.length > 3) {
+    showAllBtn.style.display = 'block';
+    showAllBtn.textContent = showAllPastMonths ? 'Свернуть ↑' : 'Показать все ↓';
+  } else { showAllBtn.style.display = 'none'; }
 }
+
 function toggleAllMonths(){ showAllPastMonths = !showAllPastMonths; renderPastMonths(); }
-function changeSalaryMonth(delta, animate = true){ let m = salaryMonth + delta; let y = salaryYear; if (m < 0){ m = 11; y--; } if (m > 11){ m = 0; y++; } salaryMonth = m; salaryYear = y; renderSalaryPage(); }
+
+function changeSalaryMonth(delta, animate = true){
+  let m = salaryMonth + delta;
+  let y = salaryYear;
+  if (m < 0){ m = 11; y--; }
+  if (m > 11){ m = 0; y++; }
+  salaryMonth = m; salaryYear = y;
+  renderSalaryPage();
+}
+
 function jumpToSalaryMonth(y, m){ salaryYear = y; salaryMonth = m; renderSalaryPage(); }
 
-/* ---------- Модалка дня ---------- */
+// Модалка дня
 function openDay(key){
-  selectedDate = key; const t = new Date(key+'T00:00:00');
+  selectedDate = key;
+  const t = new Date(key+'T00:00:00');
   document.getElementById('modalTitle').textContent = t.toLocaleDateString('ru-RU', { day:'numeric', month:'long', weekday:'long' });
-  document.getElementById('dayNoteInput').value = dayNotes[key] || ''; 
-  
-  renderDayShifts(); 
+  document.getElementById('dayNoteInput').value = dayNotes[key] || '';
+  renderDayShifts();
   renderDayPlannerTasks(key);
-  renderPickList(); 
-  
+  renderPickList();
   document.getElementById('modalBg').classList.add('open');
 }
 
-function renderDayPlannerTasks(dateKeyStr) {
-  const block = document.getElementById('dayPlannerBlock');
-  const tasks = plannerTasks[dateKeyStr] || [];
-  
-  if (tasks.length === 0) {
-    block.innerHTML = '';
-    return;
-  }
-  
-  tasks.sort((a, b) => a.time.localeCompare(b.time));
-  
-  block.innerHTML = `
-    <div class="card-title" style="margin-top:14px;">Задачи из планера</div>
-    <div class="pick-list" style="background:#0f172a;border:1px solid #334155;padding:10px;border-radius:12px;">
-      ${tasks.map(t => `
-        <div style="display:flex; gap:8px; margin-bottom:6px; align-items:flex-start;">
-          <span style="font-size:12px; font-weight:700; color:#38bdf8; margin-top:2px;">${t.time}</span>
-          <div style="flex:1;">
-            <div style="font-size:14px; color:#e5e7eb;">${escapeHtml(t.title)}</div>
-            ${t.desc ? `<div style="font-size:12px; color:#94a3b8; margin-top:2px;">${escapeHtml(t.desc)}</div>` : ''}
-          </div>
-        </div>
-      `).join('')}
-    </div>
-  `;
+function renderDayPlannerTasks(key){
+  const el=document.getElementById('dayPlannerBlock'); const tasks=(plannerTasks[key]||[]).slice().sort((a,b)=>a.time.localeCompare(b.time));
+  if(!tasks.length){el.innerHTML='';return;}
+  el.innerHTML='<div class="card-title" style="margin-top:14px">Задачи из планера</div>'+tasks.map(t=>`<div class="day-planner-task"><b style="color:#38bdf8">${escapeHtml(t.time)}</b> — ${escapeHtml(t.title)}${t.desc?`<div style="color:#94a3b8;margin-top:3px">${escapeHtml(t.desc)}</div>`:''}</div>`).join('');
 }
+function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function changePlannerDay(delta){plannerDate.setDate(plannerDate.getDate()+delta);renderPlanner();}
+function goToTodayPlanner(){plannerDate=new Date();renderPlanner();}
+function openPlannerDatePicker(){const picker=document.getElementById('plannerDatePicker');picker.value=dateKey(plannerDate.getFullYear(),plannerDate.getMonth(),plannerDate.getDate());try{if(typeof picker.showPicker==='function'){picker.showPicker();return;}}catch(e){}picker.focus();picker.click();}
+function selectPlannerDate(value){if(!value)return;plannerDate=new Date(value+'T00:00:00');renderPlanner();}
+function addPlannerTaskForSelectedDate(){if(!selectedDate)return;plannerDate=new Date(selectedDate+'T00:00:00');closeModal();switchTab('planner');openTaskModal();}
+function openTaskModal(taskId=null,dateKeyStr=null){
+  const idEl=document.getElementById('editingTaskId');
+  if(taskId && dateKeyStr){const t=(plannerTasks[dateKeyStr]||[]).find(x=>x.id===taskId);if(!t)return;plannerDate=new Date(dateKeyStr+'T00:00:00');document.getElementById('taskModalTitle').textContent='Редактировать задачу';document.getElementById('taskTimeInput').value=t.time;document.getElementById('taskDurationInput').value=String(Number(t.duration)||0);document.getElementById('taskTitleInput').value=t.title;document.getElementById('taskPhoneInput').value=t.phone||extractTaskPhone(t.desc||'');document.getElementById('taskDescInput').value=t.desc||'';document.getElementById('taskAddressInput').value=t.address||'';idEl.value=t.id;}
+  else {document.getElementById('taskModalTitle').textContent='Новая задача';const now=new Date();document.getElementById('taskTimeInput').value=pad(now.getHours())+':'+pad(now.getMinutes());document.getElementById('taskDurationInput').value='0';document.getElementById('taskTitleInput').value='';document.getElementById('taskPhoneInput').value='';document.getElementById('taskDescInput').value='';document.getElementById('taskAddressInput').value='';idEl.value='';}
+  document.getElementById('addTaskModal').classList.add('open');
+}
+function closeTaskModal(){document.getElementById('addTaskModal').classList.remove('open');}
+async function saveTask(){
+  const time=document.getElementById('taskTimeInput').value,duration=Math.max(0,Number(document.getElementById('taskDurationInput').value)||0),title=document.getElementById('taskTitleInput').value.trim(),phone=document.getElementById('taskPhoneInput').value.trim(),desc=document.getElementById('taskDescInput').value.trim(),address=document.getElementById('taskAddressInput').value.trim(),id=document.getElementById('editingTaskId').value;
+  if(!time){alert('Укажите время');return;} if(!title&&!phone&&!address&&!desc){alert('Укажите название, телефон, адрес или комментарий');return;}
+  const key=dateKey(plannerDate.getFullYear(),plannerDate.getMonth(),plannerDate.getDate());if(!plannerTasks[key])plannerTasks[key]=[];
+  if(id){const i=plannerTasks[key].findIndex(t=>t.id===id);if(i>=0)plannerTasks[key][i]={...plannerTasks[key][i],time,duration,title,phone,desc,address};}
+  else plannerTasks[key].push({id:'task_'+Date.now()+'_'+Math.random().toString(36).slice(2,9),time,duration,title,phone,desc,address});
+  await Storage.set(PLANNER_KEY,JSON.stringify(plannerTasks));closeTaskModal();renderPlanner();updateCalendarGrid();renderTodayNotes();if(selectedDate===key)renderDayPlannerTasks(key);
+}
+async function deleteTask(key,id){if(!plannerTasks[key])return;plannerTasks[key]=plannerTasks[key].filter(t=>t.id!==id);if(!plannerTasks[key].length)delete plannerTasks[key];await Storage.set(PLANNER_KEY,JSON.stringify(plannerTasks));renderPlanner();updateCalendarGrid();renderTodayNotes();if(selectedDate===key)renderDayPlannerTasks(key);}
+function extractTaskPhone(value){
+  // Ищем телефон отдельной последовательностью, не захватывая соседний текст.
+  const matches=String(value||'').match(/\+?\d[\d\s().-]{7,}\d/g)||[];
+  for(const candidate of matches){
+    let number=candidate.trim().replace(/[^\d+]/g,'');
+    if(number.startsWith('00'))number='+'+number.slice(2);
+    const digits=number.replace(/\D/g,'');
+    if(digits.length<10||digits.length>15)continue;
+    if(number.startsWith('8')&&digits.length===11)number='+7'+digits.slice(1);
+    else if(number.startsWith('7')&&digits.length===11)number='+'+digits;
+    else if(!number.startsWith('+'))number='+'+digits;
+    return number;
+  }
+  return '';
+}
+function openTaskPhone(number){
+  const phone=String(number||'').replace(/[^\d+]/g,'');
+  if(!phone)return false;
+  const url='tel:'+phone;
+  // Нативное открытие системного набора номера в браузере или PWA.
+  try{
+    const opened=window.open(url,'_blank');
+    if(opened)return false;
+  }catch(e){}
+  // Запасной вариант для WebView, который не возвращает объект окна.
+  try{
+    const link=document.createElement('a');
+    link.href=url;
+    link.style.display='none';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }catch(e){}
+  return false;
+}
+function openTaskRoute(address){
+  const query=String(address||'').trim();
+  if(!query)return;
+  const url='https://yandex.ru/maps/?text='+encodeURIComponent(query)+'&z=16';
+  window.open(url,'_blank','noopener');
+}
+function renderPlanner(){
+  const key=dateKey(plannerDate.getFullYear(),plannerDate.getMonth(),plannerDate.getDate()),today=key===todayKey();
+  document.getElementById('plannerDateTitle').textContent=plannerDate.toLocaleDateString('ru-RU',{day:'numeric',month:'long',weekday:'short'});
+  const dayShifts=shifts[key]||[];
+  document.getElementById('plannerShiftsContainer').innerHTML=dayShifts.length?'<div class="planner-shifts-row">'+dayShifts.map(s=>'<div class="planner-shift-badge"><span class="dot" style="background:'+(s.color||'#64748b')+'"></span><span>'+escapeHtml(s.name)+'</span>'+(s.hours?'<span class="time">('+s.hours+' ч)</span>':'')+'</div>').join('')+'</div>':'';
+  const tasks=(plannerTasks[key]||[]).slice().sort((a,b)=>a.time.localeCompare(b.time));
+  const prepared=tasks.map(t=>{
+    const p=(t.time||'00:00').split(':').map(Number),start=Math.max(0,Math.min(1439,(p[0]||0)*60+(p[1]||0))),duration=Math.max(0,Number(t.duration)||0),effectiveDuration=duration||60;
+    const phone=extractTaskPhone(t.phone||((t.desc||'')+' '+(t.title||'')+' '+(t.address||'')));
+    const sourceText=(t.desc||'')+' '+(t.title||'');
+    const address=String(t.address||'').trim() || (/(улица|ул\.?|проспект|пр-т|пр\.?|переулок|пер\.?|дом|д\.?|корпус|строение|стр\.?|квартира|кв\.?|офис|набережная|шоссе|бульвар|площадь|\d{1,4}\s*[а-яa-z]?\s*[,])/i.test(sourceText)?sourceText.trim():'');
+    return {t,start,end:start+effectiveDuration,duration,effectiveDuration,phone,address,title:t.title||phone||address||t.desc||'Задача'};
+  });
+  const rows=[];
+  for(let h=0;h<24;h++) rows.push('<div class="time-row '+(today&&h<new Date().getHours()?'past-hour':'')+'"><div class="time-label">'+pad(h)+':00</div><div class="time-content"></div></div>');
+  const cards=prepared.map(x=>{
+    const collision=prepared.some(y=>y!==x&&x.start<y.end&&y.start<x.end);
+    const compact=collision||(x.duration>0&&x.duration<60);
+    const height=Math.max(48,Math.min(x.effectiveDuration,1440-x.start));
+    const phoneAction=x.phone?'<a class="task-icon-btn task-phone-link" href="tel:'+escapeHtml(x.phone)+'" onclick="event.preventDefault();event.stopPropagation();return openTaskPhone(\''+escapeHtml(x.phone)+'\')" aria-label="Позвонить" title="Позвонить"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1.02-.24c1.12.37 2.32.57 3.58.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.6 21 3 13.4 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.26.2 2.46.57 3.58a1 1 0 0 1-.24 1.02z"/></svg></a>':'';
+    const phoneNumber=x.phone?'<a class="task-phone-number" href="tel:'+escapeHtml(x.phone)+'" onclick="event.preventDefault();event.stopPropagation();return openTaskPhone(\''+escapeHtml(x.phone)+'\')" aria-label="Позвонить по номеру '+escapeHtml(x.phone)+'">'+escapeHtml(x.phone)+'</a>':'';
+    const routeAction=x.address?'<button type="button" class="task-icon-btn task-route-link" aria-label="Маршрут" title="Маршрут" onclick="event.stopPropagation();openTaskRoute(\''+escapeHtml(x.address).replace(/'/g,"&#39;")+'\')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></button>':'';
+    const durationLabel=x.duration?(x.duration%60?Math.floor(x.duration/60)+' ч '+(x.duration%60)+' мин':x.duration/60+' ч'):'';
+    const content='<div class="task-compact-main"><span class="task-compact-time">'+escapeHtml(x.t.time)+'</span><span class="task-compact-title">'+escapeHtml(x.title)+'</span>'+(durationLabel?'<span class="task-duration-note">'+escapeHtml(durationLabel)+'</span>':'')+'</div><div class="task-compact-actions">'+phoneAction+routeAction+'</div>';
+    return '<div class="task-swipe-container '+(compact?'task-compact':'task-standard')+'" style="top:'+x.start+'px;height:'+height+'px;z-index:'+(100+Math.round(x.start/10))+'" data-key="'+key+'" data-id="'+escapeHtml(x.t.id)+'"><button type="button" class="task-swipe-action" onclick="event.stopPropagation();deleteTask(this.parentElement.dataset.key,this.parentElement.dataset.id)">Удалить</button><div class="task-swipe-content"><div class="task-card">'+content+'</div></div></div>';
+  }).join('');
+  document.getElementById('plannerTimeGrid').innerHTML='<div class="planner-hour-rows">'+rows.join('')+'</div><div class="planner-task-layer">'+cards+'</div>';
+  document.querySelectorAll('#plannerTimeGrid .task-card').forEach(card=>card.addEventListener('click',e=>{
+    if(e.target.closest('.task-icon-btn'))return;
+    const wrap=card.closest('.task-swipe-container');if(wrap)openTaskModal(wrap.dataset.id,wrap.dataset.key);
+  }));
+  initPlannerTaskSwipe();
+}
+function initPlannerTaskSwipe(){
+  document.querySelectorAll('#plannerTimeGrid .task-swipe-container').forEach(container=>{
+    const content=container.querySelector('.task-swipe-content');if(content.dataset.swipeReady==='1')return;content.dataset.swipeReady='1';
+    let startX=0,currentX=0,moved=false;
+    content.addEventListener('touchstart',e=>{document.querySelectorAll('#plannerTimeGrid .task-swipe-content').forEach(el=>{if(el!==content){el.style.transform='translateX(0)';el.dataset.open='0';}});startX=e.touches[0].clientX;currentX=startX;moved=false;content.classList.add('swiping');},{passive:true});
+    content.addEventListener('touchmove',e=>{currentX=e.touches[0].clientX;const dx=currentX-startX;if(Math.abs(dx)>8)moved=true;if(dx<0)content.style.transform='translateX('+Math.max(dx,-90)+'px)';else if(content.dataset.open==='1')content.style.transform='translateX('+Math.min(0,-90+dx)+'px)';},{passive:true});
+    content.addEventListener('touchend',()=>{content.classList.remove('swiping');const dx=currentX-startX;if(dx<-35){content.style.transform='translateX(-90px)';content.dataset.open='1';content.dataset.swiped='1';}else if(dx>35){content.style.transform='translateX(0)';content.dataset.open='0';}else if(moved)content.style.transform=content.dataset.open==='1'?'translateX(-90px)':'translateX(0)';});
+    content.addEventListener('click',e=>{if(content.dataset.swiped==='1'){e.preventDefault();e.stopPropagation();content.dataset.swiped='0';return;}if(content.dataset.open==='1'){e.preventDefault();e.stopPropagation();content.style.transform='translateX(0)';content.dataset.open='0';}},true);
+  });
+}
+// Свайп влево/вправо в планере переключает день.
+(function initPlannerDaySwipe(){
+  const page=document.getElementById('page-planner');
+  page.addEventListener('touchstart',e=>{if(e.target.closest('.task-card,button,input,textarea,a'))return;plannerTouchStartX=e.changedTouches[0].screenX;plannerTouchStartY=e.changedTouches[0].screenY;},{passive:true});
+  page.addEventListener('touchend',e=>{if(e.target.closest('.task-card,button,input,textarea,a'))return;const dx=e.changedTouches[0].screenX-plannerTouchStartX,dy=e.changedTouches[0].screenY-plannerTouchStartY;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy))changePlannerDay(dx>0?-1:1);},{passive:true});
+})();
 
 function setDayNote(value){
-  if (!selectedDate) return; const trimmed = value.trim();
-  if (trimmed) dayNotes[selectedDate] = trimmed; else delete dayNotes[selectedDate];
-  localStorage.setItem(DAY_NOTES_KEY, JSON.stringify(dayNotes)); updateCalendarGrid(); renderTodayNotes();
+  if (!selectedDate) return;
+  const trimmed = value.trim();
+  if (trimmed){ dayNotes[selectedDate] = trimmed; } 
+  else { delete dayNotes[selectedDate]; }
+  Storage.set(DAY_NOTES_KEY, JSON.stringify(dayNotes));
+  updateCalendarGrid(); renderTodayNotes();
 }
+
 function renderDayShifts(){
-  const list = shifts[selectedDate] || []; const block = document.getElementById('dayShiftsBlock');
+  const list = shifts[selectedDate] || [];
+  const block = document.getElementById('dayShiftsBlock');
   if (!list.length){ block.innerHTML = '<div class="empty-hint">На этот день смен нет. Выбери ниже.</div>'; return; }
   block.innerHTML = list.map((s,i)=>`
     <div class="shift-row" style="border-left-color:${s.color}">
-      <div class="top"><div class="left"><span class="dot" style="background:${s.color}"></span><span class="name">${s.name}</span></div><button class="del" onclick="removeShift(${i})">×</button></div>
+      <div class="top">
+        <div class="left"><span class="dot" style="background:${s.color}"></span><span class="name">${s.name}</span></div>
+        <button class="del" onclick="removeShift(${i})">×</button>
+      </div>
       <div class="fields">
-        <div class="field"><label>ЗП (₽)</label><input type="number" inputmode="decimal" placeholder="0" value="${s.income || ''}" onchange="setIncome(${i}, this.value)"></div>
-        <div class="field hours"><label>Часы</label><input type="number" inputmode="decimal" placeholder="0" value="${s.hours || ''}" onchange="setHours(${i}, this.value)"></div>
+        <div class="field">
+          <label>ЗП (₽)</label>
+          <input type="number" inputmode="decimal" placeholder="0" value="${s.income || ''}" onchange="setIncome(${i}, this.value)">
+        </div>
+        <div class="field hours">
+          <label>Часы</label>
+          <input type="number" inputmode="decimal" placeholder="0" value="${s.hours || ''}" onchange="setHours(${i}, this.value)">
+        </div>
       </div>
     </div>
   `).join('');
 }
-function setIncome(index, value){ const v = parseFloat(value); if (!shifts[selectedDate]?.[index]) return; shifts[selectedDate][index].income = isNaN(v) ? null : v; localStorage.setItem(STORE_KEY, JSON.stringify(shifts)); renderTodayNotes(); updateCalendarGrid(); renderSalaryPage(); }
-function setHours(index, value){ const v = parseFloat(value); if (!shifts[selectedDate]?.[index]) return; shifts[selectedDate][index].hours = isNaN(v) ? null : v; localStorage.setItem(STORE_KEY, JSON.stringify(shifts)); renderSalaryPage(); }
+
+function setIncome(index, value){
+  const v = parseFloat(value);
+  if (!shifts[selectedDate]?.[index]) return;
+  shifts[selectedDate][index].income = isNaN(v) ? null : v;
+  Storage.set(STORE_KEY, JSON.stringify(shifts));
+  renderTodayNotes(); updateCalendarGrid(); renderSalaryPage();
+}
+
+function setHours(index, value){
+  const v = parseFloat(value);
+  if (!shifts[selectedDate]?.[index]) return;
+  shifts[selectedDate][index].hours = isNaN(v) ? null : v;
+  Storage.set(STORE_KEY, JSON.stringify(shifts));
+  renderSalaryPage();
+}
+
 function renderPickList(){
-  const el = document.getElementById('pickList'); const active = templates.filter(t => !t.archived);
+  const el = document.getElementById('pickList');
+  const active = templates.filter(t => !t.archived);
   if (!active.length){ el.innerHTML = '<div class="empty-hint">Сначала добавь смены на вкладке «Мои смены».</div>'; return; }
   el.innerHTML = active.map(t=>`
     <div class="pick-item" onclick="pickTemplate('${t.id}')">
-      <div class="left"><span class="dot" style="background:${t.color}"></span><span>${t.name}</span>${t.defaultHours ? `<span style="font-size:12px;color:#94a3b8;margin-left:4px">(${t.defaultHours} ч)</span>` : ''}</div><span class="add">+</span>
+      <div class="left">
+        <span class="dot" style="background:${t.color}"></span>
+        <span>${t.name}</span>
+        ${t.defaultHours ? `<span style="font-size:12px;color:#94a3b8;margin-left:4px">(${t.defaultHours} ч)</span>` : ''}
+      </div>
+      <span class="add">+</span>
     </div>
   `).join('');
 }
+
 function pickTemplate(id){
-  const t = templates.find(x => x.id === id); if (!t) return;
+  const t = templates.find(x => x.id === id);
+  if (!t) return;
   if (!shifts[selectedDate]) shifts[selectedDate] = [];
   shifts[selectedDate].push({ templateId: t.id, name: t.name, color: t.color, income: null, hours: t.defaultHours || null, note: '' });
-  localStorage.setItem(STORE_KEY, JSON.stringify(shifts)); renderDayShifts(); updateCalendarGrid(); renderTodayNotes(); renderSalaryPage();
+  Storage.set(STORE_KEY, JSON.stringify(shifts));
+  renderDayShifts(); updateCalendarGrid(); renderTodayNotes(); renderSalaryPage();
 }
+
+// Быстрое добавление произвольной смены без предварительного создания шаблона.
+// Это сохраняет привычный сценарий первой программы: название + доход прямо в календаре.
+function quickAddShift(){
+  const nameInput = document.getElementById('quickShiftName');
+  const incomeInput = document.getElementById('quickShiftIncome');
+  const name = nameInput.value.trim();
+  if (!name){ alert('Введи название магазина или смены'); nameInput.focus(); return; }
+  let template = templates.find(t => t.name.toLocaleLowerCase() === name.toLocaleLowerCase());
+  if (!template){
+    template = { id: 't' + Date.now(), name, color: COLORS[templates.length % COLORS.length], defaultHours: null, archived: false };
+    templates.push(template);
+    Storage.set(TEMPLATES_KEY, JSON.stringify(templates));
+  }
+  const parsedIncome = incomeInput.value.trim() === '' ? null : Number(incomeInput.value);
+  if (!shifts[selectedDate]) shifts[selectedDate] = [];
+  shifts[selectedDate].push({ templateId: template.id, name: template.name, color: template.color,
+    income: Number.isFinite(parsedIncome) ? parsedIncome : null, hours: template.defaultHours || null, note: '' });
+  Storage.set(STORE_KEY, JSON.stringify(shifts));
+  nameInput.value = ''; incomeInput.value = '';
+  renderPickList(); renderDayShifts(); updateCalendarGrid(); renderTodayNotes(); renderSalaryPage(); renderTemplates();
+}
+
 function removeShift(index){
-  if (!shifts[selectedDate]) return; shifts[selectedDate].splice(index,1); if (!shifts[selectedDate].length) delete shifts[selectedDate];
-  localStorage.setItem(STORE_KEY, JSON.stringify(shifts)); renderDayShifts(); updateCalendarGrid(); renderTodayNotes(); renderSalaryPage();
+  if (!shifts[selectedDate]) return;
+  shifts[selectedDate].splice(index,1);
+  if (!shifts[selectedDate].length) delete shifts[selectedDate];
+  Storage.set(STORE_KEY, JSON.stringify(shifts));
+  renderDayShifts(); updateCalendarGrid(); renderTodayNotes(); renderSalaryPage();
 }
-function closeModal(){ document.getElementById('modalBg').classList.remove('open'); renderCalendar(); }
+
+function closeModal(){
+  document.getElementById('modalBg').classList.remove('open');
+  renderCalendar();
+}
 
 document.getElementById('modalBg').addEventListener('click', e=>{ if (e.target.id==='modalBg') closeModal(); });
 document.getElementById('missingModalBg').addEventListener('click', e=>{ if (e.target.id==='missingModalBg') closeMissingList(); });
 document.getElementById('placePicker').addEventListener('click', e=>{ if (e.target.id==='placePicker') closePlacePicker(); });
 document.getElementById('archiveModal').addEventListener('click', e=>{ if (e.target.id==='archiveModal') closeArchive(); });
 
-/* ========== ПЛАНЕР ========== */
-function renderPlanner() {
-  const dateKeyStr = dateKey(plannerDate.getFullYear(), plannerDate.getMonth(), plannerDate.getDate());
-  const isToday = dateKeyStr === todayKey();
-  
-  const titleEl = document.getElementById('plannerDateTitle');
-  const options = { day: 'numeric', month: 'long', weekday: 'short' };
-  titleEl.textContent = plannerDate.toLocaleDateString('ru-RU', options);
+// Старт
+initApp();
 
-  // Блок со сменами на этот день
-  const dayShifts = shifts[dateKeyStr] || [];
-  const shiftsContainer = document.getElementById('plannerShiftsContainer');
-  if (dayShifts.length > 0) {
-    shiftsContainer.innerHTML = `
-      <div class="planner-shifts-row">
-        ${dayShifts.map(s => `
-          <div class="planner-shift-badge">
-            <span class="dot" style="background:${s.color}"></span>
-            <span>${s.name}</span>
-            ${s.hours ? `<span class="time">(${s.hours} ч)</span>` : ''}
-          </div>
-        `).join('')}
-      </div>
-    `;
-  } else {
-    shiftsContainer.innerHTML = '';
-  }
-
-  const tasks = plannerTasks[dateKeyStr] || [];
-  const now = new Date();
-  const currentHour = now.getHours();
-  
-  const startHour = 6;
-  const endHour = 23;
-  let gridHtml = '';
-  
-  for (let h = startHour; h <= endHour; h++) {
-    const timeStr = `${pad(h)}:00`;
-    const isPast = isToday && h < currentHour;
-    
-    const hourTasks = tasks.filter(t => {
-      if (!t.time) return false;
-      const taskHour = parseInt(t.time.split(':')[0], 10);
-      return taskHour === h;
+// Офлайн-кэш для установки и запуска с экрана «Домой».
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(err => {
+      console.warn('Не удалось включить офлайн-режим:', err);
     });
-    
-    hourTasks.sort((a, b) => a.time.localeCompare(b.time));
-
-    let tasksHtml = '';
-    if (hourTasks.length > 0) {
-      tasksHtml = hourTasks.map(task => {
-        // Поиск телефона и адреса для кнопок
-        let actionButtons = '';
-        const phoneRegex = /(\+?\d[\d\s\-\(\)]{8,}\d)/g;
-        const phoneMatch = task.desc ? task.desc.match(phoneRegex) : null;
-        
-        if (phoneMatch) {
-          const cleanPhone = phoneMatch[0].replace(/[^\d+]/g, '');
-          actionButtons += `<a href="tel:${cleanPhone}" class="task-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
-            Позвонить
-          </a>`;
-        }
-
-        // Проверка на адрес (упрощенно: если есть слово "ул.", "пр.", "д.", "кв." и т.д.)
-        const addressKeywords = /(ул\.|улица|пр\.|проспект|пер\.|переулок|д\.|дом|кв\.|квартира|офис|стр\.|строение)/i;
-        if (task.desc && addressKeywords.test(task.desc)) {
-          const encodedAddr = encodeURIComponent(task.desc);
-          actionButtons += `<a href="https://yandex.ru/maps/?text=${encodedAddr}" target="_blank" class="task-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Маршрут
-          </a>`;
-        }
-
-        return `
-          <div class="task-swipe-container" data-date="${dateKeyStr}" data-id="${task.id}">
-            <div class="task-swipe-action" onclick="deleteTask('${dateKeyStr}', '${task.id}')">Удалить</div>
-            <div class="task-swipe-content">
-              <div class="t-text">${task.time} — ${escapeHtml(task.title)}</div>
-              ${task.desc ? `<div class="t-desc">${escapeHtml(task.desc)}</div>` : ''}
-              ${actionButtons ? `<div class="task-action-buttons">${actionButtons}</div>` : ''}
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    gridHtml += `
-      <div class="time-row ${isPast ? 'past-hour' : ''}">
-        <div class="time-label">${timeStr}</div>
-        <div class="time-content">${tasksHtml}</div>
-      </div>
-    `;
-  }
-  
-  document.getElementById('plannerTimeGrid').innerHTML = gridHtml;
-  initTaskSwipeHandlers();
+  });
 }
-
-function changePlannerDay(delta, animate = true) {
-  plannerDate.setDate(plannerDate.getDate() + delta);
-  renderPlanner();
-}
-
-function goToTodayPlanner() {
-  plannerDate = new Date();
-  renderPlanner();
-}
-
-/* Модалка задачи */
-function openTaskModal(taskId = null, dateKeyStr = null) {
-  const modalTitle = document.getElementById('taskModalTitle');
-  const timeInput = document.getElementById('taskTimeInput');
-  const titleInput = document.getElementById('taskTitleInput');
-  const descInput = document.getElementById('taskDescInput');
-  const idInput = document.getElementById('editingTaskId');
-
-  if (taskId && dateKeyStr) {
-    // Режим редактирования
-    const tasks = plannerTasks[dateKeyStr] || [];
-    const task = tasks.find(t => t.id === taskId);
-    
-    if (task) {
-      modalTitle.textContent = 'Редактировать задачу';
-      timeInput.value = task.time;
-      titleInput.value = task.title;
-      descInput.value = task.desc || '';
-      idInput.value = task.id;
-    }
-  } else {
-    // Режим создания
-    modalTitle.textContent = 'Новая задача';
-    const now = new Date();
-    timeInput.value = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
-    titleInput.value = '';
-    descInput.value = '';
-    idInput.value = '';
-  }
-  
-  document.getElementById('addTaskModal').classList.add('open');
-  setTimeout(() => titleInput.focus(), 100);
-}
-
-function closeTaskModal() {
-  document.getElementById('addTaskModal').classList.remove('open');
-}
-
-function saveTask() {
-  const time = document.getElementById('taskTimeInput').value;
-  const title = document.getElementById('taskTitleInput').value.trim();
-  const desc = document.getElementById('taskDescInput').value.trim();
-  const taskId = document.getElementById('editingTaskId').value;
-
-  if (!time) { alert('Укажите время'); return; }
-  if (!title) { alert('Введите название задачи'); return; }
-
-  const dateKeyStr = dateKey(plannerDate.getFullYear(), plannerDate.getMonth(), plannerDate.getDate());
-  
-  if (!plannerTasks[dateKeyStr]) {
-    plannerTasks[dateKeyStr] = [];
-  }
-  
-  if (taskId) {
-    // Редактирование существующей
-    const idx = plannerTasks[dateKeyStr].findIndex(t => t.id === taskId);
-    if (idx !== -1) {
-      plannerTasks[dateKeyStr][idx] = { ...plannerTasks[dateKeyStr][idx], time, title, desc };
-    }
-  } else {
-    // Создание новой
-    const newTaskId = 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    plannerTasks[dateKeyStr].push({ id: newTaskId, time, title, desc });
-  }
-  
-  localStorage.setItem(PLANNER_KEY, JSON.stringify(plannerTasks));
-  
-  closeTaskModal();
-  renderPlanner();
-  updateCalendarGrid(); 
-  renderTodayNotes();
-}
-
-function deleteTask(dateKeyStr, taskId) {
-  if (!plannerTasks[dateKeyStr]) return;
-  plannerTasks[dateKeyStr] = plannerTasks[dateKeyStr].filter(t => t.id !== taskId);
-  if (plannerTasks[dateKeyStr].length === 0) {
-    delete plannerTasks[dateKeyStr];
-  }
-  localStorage.setItem(PLANNER_KEY, JSON.stringify(plannerTasks));
-  renderPlanner();
-  updateCalendarGrid();
-  renderTodayNotes();
-}
-
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[c]));
-}
-
-/* ---------- Старт ---------- */
-renderTemplates();
-renderCalendar();
-renderPlanner();
-checkBackupReminder();
 </script>
 </body>
 </html>
