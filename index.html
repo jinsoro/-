@@ -615,7 +615,7 @@ async function initApp() {
   shifts = s ? JSON.parse(s) : {};
   dayNotes = n ? JSON.parse(n) : {};
   plannerTasks = pt ? JSON.parse(pt) : {};
-  if (ps) { try { const saved=JSON.parse(ps); if(saved && /^([01]\\d|2[0-3]):[0-5]0$/.test(saved.start) && /^([01]\\d|2[0-3]):[0-5]0$/.test(saved.end) && saved.end>saved.start) plannerSettings=saved; } catch(e) { console.warn('Не удалось прочитать настройки планера',e); } }
+  if (ps) { try { const saved=JSON.parse(ps); if(saved && /^([01]\d|2[0-3]):(00|30)$/.test(saved.start) && /^([01]\d|2[0-3]):(00|30)$/.test(saved.end) && saved.end>saved.start) plannerSettings=saved; } catch(e) { console.warn('Не удалось прочитать настройки планера',e); } }
 
   // Однократный перенос данных из первой готовой программы (shifts_v1 / shops_v1).
   // Перенос старых локальных данных при первом запуске новой версии.
@@ -1528,7 +1528,7 @@ function renderPlanner(){
     const p=(t.time||'00:00').split(':').map(Number),start=Math.max(0,Math.min(1439,(p[0]||0)*60+(p[1]||0))),duration=Math.max(0,Number(t.duration)||0),effectiveDuration=duration||60;
     const phone=extractTaskPhone(t.phone||((t.desc||'')+' '+(t.title||'')+' '+(t.address||'')));
     const sourceText=(t.desc||'')+' '+(t.title||'');
-    const address=String(t.address||'').trim() || (/(улица|ул\\.?|проспект|пр-т|пр\\.?|переулок|пер\\.?|дом|д\\.?|корпус|строение|стр\\.?|квартира|кв\\.?|офис|набережная|шоссе|бульвар|площадь|\\d{1,4}\\s*[а-яa-z]?\\s*[,])/i.test(sourceText)?sourceText.trim():'');
+    const address=String(t.address||'').trim() || (/(улица|ул\.?|проспект|пр-т|пр\.?|переулок|пер\.?|дом|д\.?|корпус|строение|стр\.?|квартира|кв\.?|офис|набережная|шоссе|бульвар|площадь|\d{1,4}\s*[а-яa-z]?\s*[,])/i.test(sourceText)?sourceText.trim():'');
     return {t,start,end:start+effectiveDuration,duration,effectiveDuration,phone,address,title:t.title||phone||address||t.desc||'Задача'};
   }).filter(x=>x.start<rangeEnd&&x.end>rangeStart);
   const rows=[];
