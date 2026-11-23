@@ -241,20 +241,6 @@
   .btn-import { background: #0f766e; color: #ccfbf1; margin-top: 8px; }
   .empty-hint { color: #64748b; font-size: 14px; padding: 4px 0; }
 
-  /* Меню разделов */
-  .tools-menu-heading{font-size:20px;font-weight:700;color:#e5e7eb;margin:4px 4px 14px}
-  .tools-menu-item{width:100%;display:flex;align-items:center;gap:12px;text-align:left;background:#1e293b;border:1px solid #334155;border-radius:14px;padding:15px 13px;margin:0 0 10px;color:#e5e7eb;cursor:pointer;font-family:inherit}
-  .tools-menu-icon{width:40px;height:40px;flex:0 0 40px;border-radius:12px;background:#27364d;color:#7dd3fc;display:flex;align-items:center;justify-content:center;font-size:23px}
-  .tools-menu-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:4px}
-  .tools-menu-copy strong{font-size:15px;font-weight:650}
-  .tools-menu-copy small{font-size:11px;color:#94a3b8;line-height:1.35}
-  .tools-menu-arrow{font-size:25px;color:#64748b;line-height:1}
-  .tools-back-btn{align-self:flex-start;background:none;border:0;color:#7dd3fc;font-family:inherit;font-size:14px;font-weight:600;padding:8px 2px;margin:0 0 10px;cursor:pointer}
-  .tools-appearance-title{font-size:15px;font-weight:650;margin:4px 0 8px}
-  .tools-appearance-note,.tools-appearance-hint{font-size:12px;line-height:1.5;color:#94a3b8;margin:0 0 14px}
-  .tools-palette-preview{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;padding:8px 0 16px}
-  .tools-palette-preview span{width:30px;height:30px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
-  .tools-appearance-hint{border-top:1px solid #334155;padding-top:12px;margin:0}
   /* Нижняя навигация */
   .tabbar {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 25;
@@ -487,53 +473,38 @@
   <button class="btn btn-cancel" onclick="closeTaskModal()">Отмена</button>
 </div></div>
 
-<!-- ========== МЕНЮ ПРИЛОЖЕНИЯ ========== -->
+<!-- ========== СТРАНИЦА 3: МОИ СМЕНЫ ========== -->
 <div class="page" id="page-templates">
-  <div class="tools-menu-view" id="toolsMenuHome">
-    <div class="tools-menu-heading">Управление</div>
-    <button class="tools-menu-item" type="button" onclick="showToolsView('shifts')"><span class="tools-menu-icon">▤</span><span class="tools-menu-copy"><strong>Мои смены</strong><small>Шаблоны, редактирование и архив</small></span><span class="tools-menu-arrow">›</span></button>
-    <button class="tools-menu-item" type="button" onclick="showToolsView('backup')"><span class="tools-menu-icon">↕</span><span class="tools-menu-copy"><strong>Резервная копия</strong><small>Сохранить или восстановить данные</small></span><span class="tools-menu-arrow">›</span></button>
-    <button class="tools-menu-item" type="button" onclick="showToolsView('appearance')"><span class="tools-menu-icon">◉</span><span class="tools-menu-copy"><strong>Оформление</strong><small>Цвета и внешний вид приложения</small></span><span class="tools-menu-arrow">›</span></button>
-  </div>
-  <div class="tools-subview" id="toolsShiftsView" style="display:none">
-    <button class="tools-back-btn" type="button" onclick="openToolsHome()">‹ Все разделы</button>
-    <div class="card">
-      <div class="card-title">Мои смены (для календаря)</div>
-      <div class="template-list" id="templateList"></div>
-      <div class="template-buttons">
-        <button class="show-add-btn" id="showAddBtn" onclick="showAddForm()">+ Добавить</button>
-        <button class="show-archive-btn" onclick="openArchive()">Архив</button>
+  <div class="card">
+    <div class="card-title">Мои смены (для календаря)</div>
+    <div class="template-list" id="templateList"></div>
+    <div class="template-buttons">
+      <button class="show-add-btn" id="showAddBtn" onclick="showAddForm()">+ Добавить</button>
+      <button class="show-archive-btn" onclick="openArchive()">Архив</button>
+    </div>
+
+    <div class="add-template" id="addTemplateForm">
+      <input type="hidden" id="editingTemplateId" value="">
+      <input id="newTemplateName" placeholder="Название (объект/место)">
+      <input id="newTemplateHours" class="hours-input" type="number" inputmode="decimal" placeholder="Часы по умолчанию (необязательно)">
+      <div class="color-row">
+        <span class="clabel">Цвет:</span>
+        <div class="colors" id="newColors"></div>
       </div>
-      <div class="add-template" id="addTemplateForm">
-        <input type="hidden" id="editingTemplateId" value="">
-        <input id="newTemplateName" placeholder="Название (объект/место)">
-        <input id="newTemplateHours" class="hours-input" type="number" inputmode="decimal" placeholder="Часы по умолчанию (необязательно)">
-        <div class="color-row"><span class="clabel">Цвет:</span><div class="colors" id="newColors"></div></div>
-        <button class="add-btn" id="saveTemplateBtn" onclick="saveTemplate()">Добавить</button>
-        <button class="cancel-add-btn" onclick="hideAddForm()">Отмена</button>
-      </div>
+      <button class="add-btn" id="saveTemplateBtn" onclick="saveTemplate()">Добавить</button>
+      <button class="cancel-add-btn" onclick="hideAddForm()">Отмена</button>
     </div>
   </div>
-  <div class="tools-subview" id="toolsBackupView" style="display:none">
-    <button class="tools-back-btn" type="button" onclick="openToolsHome()">‹ Все разделы</button>
-    <div class="card">
-      <div class="card-title">Резервная копия</div>
-      <p style="font-size:12px;color:#94a3b8;margin:0 0 12px;line-height:1.5;">Экспорт сохранит смены, шаблоны и задачи в файл. Импорт восстановит данные из ранее созданной копии.</p>
-      <button class="btn btn-export" onclick="exportData()">📥 Экспорт данных</button>
-      <div class="import-file-wrap" style="position:relative;margin-top:10px">
-        <button type="button" class="btn btn-import" style="margin-top:0">📤 Импорт данных</button>
-        <input type="file" id="importFile" accept=".json,application/json" aria-label="Выбрать файл резервной копии" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;z-index:2;cursor:pointer" onchange="importData(event)">
-      </div>
-    </div>
-  </div>
-  <div class="tools-subview" id="toolsAppearanceView" style="display:none">
-    <button class="tools-back-btn" type="button" onclick="openToolsHome()">‹ Все разделы</button>
-    <div class="card">
-      <div class="card-title">Оформление</div>
-      <div class="tools-appearance-title">Цветовая палитра</div>
-      <p class="tools-appearance-note">Цвет каждой смены и каждой задачи можно выбрать отдельно при создании или редактировании. Ниже — палитра, которая используется в приложении.</p>
-      <div class="tools-palette-preview"><span style="background:#22c55e"></span><span style="background:#3b82f6"></span><span style="background:#f59e0b"></span><span style="background:#ef4444"></span><span style="background:#a855f7"></span><span style="background:#ec4899"></span></div>
-      <div class="tools-appearance-hint">Приложение пока работает в тёмном оформлении; переключателя светлой темы сейчас нет.</div>
+
+  <div class="card">
+    <div class="card-title">Резервная копия</div>
+    <p style="font-size:12px;color:#94a3b8;margin:0 0 8px;line-height:1.4;">
+      Экспорт сохранит все смены в файл. Импорт восстановит их, если данные потеряются.
+    </p>
+    <button class="btn btn-export" onclick="exportData()">📥 Экспорт данных</button>
+    <div class="import-file-wrap" style="position:relative;margin-top:8px">
+      <button type="button" class="btn btn-import" style="margin-top:0">📤 Импорт данных</button>
+      <input type="file" id="importFile" accept=".json,application/json" aria-label="Выбрать файл резервной копии" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;z-index:2;cursor:pointer" onchange="importData(event)">
     </div>
   </div>
 </div>
@@ -742,7 +713,7 @@ function switchTab(tab){
   if (tab==='calendar') renderCalendar();
   else if (tab==='salary') renderSalaryPage();
   else if (tab==='planner') renderPlanner();
-  else { openToolsHome(); renderTemplates(); }
+  else renderTemplates();
   document.getElementById('placeBtn').classList.toggle('show',tab==='calendar');
   document.getElementById('addTaskFab').classList.toggle('show',tab==='planner');
   if (tab!=='calendar' && placeMode) exitPlaceMode();
@@ -1058,21 +1029,6 @@ function confirmSync() {
 }
 
 function closeSyncOverlay() { document.getElementById('syncOverlay').classList.remove('open'); pendingSyncTemplateId = null; }
-
-// Навигация по разделам вкладки «Мои смены»
-function openToolsHome(){
-  document.getElementById('toolsMenuHome').style.display='block';
-  ['toolsShiftsView','toolsBackupView','toolsAppearanceView'].forEach(id=>document.getElementById(id).style.display='none');
-  const page=document.getElementById('page-templates'); if(page) page.scrollTop=0;
-}
-function showToolsView(view){
-  document.getElementById('toolsMenuHome').style.display='none';
-  const views={shifts:'toolsShiftsView',backup:'toolsBackupView',appearance:'toolsAppearanceView'};
-  Object.values(views).forEach(id=>document.getElementById(id).style.display='none');
-  const target=views[view]; if(target) document.getElementById(target).style.display='block';
-  if(view==='shifts') renderTemplates();
-  const page=document.getElementById('page-templates'); if(page) page.scrollTop=0;
-}
 
 // Шаблоны
 function renderTemplates(){
