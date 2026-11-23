@@ -306,6 +306,24 @@
   .task-compact-time{font-size:11px;font-weight:700;color:#e5e7eb;white-space:nowrap}
   .task-compact-title{font-size:12px;font-weight:600;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.task-duration-note{font-size:10px;color:#94a3b8;white-space:nowrap}
   .task-compact-actions{display:flex;align-items:center;gap:5px;flex:0 0 auto}
+  
+  /* Компактный список планера без почасовой разлиновки */
+  #plannerGridCard{background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}
+  #plannerTimeGrid{height:auto!important;min-height:0!important;background:none!important;overflow:visible!important}
+  .planner-list{display:flex;flex-direction:column;gap:9px;padding:2px 0 90px}
+  .planner-list-row{display:grid;grid-template-columns:54px minmax(0,1fr);align-items:stretch;gap:9px;min-width:0}
+  .planner-list-time{padding-top:13px;text-align:right;font-size:13px;font-weight:700;color:#94a3b8;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .task-swipe-container.task-list-item{position:relative!important;left:auto!important;right:auto!important;top:auto!important;height:auto!important;min-height:66px;margin:0;overflow:hidden;border-radius:10px;min-width:0}
+  .task-list-item .task-swipe-content{height:auto;min-height:66px}
+  .task-list-card{height:auto!important;min-height:66px!important;padding:10px 9px!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;border-radius:10px!important}
+  .task-list-main{min-width:0;flex:1}
+  .task-list-heading{display:flex;align-items:baseline;flex-wrap:wrap;gap:5px 9px}
+  .task-list-title{font-size:13px;font-weight:700;color:#f1f5f9;overflow-wrap:anywhere}
+  .task-list-description{font-size:11px;line-height:1.35;color:#cbd5e1;margin-top:4px;white-space:pre-wrap;overflow-wrap:anywhere}
+  .task-list-card .task-compact-actions{gap:5px}
+  .planner-empty{min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#cbd5e1;font-size:14px;text-align:center;background:#0f172a;border:1px dashed #334155;border-radius:14px;margin-top:8px}
+  .planner-empty-icon{font-size:28px}.planner-empty span{font-size:12px;color:#64748b}
+
   .task-icon-btn{width:34px;height:34px;min-width:34px;border:1px solid #64748b;border-radius:50%;background:#334155;color:#fff;display:inline-flex;align-items:center;justify-content:center;padding:0;cursor:pointer;touch-action:manipulation}
   .task-icon-btn svg{width:17px;height:17px;fill:currentColor}
   .task-phone-number{display:inline-flex;align-items:center;color:#bfdbfe;font-size:11px;font-weight:700;text-decoration:underline;text-underline-offset:2px;white-space:nowrap;touch-action:manipulation;position:relative;z-index:3}.task-phone-number-wrap{flex:0 0 auto}
@@ -424,7 +442,7 @@
 </div>
 <div class="planner-settings-modal" id="plannerSettingsModal" onclick="if(event.target===this)closePlannerSettings()"><div class="inner">
   <h2>Настройки планера</h2>
-  <p>Выбери время начала и конца отображения сетки.</p>
+  <p>Выбери время начала и конца списка задач.</p>
   <div class="planner-settings-row">
     <label>Начало<input id="plannerStartTime" type="time" step="1800" value="07:00"></label>
     <label>Конец<input id="plannerEndTime" type="time" step="1800" value="23:00"></label>
@@ -1566,45 +1584,33 @@ async function savePlannerSettings(){
 
 function renderPlanner(){
   const key=dateKey(plannerDate.getFullYear(),plannerDate.getMonth(),plannerDate.getDate()),today=key===todayKey();
-  const startParts=(plannerSettings.start||'07:00').split(':').map(Number),endParts=(plannerSettings.end||'23:00').split(':').map(Number);
-  const rangeStart=startParts[0]*60+startParts[1],rangeEnd=endParts[0]*60+endParts[1],gridHeight=rangeEnd-rangeStart;
+  const sp=(plannerSettings.start||'07:00').split(':').map(Number),ep=(plannerSettings.end||'23:00').split(':').map(Number),rangeStart=sp[0]*60+sp[1],rangeEnd=ep[0]*60+ep[1];
   document.getElementById('plannerDateTitle').textContent=plannerDate.toLocaleDateString('ru-RU',{day:'numeric',month:'long',weekday:'short'});
   const dayShifts=shifts[key]||[];
   document.getElementById('plannerShiftsContainer').innerHTML=dayShifts.length?'<div class="planner-shifts-row">'+dayShifts.map(s=>'<div class="planner-shift-badge"><span class="dot" style="background:'+(s.color||'#64748b')+'"></span><span>'+escapeHtml(s.name)+'</span>'+(s.hours?'<span class="time">('+s.hours+' ч)</span>':'')+'</div>').join('')+'</div>':'';
-  const tasks=(plannerTasks[key]||[]).slice().sort((a,b)=>a.time.localeCompare(b.time));
+  const tasks=(plannerTasks[key]||[]).slice().sort((x,y)=>(x.time||'').localeCompare(y.time||''));
   const prepared=tasks.map(t=>{
-    const p=(t.time||'00:00').split(':').map(Number),start=Math.max(0,Math.min(1439,(p[0]||0)*60+(p[1]||0))),duration=Math.max(0,Number(t.duration)||0),effectiveDuration=duration||60;
-    const phone=extractTaskPhone(t.phone||((t.desc||'')+' '+(t.title||'')+' '+(t.address||'')));
-    const sourceText=(t.desc||'')+' '+(t.title||'');
+    const p=(t.time||'00:00').split(':').map(Number),start=Math.max(0,Math.min(1439,(p[0]||0)*60+(p[1]||0))),duration=Math.max(0,Number(t.duration)||0);
+    const phone=extractTaskPhone(t.phone||((t.desc||'')+' '+(t.title||'')+' '+(t.address||''))),sourceText=(t.desc||'')+' '+(t.title||'');
     const address=String(t.address||'').trim() || (/(улица|ул\.?|проспект|пр-т|пр\.?|переулок|пер\.?|дом|д\.?|корпус|строение|стр\.?|квартира|кв\.?|офис|набережная|шоссе|бульвар|площадь|\d{1,4}\s*[а-яa-z]?\s*[,])/i.test(sourceText)?sourceText.trim():'');
-    return {t,start,end:start+effectiveDuration,duration,effectiveDuration,phone,address,title:t.title||phone||address||t.desc||'Задача'};
-  }).filter(x=>x.start<rangeEnd&&x.end>rangeStart);
-  const rows=[];
-  for(let minute=rangeStart;minute<rangeEnd;minute+=60){
-    const hour=Math.floor(minute/60),mins=minute%60,rowTime=pad(hour)+':'+pad(mins),past=today&&minute<new Date().getHours()*60+new Date().getMinutes();
-    rows.push('<div class="time-row '+(past?'past-hour':'')+'"><div class="time-label">'+rowTime+'</div><div class="time-content"></div></div>');
-  }
+    return {t,start,duration,phone,address,title:t.title||phone||address||t.desc||'Задача'};
+  }).filter(x=>x.start>=rangeStart&&x.start<rangeEnd);
   const cards=prepared.map(x=>{
-    const collision=prepared.some(y=>y!==x&&x.start<y.end&&y.start<x.end);
-    const compact=collision||(x.duration>0&&x.duration<60);
-    const visibleStart=Math.max(x.start,rangeStart),visibleEnd=Math.min(x.end,rangeEnd);
-    const top=visibleStart-rangeStart,height=Math.max(1,visibleEnd-visibleStart);
     const phoneAction=x.phone?'<a class="task-icon-btn task-phone-link" href="tel:'+escapeHtml(x.phone)+'" onclick="event.preventDefault();event.stopPropagation();return openTaskPhone(\''+escapeHtml(x.phone)+'\')" aria-label="Позвонить" title="Позвонить"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1.02-.24c1.12.37 2.32.57 3.58.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.6 21 3 13.4 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.26.2 2.46.57 3.58a1 1 0 0 1-.24 1.02z"/></svg></a>':'';
-    const routeAction=x.address?'<button type="button" class="task-icon-btn task-route-link" aria-label="Маршрут" title="Маршрут" onclick="event.stopPropagation();openTaskRoute(\''+escapeHtml(x.address).replace(/'/g,"&#39;")+'\')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></button>':'';
-    const durationLabel=x.duration?(x.duration%60?Math.floor(x.duration/60)+' ч '+(x.duration%60)+' мин':x.duration/60+' ч'):'';
-    const content='<div class="task-compact-main"><span class="task-compact-time">'+escapeHtml(x.t.time)+'</span><span class="task-compact-title">'+escapeHtml(x.title)+'</span>'+(durationLabel?'<span class="task-duration-note">'+escapeHtml(durationLabel)+'</span>':'')+'</div><div class="task-compact-actions">'+phoneAction+routeAction+'</div>';
-    return '<div class="task-swipe-container '+(compact?'task-compact':'task-standard')+'" style="top:'+top+'px;height:'+height+'px;z-index:'+(100+Math.round(top/10))+'" data-key="'+key+'" data-id="'+escapeHtml(x.t.id)+'"><button type="button" class="task-swipe-action" onclick="event.stopPropagation();deleteTask(this.parentElement.dataset.key,this.parentElement.dataset.id)">Удалить</button><div class="task-swipe-content"><div class="task-card" style="'+taskColorStyle(x.t.color)+'">'+content+'</div></div></div>';
+    const routeAction=x.address?'<button type="button" class="task-icon-btn task-route-link" aria-label="Маршрут" title="Маршрут" onclick="event.stopPropagation();openTaskRoute(\''+escapeHtml(x.address).replace(/'/g,"&#39;")+'\')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0-5z"/></svg></button>':'';
+    const duration=x.duration?(x.duration%60?Math.floor(x.duration/60)+' ч '+(x.duration%60)+' мин':x.duration/60+' ч'):'';
+    const desc=x.t.desc?'<div class="task-list-description">'+escapeHtml(x.t.desc)+'</div>':'';
+    const body='<div class="task-list-main"><div class="task-list-heading"><span class="task-list-title">'+escapeHtml(x.title)+'</span>'+(duration?'<span class="task-duration-note">'+escapeHtml(duration)+'</span>':'')+'</div>'+desc+'</div><div class="task-compact-actions">'+phoneAction+routeAction+'</div>';
+    return '<div class="planner-list-row"><div class="planner-list-time">'+escapeHtml(x.t.time)+'</div><div class="task-swipe-container task-list-item" data-key="'+key+'" data-id="'+escapeHtml(x.t.id)+'"><button type="button" class="task-swipe-action" onclick="event.stopPropagation();deleteTask(this.parentElement.dataset.key,this.parentElement.dataset.id)">Удалить</button><div class="task-swipe-content"><div class="task-card task-list-card" style="'+taskColorStyle(x.t.color)+'">'+body+'</div></div></div></div>';
   }).join('');
   const grid=document.getElementById('plannerTimeGrid');
-  grid.style.setProperty('--planner-grid-height',gridHeight+'px');
-  grid.innerHTML='<div class="planner-hour-rows">'+rows.join('')+'</div><div class="planner-task-layer">'+cards+'</div>';
-  document.querySelectorAll('#plannerTimeGrid .task-card').forEach(card=>card.addEventListener('click',e=>{
+  grid.innerHTML=prepared.length?'<div class="planner-list">'+cards+'</div>':'<div class="planner-empty"><div class="planner-empty-icon">☀️</div><div>На этот день задач пока нет</div><span>Нажми +, чтобы добавить первую</span></div>';
+  document.querySelectorAll('#plannerTimeGrid .task-list-card').forEach(card=>card.addEventListener('click',e=>{
     if(e.target.closest('.task-icon-btn'))return;
     const wrap=card.closest('.task-swipe-container');if(wrap)openTaskModal(wrap.dataset.id,wrap.dataset.key);
   }));
   initPlannerTaskSwipe();
 }
-
 function initPlannerTaskSwipe(){
   document.querySelectorAll('#plannerTimeGrid .task-swipe-container').forEach(container=>{
     const content=container.querySelector('.task-swipe-content');if(content.dataset.swipeReady==='1')return;content.dataset.swipeReady='1';
