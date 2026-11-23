@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smeny-planner-local-v17';
+const CACHE_NAME = 'smeny-planner-local-v18';
 const APP_FILES = ['./index.html', './manifest.webmanifest'];
 
 self.addEventListener('install', event => {
