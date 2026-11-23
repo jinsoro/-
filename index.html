@@ -1508,7 +1508,7 @@ function renderPlannerSettings(){
 async function savePlannerSettings(){
   const start=document.getElementById('plannerStartTime').value,end=document.getElementById('plannerEndTime').value;
   if(!start||!end||end<=start){alert('Время окончания должно быть позже времени начала.');return;}
-  const valid=/^([01]\\d|2[0-3]):(00|30)$/.test(start)&&/^([01]\\d|2[0-3]):(00|30)$/.test(end);
+  const valid=/^([01]\d|2[0-3]):(00|30)$/.test(start)&&/^([01]\d|2[0-3]):(00|30)$/.test(end);
   if(!valid){alert('Выбирай время с шагом 30 минут.');return;}
   plannerSettings={start,end};
   await Storage.set(PLANNER_SETTINGS_KEY,JSON.stringify(plannerSettings));
