@@ -56,14 +56,18 @@
   .income-header .lbl { font-size: 14px; color: #94a3b8; font-weight: 500; }
   .income-header .val { font-size: 26px; font-weight: 700; color: #86efac; }
 
-  /* Блок Заметки на сегодня */
+  /* Блок задач на сегодня */
   .today-notes-card {
     background: linear-gradient(135deg, #1e3a8a, #1e293b);
     border: 1px solid #3b82f6; border-radius: 14px; padding: 12px; margin-bottom: 12px;
     min-height: 80px; display: flex; flex-direction: column; cursor: pointer;
   }
   .today-notes-card .title { font-size: 12px; color: #93c5fd; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; }
-  .today-notes-card .note-text { font-size: 14px; color: #e5e7eb; white-space: pre-wrap; line-height: 1.4; }
+  .today-notes-card .note-text { display:flex; flex-direction:column; gap:5px; font-size:14px; color:#e5e7eb; line-height:1.4; }
+  .today-notes-card .today-task-line { display:flex; align-items:baseline; gap:9px; }
+  .today-notes-card .today-task-time { flex:0 0 42px; color:#93c5fd; font-variant-numeric:tabular-nums; }
+  .today-notes-card .today-task-title { min-width:0; overflow-wrap:anywhere; }
+  .today-notes-card .today-task-line.completed .today-task-title { color:#94a3b8; text-decoration:line-through; }
   .today-notes-card .no-notes { color: #64748b; font-size: 13px; font-style: italic; }
 
   /* Календарь */
@@ -366,8 +370,8 @@
     <div class="val" id="headerMonthTotal">0 ₽</div>
   </div>
 
-  <div class="today-notes-card" onclick="openDay(todayKey())">
-    <div class="title">Заметки на сегодня</div>
+  <div class="today-notes-card" onclick="openTodayPlanner()">
+    <div class="title">Задачи на сегодня</div>
     <div class="note-text" id="todayNotesText"></div>
   </div>
 
@@ -1239,16 +1243,15 @@ function updateCalendarGrid(){
 }
 
 function renderTodayNotes(){
-  const tKey = todayKey();
-  const list = shifts[tKey] || [];
-  const dayNote = dayNotes[tKey] || '';
-  const el = document.getElementById('todayNotesText');
-  let notesArr = [];
-  if (dayNote.trim()) { notesArr.push(dayNote.trim()); }
-  list.forEach(s => { if (s.note && s.note.trim()) { notesArr.push(`[${s.name}] ${s.note.trim()}`); } });
-  (plannerTasks[tKey] || []).slice().sort((a,b)=>a.time.localeCompare(b.time)).forEach(t=>notesArr.push(`⏰ ${t.time} ${t.title}${t.desc ? ' ('+t.desc+')' : ''}`));
-  if (notesArr.length === 0) { el.innerHTML = '<span class="no-notes">Нет заметок</span>'; } 
-  else { el.textContent = notesArr.join('\n'); }
+  const tKey=todayKey();
+  const el=document.getElementById('todayNotesText');
+  const tasks=(plannerTasks[tKey]||[]).slice().sort((a,b)=>String(a.time||'').localeCompare(String(b.time||'')));
+  if(!tasks.length){el.innerHTML='<span class="no-notes">Нет задач на сегодня</span>';return;}
+  el.innerHTML=tasks.map(t=>`<div class="today-task-line ${t.completed?'completed':''}"><span class="today-task-time">${escapeHtml(t.time||'')}</span><span class="today-task-title">${escapeHtml(t.title||'Без названия')}</span></div>`).join('');
+}
+function openTodayPlanner(){
+  plannerDate=new Date();
+  switchTab('planner');
 }
 
 function changeMonth(delta, animate = true){
