@@ -318,10 +318,18 @@
   .add-task-modal.open{display:flex}
   .add-task-modal .inner{background:#1e293b;width:100%;border-radius:18px 18px 0 0;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom));max-height:85vh;overflow:auto}
   .add-task-modal h2{font-size:16px;margin:0 0 12px}
-  .task-form-group{margin-bottom:12px}
-  .task-form-group label{display:block;font-size:11px;color:#94a3b8;text-transform:uppercase;margin-bottom:4px;font-weight:600}
-  .task-form-group input,.task-form-group textarea{width:100%;padding:12px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e5e7eb;font-size:15px;font-family:inherit}
+  .task-form-group{margin-bottom:12px;min-width:0}
+  .task-form-group label{display:block;font-size:11px;color:#94a3b8;text-transform:uppercase;margin-bottom:5px;font-weight:600}
+  .task-form-group input,.task-form-group select,.task-form-group textarea{display:block;width:100%;min-width:0;max-width:100%;box-sizing:border-box;padding:12px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e5e7eb;font-size:15px;font-family:inherit}
   .task-form-group textarea{resize:vertical;min-height:65px}
+  .task-time-duration-row{display:flex;gap:10px;min-width:0}
+  .task-time-duration-row .task-form-group{flex:1 1 0;width:0;min-width:0}
+  .task-time-duration-row input,.task-time-duration-row select{height:46px;padding:9px 8px;font-size:14px}
+  .task-optional-actions{display:flex;gap:10px;margin:0 0 12px}
+  .task-optional-toggle{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:8px 12px;border:1px solid #475569;border-radius:10px;background:#27364d;color:#e2e8f0;font:600 13px inherit;cursor:pointer}
+  .task-optional-toggle svg{width:18px;height:18px;fill:currentColor;flex:0 0 auto}
+  .task-optional-toggle[aria-expanded="true"]{background:#0f766e;border-color:#14b8a6;color:#ecfeff}
+  .task-optional-field{display:none}.task-optional-field.open{display:block}
   .planner-fab{position:fixed;right:16px;bottom:90px;width:56px;height:56px;border-radius:50%;background:#334155;color:#fff;border:0;box-shadow:0 4px 12px rgba(0,0,0,.4);z-index:20;display:none;align-items:center;justify-content:center;cursor:pointer;transition:transform .1s}.planner-fab:active{transform:scale(.95)}.planner-fab svg{width:24px;height:24px;fill:currentColor}
   .planner-fab.show{display:block}
   .day-planner-task{padding:8px 10px;border-radius:8px;background:#0f172a;margin:6px 0;font-size:13px}
@@ -424,11 +432,17 @@
 <button class="planner-fab" id="addTaskFab" onclick="openTaskModal()" aria-label="Добавить задачу"><svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
 <div class="add-task-modal" id="addTaskModal"><div class="inner">
   <h2 id="taskModalTitle">Новая задача</h2>
-  <div class="task-form-group"><label>Время</label><input type="time" id="taskTimeInput" value="09:00"></div>
-  <div class="task-form-group"><label>◷ Длительность</label><select id="taskDurationInput" class="task-duration-select"><option value="0">Не указывать</option><option value="15">15 минут</option><option value="30">30 минут</option><option value="45">45 минут</option><option value="60">1 час</option><option value="90">1 час 30 минут</option><option value="120">2 часа</option><option value="150">2 часа 30 минут</option><option value="180">3 часа</option><option value="240">4 часа</option></select></div>
-  <div class="task-form-group"><label>Что нужно сделать?</label><input type="text" id="taskTitleInput" placeholder="Встреча, заказ, звонок"></div>
-  <div class="task-form-group"><label>Адрес (необязательно)</label><input type="text" id="taskAddressInput" placeholder="Улица, дом, город" autocomplete="street-address"><div class="field-hint">Если адрес заполнен, кнопка «Маршрут» появится автоматически</div></div>
-  <div class="task-form-group"><label>Телефон (необязательно)</label><input type="tel" id="taskPhoneInput" placeholder="+7 900 123-45-67" inputmode="tel" autocomplete="tel"></div>
+  <div class="task-time-duration-row">
+    <div class="task-form-group"><label for="taskTimeInput">Время</label><input type="time" id="taskTimeInput" value="09:00"></div>
+    <div class="task-form-group"><label for="taskDurationInput">Длительность</label><select id="taskDurationInput" class="task-duration-select"><option value="0">Не указывать</option><option value="15">15 минут</option><option value="30">30 минут</option><option value="45">45 минут</option><option value="60">1 час</option><option value="90">1 час 30 минут</option><option value="120">2 часа</option><option value="150">2 часа 30 минут</option><option value="180">3 часа</option><option value="240">4 часа</option></select></div>
+  </div>
+  <div class="task-form-group"><label for="taskTitleInput">Что нужно сделать?</label><input type="text" id="taskTitleInput" placeholder="Встреча, заказ, звонок"></div>
+  <div class="task-optional-actions">
+    <button type="button" class="task-optional-toggle" id="taskAddressToggle" aria-expanded="false" onclick="toggleTaskOptionalField('address')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg><span>Адрес</span></button>
+    <button type="button" class="task-optional-toggle" id="taskPhoneToggle" aria-expanded="false" onclick="toggleTaskOptionalField('phone')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1.02-.24c1.12.37 2.32.57 3.58.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.6 21 3 13.4 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.26.2 2.46.57 3.58a1 1 0 0 1-.24 1.02z"/></svg><span>Телефон</span></button>
+  </div>
+  <div class="task-form-group task-optional-field" id="taskAddressField"><label for="taskAddressInput">Адрес</label><input type="text" id="taskAddressInput" placeholder="Улица, дом, город" autocomplete="street-address"></div>
+  <div class="task-form-group task-optional-field" id="taskPhoneField"><label for="taskPhoneInput">Телефон</label><input type="tel" id="taskPhoneInput" placeholder="+7 900 123-45-67" inputmode="tel" autocomplete="tel"></div>
   <div class="task-form-group"><label>Комментарий (необязательно)</label><textarea id="taskDescInput" placeholder="Имя контакта и дополнительные детали..."></textarea></div>
   <input type="hidden" id="editingTaskId" value="">
   <button class="btn btn-primary" onclick="saveTask()" style="background:#22c55e;color:#052e16;margin-bottom:8px">Сохранить</button>
@@ -1446,7 +1460,23 @@ function openTaskModal(taskId=null,dateKeyStr=null){
   const idEl=document.getElementById('editingTaskId');
   if(taskId && dateKeyStr){const t=(plannerTasks[dateKeyStr]||[]).find(x=>x.id===taskId);if(!t)return;plannerDate=new Date(dateKeyStr+'T00:00:00');document.getElementById('taskModalTitle').textContent='Редактировать задачу';document.getElementById('taskTimeInput').value=t.time;document.getElementById('taskDurationInput').value=String(Number(t.duration)||0);document.getElementById('taskTitleInput').value=t.title;document.getElementById('taskPhoneInput').value=t.phone||extractTaskPhone(t.desc||'');document.getElementById('taskDescInput').value=t.desc||'';document.getElementById('taskAddressInput').value=t.address||'';idEl.value=t.id;}
   else {document.getElementById('taskModalTitle').textContent='Новая задача';const now=new Date();document.getElementById('taskTimeInput').value=pad(now.getHours())+':'+pad(now.getMinutes());document.getElementById('taskDurationInput').value='0';document.getElementById('taskTitleInput').value='';document.getElementById('taskPhoneInput').value='';document.getElementById('taskDescInput').value='';document.getElementById('taskAddressInput').value='';idEl.value='';}
+  syncTaskOptionalFields();
   document.getElementById('addTaskModal').classList.add('open');
+}
+function toggleTaskOptionalField(type){
+  const field=document.getElementById(type==='address'?'taskAddressField':'taskPhoneField');
+  const button=document.getElementById(type==='address'?'taskAddressToggle':'taskPhoneToggle');
+  if(!field||!button)return;
+  const opening=!field.classList.contains('open');
+  field.classList.toggle('open',opening);
+  button.setAttribute('aria-expanded',String(opening));
+}
+function syncTaskOptionalFields(){
+  [['address','taskAddressInput'],['phone','taskPhoneInput']].forEach(([type,inputId])=>{
+    const open=!!document.getElementById(inputId).value.trim();
+    document.getElementById(type==='address'?'taskAddressField':'taskPhoneField').classList.toggle('open',open);
+    document.getElementById(type==='address'?'taskAddressToggle':'taskPhoneToggle').setAttribute('aria-expanded',String(open));
+  });
 }
 function closeTaskModal(){document.getElementById('addTaskModal').classList.remove('open');}
 async function saveTask(){
