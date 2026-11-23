@@ -550,9 +550,9 @@
 <div class="modal-bg" id="modalBg">
   <div class="modal">
     <h2 id="modalTitle">День</h2>
+    <div id="dayShiftsBlock"></div>
     <button class="planner-add-from-calendar" id="toggleDayShiftBtn" type="button" onclick="toggleDayShiftEditor()">＋ Добавить смену</button>
     <div id="dayShiftEditor" style="display:none">
-      <div id="dayShiftsBlock"></div>
       <div class="card-title" style="margin-top:14px;">Выбрать смену</div>
       <div class="pick-list" id="pickList"></div>
     </div>
@@ -1472,7 +1472,7 @@ function toggleDayShiftEditor(){
   const button=document.getElementById('toggleDayShiftBtn');
   const opening=editor.style.display==='none';
   editor.style.display=opening?'block':'none';
-  button.textContent=opening?'− Скрыть смены':'＋ Добавить смену';
+  button.textContent=opening?'− Скрыть список смен':'＋ Добавить смену';
 }
 function renderDayPlannerTasks(key){
   const el=document.getElementById('dayPlannerBlock'); const tasks=(plannerTasks[key]||[]).slice().sort((a,b)=>a.time.localeCompare(b.time));
